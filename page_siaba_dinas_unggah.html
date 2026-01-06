@@ -1,0 +1,173 @@
+<header>
+  <h2>UNGGAH SURAT PERJALANAN DINAS (SPT)</h2>
+</header>
+
+<main class="manual-form form-tab-container">
+  
+  <div id="skeleton-loader">
+    <div class="scroll-inner-content">
+      <div class="form-grid">
+        <div class="form-group"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-input"></div></div>
+        <div class="form-group"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-input"></div></div>
+      </div>
+      <div class="form-footer"><div class="skeleton skeleton-button" style="width: 150px;"></div></div>
+    </div>
+  </div>
+
+  <form id="dinasUnggahForm" style="display: none;">
+    
+    <div id="dinas-scroll-wrapper">
+    
+        <h3 class="sub-section-title-large">Data SPT</h3>
+        
+        <div class="form-grid-12">
+          <div class="col-span-4">
+            <div class="form-group">
+              <label for="jenisPD">Jenis PD</label>
+              <select id="jenisPD" name="jenisPD" required>
+                <option value="" disabled selected>-- Pilih --</option>
+                <option value="DD">Dinas Dalam (DD)</option>
+                <option value="DL">Dinas Luar (DL)</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-span-8">
+            <div class="form-group">
+              <label for="nomorSPT">Nomor SPT</label>
+              <input type="text" id="nomorSPT" name="nomorSPT" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-12">
+          <div class="col-span-4">
+            <div class="form-group">
+              <label for="tanggalSPT">Tanggal SPT</label>
+              <input type="date" id="tanggalSPT" name="tanggalSPT" required>
+            </div>
+          </div>
+          <div class="col-span-4">
+            <div class="form-group">
+              <label for="tanggalMulai">Tanggal Mulai</label>
+              <input type="date" id="tanggalMulai" name="tanggalMulai" required>
+            </div>
+          </div>
+          <div class="col-span-4">
+            <div class="form-group">
+              <label for="tanggalSelesai">Tanggal Selesai</label>
+              <input type="date" id="tanggalSelesai" name="tanggalSelesai" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-12">
+          <div class="col-span-12">
+            <div class="form-group">
+              <label for="lokasi">Lokasi Tujuan</label>
+              <input type="text" id="lokasi" name="lokasi" required>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-grid-12">
+          <div class="col-span-12">
+            <div class="form-group">
+              <label for="kegiatan">Kegiatan</label>
+              <input type="text" id="kegiatan" name="kegiatan" required>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sub-section-title-large" style="margin-top: 30px;">Pelaksana Tugas</h3>
+
+        <div class="form-grid-12">
+            <div class="col-span-8">
+                <div class="form-group">
+                  <label for="unitKerjaDinas">Unit Kerja</label>
+                  <select id="unitKerjaDinas" name="unitKerja" required>
+                    <option value="" disabled selected>-- Memuat... --</option>
+                  </select>
+                </div>
+            </div>
+            <div class="col-span-4">
+                <div class="form-group">
+                  <label for="jumlahPeserta">Peserta (Orang)</label>
+                  <select id="jumlahPeserta" name="peserta" required disabled>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="peserta-wrapper"></div>
+
+        <h3 class="sub-section-title-large" style="margin-top: 30px;">Dokumen</h3>
+        
+        <div class="form-group">
+          <label for="fileSPT">Unggah File SPT (PDF, Maks. 200 KB)</label>
+          <input type="file" id="fileSPT" name="fileData" accept=".pdf" required>
+        </div>
+
+        <div class="form-group">
+          <label for="jenisDokumen">Jenis Dokumen</label>
+          <select id="jenisDokumen" name="jenisDokumen" required>
+            <option value="" disabled selected>-- Pilih Jenis Dokumen --</option>
+            <option value="Sementara">Sementara</option>
+            <option value="Final">Final</option> </select>
+        </div>
+
+        <div class="tab-form-footer">
+          <button type="submit" class="submit-btn" id="submitBtnDinas">Kirim Usulan SPT</button>
+        </div>
+
+    </div> </form>
+</main>
+
+<style>
+  /* Layout CSS (Tetap Sama) */
+  main.manual-form.form-tab-container {
+      display: flex !important;
+      flex-direction: column !important;
+      height: calc(100vh - 140px) !important; 
+      max-height: calc(100vh - 140px) !important;
+      min-height: 400px !important;
+      overflow: hidden !important; 
+      padding-bottom: 0 !important;
+      position: relative !important;
+  }
+
+  #dinasUnggahForm, #skeleton-loader {
+      position: relative !important; 
+      height: 100% !important;
+      width: 100% !important;
+      overflow: hidden !important;
+      display: flex; 
+      flex-direction: column;
+  }
+
+  #dinas-scroll-wrapper, .scroll-inner-content {
+      position: absolute !important;
+      top: 0; bottom: 0; left: 0; right: 0;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      padding: 5px 15px 20px 5px; 
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+  }
+  
+  #dinas-scroll-wrapper::-webkit-scrollbar,
+  .scroll-inner-content::-webkit-scrollbar { 
+      display: none; 
+  }
+
+  .sub-section-title-large {
+      font-size: 1.2em; 
+      color: #00c3ff;   
+      font-weight: 600;
+      border-bottom: 2px solid rgba(0, 195, 255, 0.3);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      margin-top: 10px;
+  }
+  
+  .form-group label { font-weight: 600; color: #ecf0f1; }
+</style>

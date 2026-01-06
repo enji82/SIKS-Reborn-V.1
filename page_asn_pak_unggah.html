@@ -1,0 +1,118 @@
+<header>
+  <h2>UNGGAH DATA PAK</h2>
+</header>
+
+<main class="manual-form form-tab-container">
+  
+  <div id="skeleton-loader">
+    <div class="form-grid"><div class="form-group"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-input"></div></div><div class="form-group"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-input"></div></div></div>
+    <div class="form-footer"><div class="skeleton skeleton-button" style="width: 150px;"></div></div>
+  </div>
+
+  <form id="pakUnggahForm" style="display: none;">
+    
+    <div class="info-box" style="background: rgba(241, 196, 15, 0.1); border-left: 4px solid #f1c40f; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+        <p style="margin: 0; color: #e0e0e0; font-size: 0.9em; line-height: 1.6;">
+            <i class="fas fa-info-circle" style="color: #f1c40f; margin-right: 8px;"></i>
+            <strong>Ketentuan Dokumen:</strong><br>
+            Formulir yang diunggah adalah scan dokumen tahunan lengkap yang sudah ditandatangani dengan urutan mulai dari halaman paling atas:<br>
+            <ul style="margin: 5px 0 5px 20px; padding: 0; color: #bdc3c7;">
+                <li><strong>Untuk PAK Konversi:</strong> Konversi Predikat Kinerja ke Angka Kredit, Penetapan Angka Kredit, dan Akumulasi Angka Kredit.</li>
+                <li><strong>Untuk PAK Integrasi:</strong> Penghitungan dan Akumulasi Angka Kredit pada Penilaian Integrasi, Penghitungan Kebutuhan Kekurangan Angka Kredit, dan Penetapan Angka Kredit Integrasi.</li>
+            </ul>
+        </p>
+    </div>
+
+    <div class="form-grid-12">
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="unitKerjaPak">Unit Kerja</label>
+          <select id="unitKerjaPak" name="unitKerja" required>
+            <option value="" disabled selected>-- Memuat... --</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="namaAsnPak">Nama ASN</label>
+          <select id="namaAsnPak" name="namaAsn" required disabled>
+            <option value="" disabled selected>-- Pilih Unit Kerja Dahulu --</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid-12">
+      <div class="col-span-6">
+        <div class="form-group">
+          <label>NIP</label>
+          <input type="text" id="nipPak" name="nip" readonly style="background: rgba(0,0,0,0.3);">
+        </div>
+      </div>
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="pangkatPak">Pangkat, Gol./Ruang</label>
+          <select id="pangkatPak" name="pangkat" required>
+             </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid-12">
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="tmtPak">TMT KP Terakhir</label>
+          <input type="date" id="tmtPak" name="tmt" required>
+        </div>
+      </div>
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="jabatanPak">Jabatan</label>
+          <select id="jabatanPak" name="jabatan" required>
+             </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid-12" style="margin-bottom: 30px;">
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="tahunPak">Tahun PAK</label>
+          <select id="tahunPak" name="tahun" required>
+             </select>
+        </div>
+      </div>
+      <div class="col-span-6">
+        <div class="form-group">
+          <label for="kreditPak">Jumlah Angka Kredit</label>
+          <input type="text" id="kreditPak" name="kredit" inputmode="decimal" placeholder="Contoh: 12,500" required>
+          <p class="input-hint" style="color:#f1c40f;">Gunakan tanda koma (,) sebagai pemisah desimal.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="filePak">Unggah Dokumen (PDF, Maks. 1 MB)</label>
+      <input type="file" id="filePak" name="fileData" accept=".pdf" required>
+      <p class="input-hint">Scan dokumen dalam format PDF dengan ukuran maksimal 1 MB.</p>
+    </div>
+
+    <div class="tab-form-footer">
+      <button type="submit" class="submit-btn" id="submitBtnPak">Kirim Data</button>
+    </div>
+
+  </form>
+</main>
+
+<style>
+  main.manual-form.form-tab-container {
+      display: flex !important; flex-direction: column !important;
+      height: calc(100vh - 140px) !important; max-height: calc(100vh - 140px) !important;
+      min-height: 400px !important; overflow-y: auto !important;
+      padding-bottom: 20px !important; position: relative !important;
+      scrollbar-width: none; 
+  }
+  main.manual-form.form-tab-container::-webkit-scrollbar { display: none; }
+  .form-group label { font-weight: 600; color: #ecf0f1; display: block; margin-bottom: 5px; }
+  .input-hint { font-size: 0.85em; color: #bdc3c7; margin-top: 5px; }
+</style>

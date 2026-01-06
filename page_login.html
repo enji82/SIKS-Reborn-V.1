@@ -1,0 +1,191 @@
+<div id="gerbang-login" class="login-screen-wrapper">
+  <style>
+    /* ========================================================= */
+    /* PREMIUM LOGIN – SIKS REBORN                                */
+    /* ========================================================= */
+
+    :root{
+      --maroon-main:#7a0c0c;
+      --maroon-dark:#3b0404;
+      --gold-accent:#d4af37;
+      --text-dark:#2b2b2b;
+    }
+
+    .login-screen-wrapper{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        linear-gradient(145deg, rgba(58,5,5,0.95), rgba(15,15,15,0.95)),
+        url("https://images.unsplash.com/photo-1557683316-973673baf926");
+      background-size:cover;
+      background-position:center;
+      z-index:99999;
+      font-family:'Segoe UI', 'Inter', sans-serif;
+    }
+
+    .login-box{
+      width:420px;
+      max-width:92%;
+    }
+
+    .card-maroon{
+      background:rgba(255,255,255,0.96);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:
+        0 25px 50px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.6);
+      border-top:6px solid var(--gold-accent);
+    }
+
+    .card-header{
+      background:linear-gradient(
+        to bottom,
+        rgba(255,255,255,.95),
+        rgba(245,245,245,.95)
+      );
+      padding:28px 24px 22px;
+      border-bottom:1px solid #e5e5e5;
+    }
+
+    .card-header i{
+      color:var(--maroon-main);
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));
+    }
+
+    .card-header h2{
+      margin:10px 0 4px;
+      font-weight:800;
+      letter-spacing:.5px;
+      color:var(--text-dark);
+    }
+
+    .card-header h2 span{
+      color:var(--maroon-main);
+    }
+
+    .card-header p{
+      font-size:12px;
+      color:#666;
+      margin:0;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+
+    .login-card-body{
+      padding:26px 26px 30px;
+    }
+
+    .input-group{
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+    }
+
+    .form-control{
+      height:50px;
+      padding-left:14px;
+      font-size:18px;
+    }
+
+    .form-control:focus{
+      box-shadow:none;
+    }
+
+    .input-group-text{
+      background:#fff;
+      border:none;
+      color:var(--maroon-main);
+      padding:0 16px;
+      font-size:16px;
+    }
+
+    #loginNotif{
+      border-radius:10px;
+      font-size:12px;
+      margin-bottom:16px;
+    }
+
+    .btn-login{
+      height:52px;
+      border-radius:14px;
+      font-weight:700;
+      letter-spacing:1px;
+      background:
+        linear-gradient(135deg,
+          var(--maroon-main),
+          var(--maroon-dark)
+        );
+      border:none;
+      box-shadow:
+        0 10px 25px rgba(122,12,12,.45),
+        inset 0 1px 0 rgba(255,255,255,.25);
+      transition:.25s ease;
+    }
+
+    .btn-login:hover{
+      transform:translateY(-1px);
+      box-shadow:
+        0 14px 30px rgba(122,12,12,.6);
+    }
+
+    .btn-login:active{
+      transform:scale(.98);
+    }
+
+    .login-footer{
+      text-align:center;
+      font-size:11px;
+      color:#777;
+      margin-top:18px;
+    }
+  </style>
+
+  <div class="login-box">
+    <div class="card card-maroon">
+      <div class="card-header text-center">
+        <i class="fa-solid fa-paperclip fa-3x mb-2"></i>
+        <h2><span>SIKS</span> – REBORN</h2>
+        <p>Ruang Edukasi dan Layanan Berbasis Online Terintegrasi</p>
+      </div>
+
+      <div class="card-body login-card-body">
+        <div id="loginNotif" style="display:none;" class="alert alert-danger py-2 px-3">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span id="loginNotifMsg"></span>
+        </div>
+
+        <form id="formLogin" onsubmit="handleLoginV2(event)">
+          <div class="input-group mb-3">
+            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <i class="fas fa-user"></i>
+              </span>
+            </div>
+          </div>
+
+          <div class="input-group mb-4">
+            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <i class="fas fa-lock"></i>
+              </span>
+            </div>
+          </div>
+
+          <button type="submit" id="tombolLogin" class="btn btn-login btn-block text-white">
+            LOGIN
+          </button>
+        </form>
+
+        <div class="login-footer">
+          © 2026 Korwil Disdikbud Kecamatan Secang
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

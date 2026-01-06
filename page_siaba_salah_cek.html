@@ -1,0 +1,69 @@
+<header>
+  <h2>CEK PERBAIKAN SALAH PRESENSI</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahunSalah">Tahun:</label>
+    <select id="filterTahunSalah"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulanSalah">Bulan:</label>
+    <select id="filterBulanSalah"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitSalah">Unit Kerja:</label>
+    <select id="filterUnitSalah"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="tableWrapperSalah" style="display:flex; position: relative;"> 
+    
+    <div id="tableOverlayLoaderSalah" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
+    </div>
+
+    <div class="table-container">
+        <table id="salahCekTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+    </div>
+  </div> 
+</main>
+
+<style>
+  /* Layout */
+  #main-content { overflow-y: hidden !important; }
+  main.table-view-container { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+  #tableWrapperSalah { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0; }
+  #tableWrapperSalah .table-container { flex-grow: 1 !important; overflow: auto !important; border-radius: 10px; border-bottom: none; }
+  #tableWrapperSalah .table-container::-webkit-scrollbar { display: none !important; }
+  
+  /* Freeze Pane Header */
+  #salahCekTable thead th { position: sticky; top: 0; z-index: 5; background-color: #101E26; border-bottom: 2px solid rgba(0, 195, 255, 0.5); }
+  
+  /* Freeze Pane Body (Nama & NIP) */
+  #salahCekTable tbody td:nth-child(1), 
+  #salahCekTable tbody td:nth-child(2) { position: sticky; background-color: #1c2e3a; z-index: 3; }
+  
+  /* Koordinat Header Kiri Atas */
+  #salahCekTable thead th:nth-child(1) { left: 0; z-index: 7; }
+  #salahCekTable thead th:nth-child(2) { left: 50px; z-index: 7; } /* Kolom Nama geser stlh No */
+  
+  /* Koordinat Body Kiri */
+  #salahCekTable tbody td:nth-child(1) { left: 0; }
+  #salahCekTable tbody td:nth-child(2) { left: 50px; text-align: left !important; }
+
+  /* Styling Status "Cek" */
+  .status-ok { color: #2ecc71; font-weight: bold; }
+  .status-proses { color: #f1c40f; font-style: italic; }
+  .status-tolak { color: #e74c3c; font-weight: bold; }
+</style>

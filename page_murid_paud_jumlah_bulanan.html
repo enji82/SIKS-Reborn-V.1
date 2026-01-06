@@ -1,0 +1,167 @@
+<header>
+  <h2>JUMLAH MURID PAUD (BULANAN)</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahun">Tahun:</label>
+    <select id="filterTahun"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulan">Bulan:</label>
+    <select id="filterBulan"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterJenjang">Jenjang:</label>
+    <select id="filterJenjang"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+      <div class="spinner-container">
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+    </div>
+      <p>Memuat data, mohon tunggu...</p>
+  </div>
+  
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+        <table id="muridPaudBulananTable" class="data-table">
+          <thead></thead>
+          <tbody></tbody>
+          <tfoot></tfoot> 
+        </table>
+    </div>
+    <div class="table-footer-note">
+      Sumber data: laporan bulan terakhir.
+    </div>
+  </div>
+</main>
+
+<style>
+  /* Mengatur layout dan scrollbar internal */
+  .main-content {
+    overflow-y: hidden;
+  }
+  main.table-view-container, #tableWrapper {
+    flex-grow: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #tableWrapper .table-container {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  /* =================================================================== */
+  /* ====== PENGATURAN TAMPILAN & FREEZE PANE (FINAL) ====== */
+  /* =================================================================== */
+
+  /* 1. Atur perataan teks dan lebar otomatis */
+  #muridPaudBulananTable th,
+  #muridPaudBulananTable td {
+    text-align: center;
+    vertical-align: middle;
+  }
+  #muridPaudBulananTable td:nth-child(2) {
+    text-align: left;
+  }
+  #muridPaudBulananTable th {
+    white-space: normal;
+  }
+
+  /* 2. Pengaturan Freeze Pane */
+  #muridPaudBulananTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  #muridPaudBulananTable tfoot td {
+    position: sticky;
+    bottom: 0;
+    background-color: #101E26; /* Warna solid untuk footer */
+    z-index: 2;
+    border-top: 2px solid rgba(0, 195, 255, 0.5);
+  }
+  #muridPaudBulananTable thead tr:first-child th { top: 0; }
+  #muridPaudBulananTable thead tr:nth-child(2) th { top: 40px; }
+  #muridPaudBulananTable tfoot td { bottom: 0; }
+
+  #muridPaudBulananTable tbody td:nth-child(1),
+  #muridPaudBulananTable tbody td:nth-child(2) {
+    position: sticky;
+    background-color: #1c2e3a;
+  }
+  #muridPaudBulananTable thead th:nth-child(1),
+  #muridPaudBulananTable tbody td:nth-child(1),
+  #muridPaudBulananTable tfoot td:nth-child(1) {
+    left: 0;
+  }
+  #muridPaudBulananTable thead th:nth-child(2),
+  #muridPaudBulananTable tbody td:nth-child(2),
+  #muridPaudBulananTable tfoot td:nth-child(2) {
+    left: 50px; /* Lebar kolom No. */
+  }
+
+  /* 3. Hirarki z-index yang Benar */
+  #muridPaudBulananTable tbody td { z-index: 1; }
+  #muridPaudBulananTable thead th { z-index: 2; }
+  #muridPaudBulananTable tfoot td { 
+    z-index: 3; 
+  }
+  #muridPaudBulananTable thead tr:first-child th:nth-child(1),
+  #muridPaudBulananTable thead tr:first-child th:nth-child(2) {
+    z-index: 4;
+  }
+  #muridPaudBulananTable tfoot td:nth-child(1),
+  #muridPaudBulananTable tfoot td:nth-child(2) {
+    z-index: 5;
+  }
+
+  /* 4. Efek hover untuk kolom beku */
+  #muridPaudBulananTable tbody tr:hover td:nth-child(1),
+  #muridPaudBulananTable tbody tr:hover td:nth-child(2) {
+    background-color: #2a4152;
+  }
+  
+  /* =================================================================== */
+  /* ====== PEWARNAAN FONT & KOLOM (PERBAIKAN +2 KOLOM) ====== */
+  /* =================================================================== */
+
+  /* 5. Beri warna font biru pada kolom 24-25 (ISI & SUBHEADER) */
+  #muridPaudBulananTable td:nth-child(n+26):nth-child(-n+27),
+  #muridPaudBulananTable thead tr:nth-child(2) th:nth-child(n+21):nth-child(-n+22) {
+    color: var(--color-blue);
+    font-weight: bold;
+  }
+
+  /* 6. Beri warna font oranye pada kolom terakhir (ISI & HEADER) */
+  #muridPaudBulananTable td:last-child,
+  #muridPaudBulananTable thead tr:first-child th:last-child {
+    color: var(--color-orange);
+    font-weight: bold;
+  }
+
+  /* 7. Beri warna latar pada grup kolom di dalam body tabel (DIGESER +2) */
+  #muridPaudBulananTable tbody td:nth-child(n+8):nth-child(-n+21) { background-color: rgba(52, 152, 219, 0.1); }
+  #muridPaudBulananTable tbody td:nth-child(n+22):nth-child(-n+25) { background-color: rgba(46, 204, 113, 0.1); }
+  #muridPaudBulananTable tbody td:nth-child(n+26):nth-child(-n+27) { background-color: rgba(155, 89, 182, 0.1); }
+  #muridPaudBulananTable tbody td:nth-child(n+28):nth-child(-n+34) { background-color: rgba(241, 196, 15, 0.1); }
+  #muridPaudBulananTable tbody td:nth-child(n+35):nth-child(-n+36) { background-color: rgba(230, 126, 34, 0.1); }
+  #muridPaudBulananTable tbody td:last-child { background-color: rgba(231, 76, 60, 0.1); }
+
+
+  /* 8. Pastikan efek hover tetap berfungsi di atas warna latar */
+  #muridPaudBulananTable tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  #muridPaudBulananTable tbody tr:hover td:nth-child(1),
+  #muridPaudBulananTable tbody tr:hover td:nth-child(2) {
+    background-color: #2a4152 !important;
+  }
+</style>

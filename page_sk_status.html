@@ -1,0 +1,229 @@
+<?!= include('css'); ?>
+
+<style>
+/* MENYAMAKAN UI DENGAN RIWAYAT + AUTO FIT COLUMN */
+
+/* 1. CONTAINER & TABLE */
+.table-view-container {
+  background: rgba(255, 255, 255, 0.02); 
+  border-radius: 8px; 
+  padding: 10px;
+}
+.table-container {
+    overflow: auto;
+    height: 100%;
+    max-height: 75vh;
+}
+
+/* AUTO FIT: Width auto agar tabel menyusut/melebar sesuai konten */
+.data-table {
+    width: auto; 
+    min-width: 100%; 
+    border-collapse: collapse; 
+}
+
+/* 2. HEADER */
+.data-table thead th {
+    position: sticky; 
+    top: 0; 
+    z-index: 10; 
+    background: #1a252f;
+    color: #fff;
+    padding: 15px 20px; /* Padding lega */
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #2c3e50;
+    white-space: nowrap; 
+}
+
+/* 3. BODY */
+.data-table tbody td {
+    padding: 12px 20px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: #ddd;
+    white-space: nowrap; /* Teks dilarang turun baris */
+    vertical-align: middle;
+}
+
+/* 4. KOLOM SPESIFIK (AUTO FIT) */
+/* Kolom No */
+.col-no { text-align: center; color: #aaa; width: 1%; }
+
+/* Kolom Nama Sekolah */
+.col-nama { text-align: left; font-weight: 500; color: #fff; }
+
+/* Kolom Data: width 1% memaksa kolom menyusut pas dengan teks */
+.col-data { text-align: center; width: 1%; }
+
+/* Hover Effect */
+.data-table tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+</style>
+
+<div class="main-wrapper" style="animation: fadeIn 0.4s ease-in-out; height: 100%; display: flex; flex-direction: column;">
+  
+  <div class="page-title-container" style="margin-bottom: 20px;">
+    <h2 class="page-title" style="border-left: 5px solid #f39c12; padding-left: 15px;">Status Pengiriman SK</h2>
+  </div>
+
+  <div class="filter-container items-bottom">
+      <div class="filter-group filter-group-vertical">
+        <label>Cari Sekolah</label>
+        <select id="ftFilterSekolah" class="custom-select" style="min-width: 250px;"></select>
+      </div>
+      
+      <button onclick="refreshFlatData()" class="btn-refresh-glass" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+
+      <div style="margin-left:auto; display:flex; gap:5px; align-items:center;">
+         <span class="status-badge status-ok" style="min-width:auto; font-size:10px;">OK</span>
+         <span class="status-badge status-revisi" style="min-width:auto; font-size:10px;">Revisi</span>
+         <span class="status-badge status-ditolak" style="min-width:auto; font-size:10px;">Ditolak</span>
+      </div>
+  </div>
+
+  <main class="table-view-container" style="flex:1; display:flex; flex-direction:column; min-height:0; overflow: hidden;">
+
+    <div id="ftLoading" style="display:none; flex-direction:column; justify-content:center; align-items:center; height: 100%;">
+        <div class="spinner-container" style="display:flex; gap:6px;">
+            <div class="spinner-bar" style="background:#f39c12; width:4px; height:20px; animation: bounce 1s infinite;"></div>
+            <div class="spinner-bar" style="background:#f39c12; width:4px; height:20px; animation: bounce 1s infinite 0.2s;"></div>
+            <div class="spinner-bar" style="background:#f39c12; width:4px; height:20px; animation: bounce 1s infinite 0.4s;"></div>
+        </div>
+        <p style="color: #bbb; margin-top: 15px; font-size: 12px; letter-spacing: 1px;">MEMUAT DATA...</p>
+    </div>
+
+    <div id="ftTableWrapper" style="display:flex; flex-direction:column; height:100%;">
+        <div class="table-container">
+            <table id="flatTable" class="data-table">
+                <thead></thead>
+                <tbody style="font-size: 13px;"></tbody> 
+            </table>
+        </div>
+        <div style="padding: 10px; color: #7f8c8d; font-size: 12px; text-align: right; border-top: 1px solid #2c3e50;">
+            Total Sekolah: <strong id="ftTotalData" style="color: #fff;">0</strong>
+        </div>
+    </div>
+    
+  </main>
+</div>
+
+<script>
+  var flatCache = { headers: [], rows: [] };
+
+  // 1. INIT
+  window.initSkStatusPage = function() {
+      $('#ftLoading').css('display', 'flex'); 
+      $('#ftTableWrapper').hide();
+      
+      google.script.run
+        .withSuccessHandler(renderFlatTable)
+        .withFailureHandler(function(err) {
+           $('#ftLoading').hide();
+           Swal.fire('Error', 'Gagal: ' + err.message, 'error');
+        })
+        .getSKStatusData(); 
+  };
+
+  // 2. REFRESH
+  window.refreshFlatData = function() {
+      $('#ftFilterSekolah').val('Semua');
+      window.initSkStatusPage();
+  }
+
+  // 3. RENDER TABEL
+  function renderFlatTable(data) {
+    flatCache = data;
+    var headers = data.headers || [];
+    var rows = data.rows || [];
+
+    var $thead = $('#flatTable thead').empty();
+    
+    // BUILD HEADER
+    var tr = '<tr>';
+    tr += '<th style="width:50px;">No</th>'; 
+    
+    headers.forEach(function(h, idx) {
+        if(h.toLowerCase() === 'no') return; 
+
+        // Kolom Nama (Index 0) Rata Kiri, Sisanya Tengah
+        var align = (idx === 0) ? 'text-align:left;' : 'text-align:center;';
+        tr += `<th style="${align}">${h}</th>`;
+    });
+    tr += '</tr>';
+    $thead.append(tr);
+
+    // FILTER DROPDOWN
+    var nameColIndex = 0; 
+    if($('#ftFilterSekolah').children().length === 0) {
+        var names = rows.map(r => r[nameColIndex]).filter(v=>v).sort();
+        var uniqueNames = [...new Set(names)];
+        var $sel = $('#ftFilterSekolah');
+        $sel.empty().append('<option value="Semua">Semua</option>');
+        uniqueNames.forEach(function(n){ $sel.append(`<option value="${n}">${n}</option>`) });
+    }
+
+    applyFlatFilter(nameColIndex);
+    $('#ftLoading').hide();
+    $('#ftTableWrapper').fadeIn(300);
+  }
+
+  // 4. FILTER & BODY
+  function applyFlatFilter(nameColIndex) {
+    nameColIndex = nameColIndex || 0;
+    var fSekolah = $('#ftFilterSekolah').val() || 'Semua';
+    var rows = flatCache.rows;
+    var headers = flatCache.headers;
+
+    var filtered = rows.filter(function(r) {
+        return fSekolah === 'Semua' || r[nameColIndex] === fSekolah;
+    });
+
+    var $tbody = $('#flatTable tbody').empty();
+
+    if (filtered.length === 0) {
+        $tbody.append(`<tr><td colspan="${headers.length + 1}" style="text-align:center; padding:30px; color:#7f8c8d;">Data tidak ditemukan.</td></tr>`);
+    } else {
+        filtered.forEach(function(r, i) {
+            var tr = `<tr>`;
+            
+            // Kolom No
+            tr += `<td class="col-no">${i+1}</td>`;
+
+            // Loop Data
+            r.forEach(function(cellData, colIdx) {
+                if(headers[colIdx].toLowerCase() === 'no') return;
+
+                var content = cellData || '-';
+                
+                // Status Badge Logic
+                if(content.length < 25 && (content.match(/tolak|revisi|ok|terima|sudah|proses/i))) {
+                    var sClass = 'status-diproses'; 
+                    if(content.match(/tolak/i)) sClass = 'status-ditolak';
+                    else if(content.match(/revisi/i)) sClass = 'status-revisi';
+                    else if(content.match(/ok|terima|sudah/i)) sClass = 'status-ok';
+                    content = `<span class="status-badge ${sClass}" style="min-width:60px; font-size:10px; padding:4px 8px;">${content}</span>`;
+                }
+
+                if (colIdx === 0) {
+                     // Kolom Nama
+                     tr += `<td class="col-nama">${content}</td>`;
+                } else {
+                     // Kolom Data
+                     tr += `<td class="col-data">${content}</td>`;
+                }
+            });
+
+            tr += `</tr>`;
+            $tbody.append(tr);
+        });
+    }
+    $('#ftTotalData').text(filtered.length);
+  }
+
+  $('#ftFilterSekolah').off('change').on('change', function(){ applyFlatFilter(); });
+
+  window.initSkStatusPage();
+</script>

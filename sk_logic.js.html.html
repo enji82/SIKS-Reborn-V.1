@@ -1,0 +1,111 @@
+<script>
+/**
+ * LOGIKA INTEGRASI: Menghubungkan Form Baru ke Mesin Lama yang Stabil
+ */
+
+window.inisialisasiUnggahSK = function() {
+    try {
+        if (typeof DROPDOWN_STATIS !== 'undefined') {
+            const fill = (id, data, label) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.innerHTML = `<option value="" disabled selected>-- Pilih ${label} --</option>`;
+                (data || []).forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item;
+                    opt.text = item;
+                    el.appendChild(opt);
+                });
+            };
+            // Mengisi dropdown dari kulkas data statis
+            fill('namaSD', DROPDOWN_STATIS['NamaSD'], 'Sekolah');
+            fill('tahunAjaran', DROPDOWN_STATIS['TahunAjaran'], 'Tahun');
+            fill('semester', DROPDOWN_STATIS['Semester'], 'Semester');
+            fill('kriteriaSK', DROPDOWN_STATIS['KriteriaSK'], 'Jenis SK');
+        }
+        
+        // Menutup skeleton dan menampilkan form
+        $('#skeleton-loader').fadeOut(200, function(){ 
+            $('#form-content').fadeIn(300); 
+        });
+    } catch (e) {
+        console.error("Gagal Render:", e);
+        $('#skeleton-loader').hide();
+        $('#form-content').show();
+    }
+};
+
+/**
+ * HANDLE SUBMIT (Diperbaiki agar selaras dengan muatHalaman)
+ */
+function handleFormSubmit(e) {
+    if(e) e.preventDefault(); 
+    
+    var btn = $('#submitBtn');
+    // Simpan teks asli untuk dikembalikan nanti
+    var originalText = '<i class="fas fa-paper-plane" style="margin-right: 8px;"></i> Kirim Dokumen';
+    
+    var file = document.getElementById('fileUpload').files[0];
+    
+    // 1. Validasi
+    if (!file) { 
+        if(typeof showToast === 'function') showToast('error', 'File Kosong', 'Silakan pilih file PDF.'); 
+        return; 
+    }
+
+    // 2. Loading State
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Mengirim...');
+
+    // 3. Ambil User (Menggunakan sistem App.currentUser Anda)
+    var userNameInput = "Admin/Operator";
+    if (typeof App !== 'undefined' && App.currentUser) {
+        userNameInput = App.currentUser.nama || App.currentUser.username;
+    }
+    
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var base64Data = e.target.result.split(',')[1];
+        
+        // PAYLOAD: Harus persis sama dengan yang diminta processManualForm di Code.gs
+        var formData = {
+            namaSD: $('#namaSD').val(),
+            tahunAjaran: $('#tahunAjaran').val(),
+            semester: $('#semester').val(),
+            kriteriaSK: $('#kriteriaSK').val(),
+            nomorSK: $('#nomorSK').val(),
+            tanggalSK: $('#tanggalSK').val(),
+            userInput: userNameInput,
+            fileData: { 
+                mimeType: file.type, 
+                data: base64Data, 
+                name: file.name 
+            }
+        };
+
+        google.script.run
+          .withSuccessHandler(function(response) {
+               btn.prop('disabled', false).html(originalText);
+               
+               if (response.toString().toLowerCase().includes("berhasil")) {
+                   document.getElementById('manualUploadForm').reset();
+                   if(typeof showToast === 'function') showToast('success', 'Terkirim!', response);
+                   
+                   // PERBAIKAN: Ganti App.loadPage menjadi muatHalaman
+                   setTimeout(function() {
+                       if(typeof muatHalaman === 'function') {
+                           muatHalaman('home'); // Atau ke halaman dashboard Anda
+                       }
+                   }, 2000);
+               } else {
+                   if(typeof showToast === 'function') showToast('error', 'Gagal', response);
+               }
+          })
+          .withFailureHandler(function(err) {
+               btn.prop('disabled', false).html(originalText);
+               if(typeof showToast === 'function') showToast('error', 'Error Sistem', err.message);
+          })
+          .processManualForm(formData); 
+    };
+    reader.readAsDataURL(file);
+}
+</script>

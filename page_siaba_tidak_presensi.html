@@ -1,0 +1,73 @@
+<header>
+  <h2>DAFTAR ASN TIDAK PRESENSI SIABA</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahun">Tahun:</label>
+    <select id="filterTahun"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulan">Bulan:</label>
+    <select id="filterBulan"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitKerja">Unit Kerja:</label>
+    <select id="filterUnitKerja"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="tableWrapper" style="display:flex; position: relative;"> 
+    
+    <div id="tableOverlayLoaderTidakPresensi" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memproses Data...</p>
+    </div>
+    <div class="table-container">
+        <table id="tidakPresensiTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+    </div>
+  </div>
+</main>
+
+<style>
+  /* Layout Utama */
+  #main-content { overflow-y: hidden !important; }
+  main.table-view-container { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+  
+  /* Wrapper */
+  #tableWrapper { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; margin-bottom: 5px; }
+  
+  /* Scroll Area */
+  #tableWrapper .table-container {
+    flex-grow: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+
+  /* Freeze Pane */
+  #tidakPresensiTable thead tr:first-child th:nth-child(1),
+  #tidakPresensiTable thead tr:first-child th:nth-child(2) {
+    z-index: 7 !important;
+  }
+  
+  /* Rata Kiri */
+  #tidakPresensiTable tbody td:nth-child(2),
+  #tidakPresensiTable tbody td:last-child {
+    text-align: left !important;
+  }
+
+  /* Scrollbar Hide */
+  #tableWrapper .table-container::-webkit-scrollbar { display: none !important; }
+  #tableWrapper .table-container { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+</style>

@@ -1,0 +1,148 @@
+<header>
+  <h2>DATA MURID PAUD MENURUT KELAS DAN USIA</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterJenjang">Jenjang:</label>
+    <select id="filterJenjang"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+      <div class="spinner-container">
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+    </div>
+      <p>Memuat data, mohon tunggu...</p>
+  </div>
+  
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+        <table id="muridPaudKelasUsiaTable" class="data-table">
+          <thead></thead>
+          <tbody></tbody>
+          <tfoot></tfoot> 
+        </table>
+    </div>
+    <div class="table-footer-note">
+      Sumber data: laporan bulan terakhir.
+    </div>
+  </div>
+</main>
+
+<style>
+  /* CSS untuk memastikan scrollbar ada di dalam tabel */
+  .main-content {
+    overflow-y: hidden;
+  }
+  main.table-view-container, #tableWrapper {
+    flex-grow: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #tableWrapper .table-container {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  /* =================================================================== */
+  /* ====== 1. PENGATURAN TAMPILAN TABEL MURID PAUD ====== */
+  /* =================================================================== */
+
+  /* Secara default, buat semua rata tengah */
+  #muridPaudKelasUsiaTable th,
+  #muridPaudKelasUsiaTable td {
+    text-align: center;
+  }
+
+  /* Kecualikan kolom 2 (Nama Sekolah) dan 4 (Rombel) agar rata kiri */
+  #muridPaudKelasUsiaTable td:nth-child(2),
+  #muridPaudKelasUsiaTable td:nth-child(4) {
+    text-align: left;
+  }
+  
+  /* --- INI ADALAH PERBAIKANNYA --- */
+  /* Beri warna pada grup kolom di dalam body tabel */
+  #muridPaudKelasUsiaTable tbody td:nth-child(n+8):nth-child(-n+9) {
+    background-color: rgba(52, 152, 219, 0.1); /* Biru (Digeser dari 7-8 ke 8-9) */
+  }
+  #muridPaudKelasUsiaTable tbody td:nth-child(n+10):nth-child(-n+16) {
+    background-color: rgba(46, 204, 113, 0.1); /* Hijau (Digeser dari 9-15 ke 10-16) */
+  }
+  /* --- AKHIR PERBAIKAN --- */
+
+  /* Buat teks di kolom terakhir menjadi tebal (header, body, dan footer) */
+  #muridPaudKelasUsiaTable th:last-child,
+  #muridPaudKelasUsiaTable td:last-child {
+    font-weight: bold;
+    color: var(--color-orange);
+  }
+  
+  /* Pastikan efek hover tetap berfungsi di atas warna latar */
+  #muridPaudKelasUsiaTable tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* =================================================================== */
+  /* ====== 2. EFISIENSI LEBAR TABEL ====== */
+  /* =================================================================== */
+
+  /* Izinkan semua header untuk turun baris jika diperlukan */
+  #muridPaudKelasUsiaTable th {
+    white-space: normal;
+  }
+  
+  /* =================================================================== */
+  /* ====== 3. PENGATURAN FREEZE PANE ====== */
+  /* =================================================================== */
+
+  /* Bekukan header di atas dan footer di bawah */
+  #muridPaudKelasUsiaTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  #muridPaudKelasUsiaTable tfoot td {
+    position: sticky;
+    bottom: 0;
+    background-color: #101E26; /* Warna solid untuk footer */
+    z-index: 2;
+    border-top: 2px solid rgba(0, 195, 255, 0.5); /* <-- TAMBAHKAN BARIS INI */
+  }
+
+  /* Bekukan 2 kolom pertama di kiri untuk semua bagian tabel */
+  #muridPaudKelasUsiaTable th:nth-child(1), #muridPaudKelasUsiaTable td:nth-child(1) {
+    position: sticky;
+    left: 0;
+  }
+  #muridPaudKelasUsiaTable th:nth-child(2), #muridPaudKelasUsiaTable td:nth-child(2) {
+    position: sticky;
+    left: 50px; /* Sesuaikan dengan lebar kolom "No." */
+  }
+
+  /* Beri warna latar solid untuk kolom beku di body */
+  #muridPaudKelasUsiaTable tbody td:nth-child(1),
+  #muridPaudKelasUsiaTable tbody td:nth-child(2) {
+    background-color: #1c2e3a;
+  }
+
+  /* Atur sudut kiri atas dan kiri bawah agar selalu di lapisan teratas */
+  #muridPaudKelasUsiaTable thead th:nth-child(1),
+  #muridPaudKelasUsiaTable thead th:nth-child(2),
+  #muridPaudKelasUsiaTable tfoot td:nth-child(1),
+  #muridPaudKelasUsiaTable tfoot td:nth-child(2) {
+    z-index: 3;
+  }
+  
+  /* Pastikan warna hover untuk kolom beku tetap berfungsi */
+  #muridPaudKelasUsiaTable tbody tr:hover td:nth-child(1),
+  #muridPaudKelasUsiaTable tbody tr:hover td:nth-child(2) {
+    background-color: #2a4152 !important;
+  }
+
+</style>

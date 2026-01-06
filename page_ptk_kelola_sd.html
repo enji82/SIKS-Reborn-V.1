@@ -1,0 +1,40 @@
+<header>
+  <h2>KELOLA DAFTAR PTK SEKOLAH DASAR</h2>
+</header>
+
+<div class="filter-container">
+  <!-- FILTER BARU: Status Sekolah (Parent) -->
+  <div class="filter-group">
+    <label for="filterStatusSekolah">Status Sekolah:</label>
+    <select id="filterStatusSekolah"></select>
+  </div>
+  
+  <!-- FILTER LAMA: Unit Kerja (Child) -->
+  <div class="filter-group">
+    <label for="filterUnitKerja">Unit Kerja:</label>
+    <select id="filterUnitKerja"></select>
+  </div>
+
+  <button id="tambahPtkSdBtn" class="submit-btn" style="width: auto; padding: 10px 20px;">
+    <i class="fas fa-plus" style="margin-right: 8px;"></i> Tambah PTK
+  </button>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+    <div class="spinner-container">
+      <div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div>
+    </div>
+    <p>Menggabungkan dan memuat data PTK, mohon tunggu...</p>
+  </div>
+
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+      <table id="kelolaPtkSdTable" class="data-table freeze-pane-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="pagination-container" class="pagination-container"></div>
+  </div>
+</main>

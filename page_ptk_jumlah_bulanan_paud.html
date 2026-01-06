@@ -1,0 +1,90 @@
+<header>
+  <h2>JUMLAH PTK PAUD BULANAN</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahun">Tahun:</label>
+    <select id="filterTahun"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulan">Bulan:</label>
+    <select id="filterBulan"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterJenjang">Jenjang:</label>
+    <select id="filterJenjang"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterNamaLembaga">Nama Lembaga:</label>
+    <select id="filterNamaLembaga"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+    <div class="spinner-container">
+      <div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div>
+    </div>
+    <p>Memuat data, mohon tunggu...</p>
+  </div>
+
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+      <table id="ptkJumlahBulananPaudTable" class="data-table freeze-pane-table">
+        <thead></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+    
+    <div class="table-footer-note">
+      Sumber data: laporan bulan.
+    </div>
+
+  </div>
+</main>
+
+<style>
+  /* 1. Paksa halaman (#main-content) untuk TIDAK scroll */
+  #main-content {
+    overflow-y: hidden !important;
+  }
+
+  /* 2. Paksa <main> (pembungkus halaman) untuk mengisi sisa ruang */
+  main.table-view-container {
+    flex-grow: 1 !important;
+    min-height: 0 !important; 
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 3. Paksa #tableWrapper untuk mengisi sisa ruang di dalam <main> */
+  #tableWrapper {
+    flex-grow: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 4. INTI: Perintahkan .table-container untuk mengisi sisa ruang DAN SCROLL */
+  #tableWrapper .table-container {
+    flex-grow: 1 !important;
+    overflow-y: auto !important; /* Aktifkan scrollbar vertikal HANYA di sini */
+  }
+
+  /* 5. PERBAIKAN Z-INDEX: (Menargetkan ID tabel halaman ini) */
+  #ptkJumlahBulananPaudTable thead th:nth-child(1),
+  #ptkJumlahBulananPaudTable thead th:nth-child(2) {
+    z-index: 7 !important;
+  }
+
+  /* 6. PERBAIKAN SCROLLBAR: Sembunyikan scrollbar */
+  #tableWrapper .table-container::-webkit-scrollbar {
+    display: none !important; 
+  }
+  #tableWrapper .table-container {
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important; 
+  }
+</style>

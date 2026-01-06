@@ -1,0 +1,159 @@
+<?!= include('css'); ?>
+
+<style>
+  /* Ganti kode warna sesuai modul */
+  :root { --page-accent: #00c3ff; } 
+  
+  /* Style Input Glassmorphism (Transparan) */
+  .form-group label {
+      font-weight: 500; color: #ddd; margin-bottom: 8px; display: block; font-size: 13px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      color: #fff !important;
+      border-radius: 6px; padding: 10px; width: 100%; box-sizing: border-box;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--page-accent) !important;
+      background: rgba(0, 0, 0, 0.3) !important;
+      outline: none;
+  }
+  /* Placeholder Tipis */
+  input::placeholder, select::placeholder {
+      font-weight: 300 !important; color: rgba(255, 255, 255, 0.5) !important;
+  }
+</style>
+
+<div class="main-wrapper" style="animation: fadeIn 0.4s ease-in-out; height: 100%; display: flex; flex-direction: column; overflow-y: auto;">
+  
+  <div class="page-title-container" style="margin-bottom: 20px;">
+    <h2 class="page-title" style="border-left: 5px solid; padding-left: 15px;">
+        [JUDUL FORMULIR]
+    </h2>
+  </div>
+
+  <div id="skeleton-loader" style="max-width: 800px; margin: 0 auto; width: 100%;">
+      <div class="form-grid-12" style="margin-bottom: 20px;">
+          <div class="col-span-6"><div class="skeleton skeleton-input"></div></div>
+          <div class="col-span-6"><div class="skeleton skeleton-input"></div></div>
+      </div>
+      <div class="skeleton skeleton-input" style="height: 100px;"></div>
+  </div>
+
+  <div id="form-content" style="display: none; max-width: 800px; margin: 0 auto; width: 100%;">
+      
+      <div class="glass-panel" style="padding: 15px 20px; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 15px; border-left: 4px solid var(--page-accent); background: rgba(0, 195, 255, 0.05);">
+          <i class="fas fa-info-circle" style="font-size: 1.3em; color: var(--page-accent); margin-top: 2px;"></i>
+          <div>
+              <h4 style="margin: 0 0 5px 0; color: #fff; font-size: 14px; font-weight: 600;">Petunjuk Pengisian</h4>
+              <p style="margin: 0; color: #ccc; font-size: 13px; line-height: 1.4;">
+                  [TULIS INSTRUKSI DI SINI. Contoh: Lengkapi data di bawah ini. Tanda bintang (*) wajib diisi.]
+              </p>
+          </div>
+      </div>
+
+      <form id="mainForm" onsubmit="handleFormSubmit(event)">
+        
+        <div class="form-grid-12" style="margin-bottom: 20px; display: grid; gap: 20px; grid-template-columns: 1fr 1fr;">
+            <div class="form-group">
+                <label>Label Input 1 <span style="color:red">*</span></label>
+                <input type="text" id="inputSatu" required placeholder="...">
+            </div>
+            <div class="form-group">
+                <label>Label Dropdown <span style="color:red">*</span></label>
+                <select id="inputDua" required>
+                    <option value="" disabled selected>-- Memuat --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label>Label Textarea</label>
+            <textarea id="inputTiga" rows="3" placeholder="..."></textarea>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <button type="submit" id="submitBtn" class="btn-lihat-premium" style="height: 40px !important; padding: 0 30px !important; font-size: 14px !important;">
+                <i class="fas fa-save" style="margin-right: 8px;"></i> Simpan Data
+            </button>
+        </div>
+
+      </form>
+  </div>
+  
+</div>
+
+<script>
+  // --- A. INIT PAGE ---
+  // Ganti nama fungsi sesuai halaman (misal: initPageInputPTK)
+  window.initFormPage = function() {
+      // Panggil Data Master untuk Dropdown (jika ada)
+      google.script.run
+        .withSuccessHandler(function(data) {
+            // Isi Dropdown jika perlu
+            // isiDropdown('inputDua', data['ListSekolah']);
+            
+            // Tampilkan Form
+            $('#skeleton-loader').fadeOut(200, function(){ $('#form-content').fadeIn(300); });
+        })
+        .getMasterOptions(); // [GANTI] Nama fungsi backend
+  };
+
+  // --- B. HANDLE SUBMIT ---
+  function handleFormSubmit(e) {
+      e.preventDefault(); 
+      var btn = $('#submitBtn');
+      var originalText = btn.html();
+      
+      // Loading State
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Menyimpan...');
+
+      // Kumpulkan Data
+      var formData = {
+          field1: $('#inputSatu').val(),
+          field2: $('#inputDua').val(),
+          field3: $('#inputTiga').val(),
+          // userInput: ambilUserSession() // Jika perlu user login
+      };
+
+      // Kirim ke Backend
+      google.script.run
+        .withSuccessHandler(function(response) {
+             btn.prop('disabled', false).html(originalText);
+             
+             if (response.toString().toLowerCase().includes("berhasil")) {
+                 document.getElementById('mainForm').reset();
+                 
+                 Swal.fire({
+                     title: 'Berhasil!', 
+                     text: response, 
+                     icon: 'success', 
+                     timer: 2000, 
+                     showConfirmButton: false
+                 }).then(() => { 
+                     // [GANTI] Redirect ke halaman tabel/dashboard yang sesuai
+                     if(typeof App !== 'undefined') App.loadPage('nama_halaman_tujuan');
+                 });
+
+             } else {
+                 Swal.fire('Gagal', response, 'error');
+             }
+        })
+        .withFailureHandler(function(err) {
+             btn.prop('disabled', false).html(originalText);
+             Swal.fire('Error Sistem', err.message, 'error');
+        })
+        .processFormBackend(formData); // [GANTI] Nama fungsi backend
+  }
+
+  // --- C. HELPER ---
+  function isiDropdown(id, listData) {
+      var $select = $('#' + id);
+      $select.empty().append('<option value="" disabled selected>-- Pilih --</option>');
+      if (listData) listData.forEach(function(item) { $select.append('<option value="' + item + '">' + item + '</option>'); });
+  }
+
+  // START
+  window.initFormPage();
+</script>

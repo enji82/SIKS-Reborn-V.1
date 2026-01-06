@@ -1,0 +1,121 @@
+<header>
+  <h2>KEADAAN PTK SEKOLAH DASAR</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterStatusSekolah">Status Sekolah:</label>
+    <select id="filterStatusSekolah"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+      <div class="spinner-container">
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+    </div>
+      <p>Memuat data, mohon tunggu...</p>
+  </div>
+  
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+        <table id="keadaanPtkSdTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+          <tfoot></tfoot> 
+        </table>
+    </div>
+    <div class="table-footer-note">
+      Sumber data: laporan bulan terakhir.
+    </div>
+  </div>
+</main>
+
+<style>
+  /* 1. Paksa halaman (#main-content) untuk TIDAK scroll */
+  #main-content {
+    overflow-y: hidden !important;
+  }
+
+  /* 2. Paksa <main> (pembungkus halaman) untuk mengisi sisa ruang */
+  main.table-view-container {
+    flex-grow: 1 !important;
+    min-height: 0 !important; 
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 3. Paksa #tableWrapper untuk mengisi sisa ruang di dalam <main> */
+  #tableWrapper {
+    flex-grow: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 4. INTI: Aktifkan scroll Vertikal DAN Horizontal */
+  #tableWrapper .table-container {
+    flex-grow: 1 !important;
+    overflow-y: auto !important; /* Scroll atas-bawah */
+    overflow-x: auto !important; /* Scroll kiri-kanan */
+  }
+
+  /* 5. PERBAIKAN Z-INDEX (ANTI 'GLITTER' v2)
+     Hanya targetkan header di BARIS PERTAMA (tr:first-child)
+  */
+  #keadaanPtkSdTable thead tr:first-child th:nth-child(1),
+  #keadaanPtkSdTable thead tr:first-child th:nth-child(2) {
+    z-index: 7 !important;
+  }
+
+  /* 6. PERBAIKAN SCROLLBAR: Sembunyikan scrollbar (sesuai kode Anda) */
+  #tableWrapper .table-container::-webkit-scrollbar {
+    display: none !important; 
+  }
+  #tableWrapper .table-container {
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important; 
+  }
+
+  /* ======================================================== */
+  /* === 7. ATURAN PEWARNAAN KOLOM (PERBAIKAN: HANYA tbody) === */
+  /* ======================================================== */
+
+  /* Grup 1 (Biru): Kolom 7 s/d 44 (HANYA tbody) */
+  #keadaanPtkSdTable tbody td:nth-child(n+7):nth-child(-n+44) {
+    background-color: rgba(52, 152, 219, 0.1); /* Biru */
+  }
+
+  /* Grup 2 (Hijau): Kolom 45 s/d 89 (HANYA tbody) */
+  #keadaanPtkSdTable tbody td:nth-child(n+45):nth-child(-n+89) {
+    background-color: rgba(46, 204, 113, 0.1); /* Hijau */
+  }
+
+  /* Grup 3 (Ungu): Kolom 90 s/d 101 (HANYA tbody) */
+  #keadaanPtkSdTable tbody td:nth-child(n+90):nth-child(-n+101) {
+    background-color: rgba(155, 89, 182, 0.1); /* Ungu */
+  }
+
+  /* Grup 4 (Kuning): Kolom 102 (HANYA tbody) */
+  #keadaanPtkSdTable tbody td:nth-child(102) {
+    background-color: rgba(241, 196, 15, 0.1); /* Kuning */
+  }
+  
+  /* ======================================================== */
+  /* === 8. PERBAIKAN HOVER (DI ATAS WARNA BARU) === */
+  /* ======================================================== */
+  
+  /* Pastikan hover umum tetap berfungsi */
+  #keadaanPtkSdTable tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  /* Pastikan hover kolom beku (kiri) tetap lebih gelap */
+  #keadaanPtkSdTable tbody tr:hover td:nth-child(1),
+  #keadaanPtkSdTable tbody tr:hover td:nth-child(2) {
+    background-color: #2a4152 !important;
+  }
+</style>

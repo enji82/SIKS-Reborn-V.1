@@ -1,0 +1,43 @@
+<header>
+  <h2>KELOLA DAFTAR PTK PAUD</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterJenjang">Jenjang:</label>
+    <select id="filterJenjang"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterNamaLembaga">Nama Lembaga:</label>
+    <select id="filterNamaLembaga"></select>
+  </div>
+
+  <div class="filter-group" style="margin-left: auto;">
+    <label for="searchFilter" class="search-icon-label">
+      <i class="fas fa-search"></i>
+    </label>
+    <input type="search" id="searchFilter" class="search-input" placeholder="Cari di tabel...">
+  </div>
+  <button id="tambahPtkBtn" class="submit-btn" style="width: auto; padding: 10px 20px;">
+    <i class="fas fa-plus" style="margin-right: 8px;"></i> Tambah PTK
+  </button>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+    <div class="spinner-container">
+      <div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div>
+    </div>
+    <p>Memuat data PTK, mohon tunggu...</p>
+  </div>
+
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+      <table id="kelolaPtkPaudTable" class="data-table freeze-pane-table">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="pagination-container" class="pagination-container"></div>
+  </div>
+</main>

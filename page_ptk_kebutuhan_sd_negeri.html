@@ -1,0 +1,89 @@
+<header>
+  <h2>KEBUTUHAN GURU SEKOLAH DASAR</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterKebutuhanStatus">Status Sekolah:</label>
+    <select id="filterKebutuhanStatus">
+      <option value="negeri" selected>Negeri</option>
+      <option value="swasta">Swasta</option>
+    </select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+    <div class="spinner-container">
+      <div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div>
+    </div>
+    <p>Memuat data kebutuhan Guru, mohon tunggu...</p>
+  </div>
+
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+      <table id="kebutuhanGuruTable" class="data-table freeze-pane-table">
+        <thead></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+    <div class="table-footer-note">
+      Sumber data: Laporan bulan terakhir.
+    </div>
+  </div>
+</main>
+
+<style>
+  /* 1. Paksa halaman (#main-content) untuk TIDAK scroll */
+  #main-content {
+    overflow-y: hidden !important;
+  }
+
+  /* 2. Paksa <main> (pembungkus halaman) untuk mengisi sisa ruang */
+  main.table-view-container {
+    flex-grow: 1 !important;
+    min-height: 0 !important; 
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 3. Paksa #tableWrapper untuk mengisi sisa ruang di dalam <main> */
+  #tableWrapper {
+    flex-grow: 1 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* 4. INTI: Aktifkan scroll Vertikal DAN Horizontal */
+  #tableWrapper .table-container {
+    flex-grow: 1 !important;
+    overflow-y: auto !important; /* Scroll atas-bawah */
+    overflow-x: auto !important; /* Scroll kiri-kanan */
+  }
+
+  /* 5. PERBAIKAN Z-INDEX (Menargetkan ID tabel baru) */
+  #kebutuhanGuruTable thead tr:first-child th:nth-child(1),
+  #kebutuhanGuruTable thead tr:first-child th:nth-child(2) {
+    z-index: 7 !important;
+  }
+
+  /* 6. PERBAIKAN SCROLLBAR: Sembunyikan scrollbar */
+  #tableWrapper .table-container::-webkit-scrollbar {
+    display: none !important; 
+  }
+  #tableWrapper .table-container {
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important; 
+  }
+
+  /* 7. Perataan teks (PENTING) */
+  #kebutuhanGuruTable td:nth-child(2),
+  #kebutuhanGuruTable tfoot td:nth-child(2) { 
+    text-align: left !important; /* Kolom Nama Sekolah rata kiri */
+  }
+  #kebutuhanGuruTable th {
+    white-space: normal; /* Izinkan header turun baris */
+  }
+</style>

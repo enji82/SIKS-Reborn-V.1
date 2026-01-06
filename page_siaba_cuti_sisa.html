@@ -1,0 +1,139 @@
+<header>
+  <h2>SISA CUTI TAHUNAN PEGAWAI</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterUnitCutiSisa">Unit Kerja:</label>
+    <select id="filterUnitCutiSisa"></select>
+  </div>
+  
+  <div class="filter-group" style="margin-left: auto;">
+    <label for="searchCutiSisa" class="search-icon-label"><i class="fas fa-search"></i></label>
+    <input type="search" id="searchCutiSisa" class="search-input" placeholder="Cari Nama/NIP...">
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="tableWrapperCutiSisa" style="display:flex; position: relative;"> 
+    
+    <div id="tableOverlayLoaderCutiSisa" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
+    </div>
+
+    <div class="table-container">
+        <table id="cutiSisaTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+    </div>
+  </div>
+</main>
+
+<style>
+  /* --- 1. LAYOUT WRAPPER --- */
+  #main-content { overflow-y: hidden !important; }
+  
+  main.table-view-container { 
+      flex-grow: 1 !important; 
+      min-height: 0 !important; 
+      display: flex !important; 
+      flex-direction: column !important; 
+  }
+  
+  #tableWrapperCutiSisa { 
+      flex-grow: 1 !important; 
+      min-height: 0 !important; 
+      display: flex !important; 
+      flex-direction: column !important; 
+      margin-bottom: 0; 
+  }
+  
+  #tableWrapperCutiSisa .table-container { 
+      flex-grow: 1 !important; 
+      overflow: auto !important; 
+      border-radius: 10px; 
+      border-bottom: none; 
+  }
+  #tableWrapperCutiSisa .table-container::-webkit-scrollbar { display: none !important; }
+
+  /* --- 2. ATURAN KOLOM SPESIFIK --- */
+  
+  /* Kolom 1 (No): Paksa lebar fix 50px */
+  #cutiSisaTable th:nth-child(1),
+  #cutiSisaTable td:nth-child(1) {
+      width: 50px;
+      min-width: 50px;
+      max-width: 50px;
+      box-sizing: border-box !important;
+  }
+
+  /* Kolom 2 (Nama ASN): Rata Kiri & Lebar Min */
+  #cutiSisaTable tbody td:nth-child(2) {
+      text-align: left !important; 
+      min-width: 200px;
+  }
+
+  /* Rata Kiri Lainnya */
+  #cutiSisaTable tbody td:nth-child(3) {
+      text-align: left !important;
+  }
+
+  /* --- 3. PERBAIKAN FREEZE PANE (SUDUT MATI) --- */
+  /* Masalah scroll terjadi karena Header Kolom 1 & 2 perlu dikunci 2 arah (Top & Left) */
+  /* Kita override CSS global khusus untuk 2 sel header ini dengan !important */
+  
+  #cutiSisaTable thead th:nth-child(1) {
+      position: sticky !important;
+      top: 0 !important;        /* Kunci ke Atas */
+      left: 0 !important;       /* Kunci ke Kiri */
+      z-index: 10 !important;   /* Layer Paling Atas (di atas header lain & body) */
+      background-color: #101E26 !important; /* Pastikan background tidak transparan */
+  }
+  
+  #cutiSisaTable thead th:nth-child(2) {
+      position: sticky !important;
+      top: 0 !important;        /* Kunci ke Atas */
+      left: 50px !important;    /* Kunci ke Kiri (setelah kolom 1) */
+      z-index: 10 !important;   /* Layer Paling Atas */
+      background-color: #101E26 !important;
+  }
+
+  /* --- 4. PEWARNAAN KOLOM --- */
+  
+  /* Kolom 7 (Biru Muda) */
+  #cutiSisaTable tbody td:nth-child(7) {
+      background-color: rgba(52, 152, 219, 0.15);
+      color: #3498db;
+      font-weight: bold;
+  }
+
+  /* Kolom 8 (Ungu Muda) */
+  #cutiSisaTable tbody td:nth-child(8) {
+      background-color: rgba(155, 89, 182, 0.15);
+      color: #9b59b6;
+      font-weight: bold;
+  }
+
+  /* Kolom 12 (Hijau) */
+  #cutiSisaTable tbody td:nth-child(12) {
+      background-color: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+      font-weight: bold;
+  }
+  
+  /* Hover Effect */
+  #cutiSisaTable tbody tr:hover td { background-color: rgba(255, 255, 255, 0.08); }
+  
+  /* Pastikan hover kolom freeze (kiri) warnanya konsisten/gelap */
+  #cutiSisaTable tbody tr:hover td:nth-child(1), 
+  #cutiSisaTable tbody tr:hover td:nth-child(2) { 
+      background-color: #2a4152 !important; 
+  }
+</style>

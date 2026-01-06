@@ -1,0 +1,92 @@
+<header>
+  <h2>EDIT DATA SK PEMBAGIAN TUGAS</h2>
+</header>
+
+<div class="form-container">
+  <div id="loading-data">
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 100px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 100px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 100px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 100px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="skeleton skeleton-text" style="width: 250px;"></div>
+        <div class="skeleton skeleton-input" style="height: 60px;"></div>
+      </div>
+      <div class="form-footer">
+        <div class="skeleton skeleton-button" style="width: 180px;"></div>
+      </div>
+    </div>
+
+    <!-- Formulir Edit, awalnya tersembunyi -->
+    <form id="skEditForm" class="edit-form" style="display: none;">
+        <input type="hidden" id="rowIndex" name="rowIndex">
+        
+        <!-- PERUBAHAN: Dibungkus dalam form-grid -->
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nama Sekolah (Tidak dapat diubah)</label>
+                <input type="text" id="namaSD" name="namaSD" readonly style="background-color: rgba(0,0,0,0.3); cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+                <label>Tahun Ajaran (Tidak dapat diubah)</label>
+                <input type="text" id="tahunAjaran" name="tahunAjaran" readonly style="background-color: rgba(0,0,0,0.3); cursor: not-allowed;">
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="semester">Semester</label>
+                <select id="semester" name="semester" required></select>
+            </div>
+            <div class="form-group">
+                <label for="kriteriaSK">Kriteria SK</label>
+                <select id="kriteriaSK" name="kriteriaSK" required></select>
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="nomorSK">Nomor SK</label>
+                <input type="text" id="nomorSK" name="nomorSK" required>
+            </div>
+            <div class="form-group">
+                <label for="tanggalSK">Tanggal SK</label>
+                <input type="date" id="tanggalSK" name="Tanggal SK" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="fileSK">Lewati apabila tidak mengganti file. (Scan PDF, Maks. 1 MB)</label>
+            <input type="file" id="fileSK" name="fileSK" accept="application/pdf">
+            <div id="existingFileLink" class="input-hint" style="margin-top: 10px;"></div>
+        </div>
+        <div class="form-footer">
+            <button type="submit" id="submitButton" class="submit-btn">Simpan Perubahan</button>
+        </div>
+    </form>
+</div>
+

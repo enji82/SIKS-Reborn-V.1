@@ -1,0 +1,305 @@
+<header>
+  <h2>EDIT DATA PTK SEKOLAH DASAR</h2>
+</header>
+
+<main class="manual-form form-tab-container">
+
+  <!-- SKELETON LOADER (SAMA SEPERTI FORM TAMBAH) -->
+  <div id="skeleton-loader">
+    <div class="skeleton-tabs">
+      <div class="skeleton skeleton-tab" style="width: 150px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 150px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 180px;"></div>
+    </div>
+    
+    <div class="tab-content-wrapper" style="padding-top: 15px;">
+      <h3 class="skeleton skeleton-text" style="width: 200px;"></h3>
+      <div class="form-grid-12">
+        <div class="col-span-4">
+          <div class="form-group">
+            <div class="skeleton skeleton-text" style="width: 120px;"></div>
+            <div class="skeleton skeleton-input"></div>
+          </div>
+        </div>
+        <div class="col-span-8">
+          <div class="form-group">
+            <div class="skeleton skeleton-text" style="width: 200px;"></div>
+            <div class="skeleton skeleton-input"></div>
+          </div>
+        </div>
+      </div>
+      
+      <h3 class="skeleton skeleton-text" style="width: 220px; margin-top: 30px;"></h3>
+      <div class="form-grid-12">
+        <div class="col-span-12">
+          <div class="form-group">
+            <div class="skeleton skeleton-text" style="width: 150px;"></div>
+            <div class="skeleton skeleton-input"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid-12">
+        <div class="col-span-6">
+            <div class="skeleton skeleton-text" style="width: 150px;"></div>
+            <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="col-span-3">
+            <div class="skeleton skeleton-text" style="width: 100px;"></div>
+            <div class="skeleton skeleton-input"></div>
+        </div>
+          <div class="col-span-3">
+            <div class="skeleton skeleton-text" style="width: 100px;"></div>
+            <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      
+      <div class="skeleton-footer">
+        <div class="skeleton skeleton-button" style="width: 120px; margin-left: auto;"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- FORM UTAMA (ID BERBEDA: "editPtkSdForm") -->
+  <form id="editPtkSdForm" style="display: none;">
+    <input type="hidden" name="rowIndex">
+    <input type="hidden" name="source">
+    
+    <div id="tab-nav" class="tabs-container">
+      <button type="button" class="tab-link active" data-tab="dataSekolah">1. Data Sekolah</button>
+      <button type="button" class="tab-link" data-tab="dataPribadi" disabled>2. Data Pribadi</button>
+      <button type="button" class="tab-link" data-tab="dataKepegawaian" disabled>3. Data Kepegawaian</button>
+    </div>
+
+    <div id="tab-content-wrapper" class="tab-content-wrapper">
+
+      <div id="dataSekolah" class="tab-content-form active">
+        <!-- Judul sudah dihapus sesuai permintaan Anda sebelumnya -->
+        
+        <div class="form-grid-12">
+          <div class="col-span-4">
+            <div class="form-group">
+              <label for="statusSekolah">Status Sekolah</label>
+              <select id="statusSekolah" name="statusSekolah" required>
+                <option value="" disabled selected>-- Pilih Status Sekolah --</option>
+                <option value="Negeri">Negeri</option>
+                <option value="Swasta">Swasta</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-span-8">
+            <div class="form-group">
+              <label for="unitKerja">Unit Kerja (Nama Sekolah)</label>
+              <select id="unitKerja" name="Unit Kerja" required disabled>
+                <option value="">-- Pilih Status Sekolah Dahulu --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-form-footer">
+          <button type="button" class="submit-btn next-tab-btn" style="width: auto; margin-left: auto;">Berikutnya</button>
+        </div>
+      </div>
+
+      <div id="dataPribadi" class="tab-content-form">
+        <!-- Judul sudah dihapus -->
+        
+        <div class="form-grid-12">
+          <div class="col-span-12">
+            <div class="form-group">
+              <label for="nama">Nama Lengkap</label>
+              <input type="text" id="nama" name="Nama" required>
+              <p class="input-hint">Isikan dengan huruf kapital.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-12">
+          <div class="col-span-6">
+            <div class="form-group">
+              <label for="ttl">Tempat, Tanggal Lahir</label>
+              <input type="text" id="ttl" name="Tempat, Tanggal Lahir" required>
+            </div>
+          </div>
+          <div class="col-span-3">
+            <div class="form-group">
+              <label for="jenisKelamin">Jenis Kelamin</label>
+              <select id="jenisKelamin" name="L/P" required>
+                <option value="" disabled selected>-- Pilih --</option>
+                <option value="L">L</option>
+                <option value="P">P</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-span-3">
+             <div class="form-group">
+              <label for="agama">Agama</label>
+              <select id="agama" name="Agama" required>
+                  <option value="" disabled selected>-- Memuat... --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-12">
+          <div class="col-span-3">
+            <div class="form-group">
+              <label for="pendidikan">Pendidikan</label>
+              <select id="pendidikan" name="Pendidikan" required>
+                <option value="" disabled selected>-- Memuat... --</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-span-3">
+            <div class="form-group">
+              <label for="tahunLulus">Tahun Lulus</label>
+              <input type="text" id="tahunLulus" name="Tahun Lulus" pattern="(19|20)\d{2}" maxlength="4" title="Tahun harus 4 digit (diawali 19 atau 20)" required>
+            </div>
+          </div>
+          <div class="col-span-6">
+            <div class="form-group">
+              <label for="jurusan">Jurusan</label>
+              <input type="text" id="jurusan" name="Jurusan" required>
+              <p class="input-hint">Isikan tanda - untuk pendidikan SD dan SMP sederajat.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-12">
+          <div class="col-span-6">
+            <div class="form-group">
+              <label for="serdik">Sertifikat Pendidik (Serdik)</label>
+              <select id="serdik" name="Serdik" required>
+                <option value="" disabled selected>-- Pilih --</option>
+                <option value="Sudah">Sudah</option>
+                <option value="Belum">Belum</option>
+                <option value="Sedang PPG">Sedang PPG</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-span-6">
+            <div class="form-group">
+              <label for="nuptk">NUPTK</label>
+              <input type="text" id="nuptk" name="NUPTK" pattern="\d{16}" title="NUPTK harus 16 digit angka (atau kosongkan)">
+              <p class="input-hint">Isikan 16 angka NUPTK atau kosongkan apabila tidak memiliki.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-form-footer">
+            <button type="button" class="submit-btn prev-tab-btn" style="width: auto;">Sebelumnya</button>
+            <button type="button" class="submit-btn next-tab-btn" style="width: auto; margin-left: auto;">Berikutnya</button>
+        </div>
+      </div>
+
+      <div id="dataKepegawaian" class="tab-content-form">
+        <!-- Judul sudah dihapus -->
+        
+        <div id="form-negeri" style="display: none;">
+          <div class="form-grid-12">
+            <div class="col-span-3">
+              <div class="form-group">
+                <label for="statusNegeri">Status</label>
+                <select id="statusNegeri" name="Status" required disabled>
+                  <option value="" disabled selected>-- Memuat... --</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-span-6">
+              <div class="form-group">
+                <label for="nip">NIP</label>
+                <input type="text" id="nip" name="NIP" pattern="\d{18}" title="NIP harus 18 digit angka (atau kosongkan)" disabled>
+                <p class="input-hint">Isikan 18 angka NIP bagi ASN atau kosongkan apabila Non ASN.</p>
+              </div>
+            </div>
+            <div class="col-span-3">
+              <div class="form-group">
+                <label for="pangkatNegeri">Pangkat, Gol./Ruang</label>
+                <select id="pangkatNegeri" name="Pangkat, Gol./Ruang" required disabled>
+                    <option value="">-- Pilih Status Dahulu --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="form-swasta" style="display: none;">
+          <div class="form-grid-12">
+            <div class="col-span-3">
+              <div class="form-group">
+                <label for="statusSwasta">Status</label>
+                <select id="statusSwasta" name="Status" required disabled>
+                  <option value="" disabled selected>-- Pilih --</option>
+                  <option value="GTY">GTY</option>
+                  <option value="PTY">PTY</option>
+                  <option value="GTT">GTT</option>
+                  <option value="PTT">PTT</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-span-6">
+              <div class="form-group">
+                <label for="niy">NIY</label>
+                <input type="text" id="niy" name="NIY" value="-" disabled>
+              </div>
+            </div>
+            <div class="col-span-3">
+              <div class="form-group">
+                <label for="golImpassing">Gol. Inpassing</label>
+                <input type="text" id="golImpassing" name="Gol. Inpassing" value="-" disabled>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+        
+        <div class="form-grid-12">
+          <div class="col-span-6">
+             <div class="form-group">
+              <label for="jabatan">Tugas/Jabatan</label>
+              <select id="jabatan" name="Jabatan" required>
+                <option value="" disabled selected>-- Memuat... --</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-span-3">
+            <div class="form-group">
+              <label for="tmtJabatan">TMT Jabatan</label>
+              <input type="date" id="tmtJabatan" name="TMT" required>
+            </div>
+          </div>
+          <div class="col-span-3">
+            <div class="form-group">
+                <label for="dapodik">Dapodik</label>
+                <select id="dapodik" name="Dapodik" required>
+                  <option value="" disabled selected>-- Pilih --</option>
+                  <option value="Sudah">Sudah</option>
+                  <option value="Belum">Belum</option>
+                </select>
+                <p class="input-hint">Terdata di Dapodik.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-12">
+          <div class="col-span-12">
+            <div class="form-group">
+              <label for="tugasTambahan">Tugas Tambahan</label>
+              <select id="tugasTambahan" name="Tugas Tambahan" required>
+                <option value="" disabled selected>-- Memuat... --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="tab-form-footer">
+            <button type="button" class="submit-btn prev-tab-btn" style="width: auto;">Sebelumnya</button>
+            <button type="submit" class="submit-btn" id="editSubmitBtn" style="width: auto; margin-left: auto;">Simpan Data PTK</button>
+        </div>
+      </div>
+      
+    </div>
+  </form>
+</main>

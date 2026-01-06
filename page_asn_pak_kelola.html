@@ -1,0 +1,201 @@
+<header>
+  <h2>KELOLA DATA PAK</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahunPak">Tahun PAK:</label>
+    <select id="filterTahunPak"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitPak">Unit Kerja:</label>
+    <select id="filterUnitPak"></select>
+  </div>
+  
+  <div class="filter-group" style="margin-left: auto;">
+    <label for="searchPak" class="search-icon-label"><i class="fas fa-search"></i></label>
+    <input type="search" id="searchPak" class="search-input" placeholder="Cari Nama/NIP...">
+  </div>
+</div>
+
+<main class="table-view-container">
+  
+  <div id="tableWrapperPak" style="display:flex; position: relative;"> 
+    <div id="tableOverlayLoaderPak" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
+    </div>
+
+    <div class="table-container">
+      <table id="pakTable" class="data-table freeze-pane-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Nama ASN</th>   <th>NIP</th>        <th>Pangkat</th>    <th>TMT KP</th>     <th>Jabatan</th>    <th>Tahun</th>      <th>Angka Kredit</th> <th>Dokumen</th>    <th>Cek</th>        <th>Keterangan</th> <th>Aksi</th>       <th>Tgl Unggah</th> <th>Update</th>     </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<style>
+  /* --- LAYOUT UTAMA --- */
+  #main-content { overflow-y: hidden !important; }
+  
+  main.table-view-container { 
+      flex-grow: 1 !important; 
+      min-height: 0 !important; 
+      display: flex !important; 
+      flex-direction: column !important; 
+      position: relative; 
+  }
+  
+  #tableWrapperPak { 
+      flex-grow: 1 !important; 
+      min-height: 0 !important; 
+      display: flex !important; 
+      flex-direction: column !important; 
+      margin-bottom: 0; 
+  }
+  
+  #tableWrapperPak .table-container { 
+      flex-grow: 1 !important; 
+      overflow: auto !important; 
+      border-radius: 10px; 
+      border-bottom: none; 
+  }
+  #tableWrapperPak .table-container::-webkit-scrollbar { display: none !important; }
+
+  /* --- TABEL --- */
+  #pakTable { 
+      border-collapse: separate; 
+      border-spacing: 0; 
+      width: 100%;
+  }
+
+  /* Style Dasar Sel (Header & Body) */
+  #pakTable th, #pakTable td { 
+      padding: 10px 10px !important; /* Padding Tinggi 10px */
+      vertical-align: middle; 
+      border-bottom: 1px solid rgba(255,255,255,0.1); 
+      border-right: 1px solid rgba(255,255,255,0.1); 
+      font-size: 13px; 
+      text-align: center; /* Default Rata Tengah */
+      white-space: nowrap; 
+      box-sizing: border-box;
+  }
+
+  /* --- HEADER FREEZE (ATAS) --- */
+  #pakTable thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5; /* Layer Menengah */
+      background-color: #101E26 !important; 
+      color: #ffffff;
+      border-bottom: 2px solid rgba(0, 195, 255, 0.5);
+      height: 40px; /* Tinggi Header Standar */
+  }
+
+  /* --- KOLOM BEKU (KIRI - BODY) --- */
+  
+  /* Kolom 1: No */
+  #pakTable tbody td:nth-child(1) { 
+      position: sticky; 
+      left: 0; 
+      z-index: 3; /* Di atas body biasa */
+      background-color: #1c2e3a; 
+      width: 50px; min-width: 50px; max-width: 50px;
+  }
+
+  /* Kolom 2: Nama ASN */
+  #pakTable tbody td:nth-child(2) { 
+      position: sticky; 
+      left: 50px; 
+      z-index: 3; 
+      background-color: #1c2e3a; 
+      text-align: left !important; /* Rata Kiri */
+      min-width: 200px;
+  }
+
+  /* --- SUDUT MATI (HEADER KIRI ATAS) --- */
+  /* Wajib Z-Index Tertinggi (7) agar tidak tertutup saat scroll */
+  
+  /* Header No */
+  #pakTable thead th:nth-child(1) { 
+      position: sticky !important; 
+      left: 0 !important; 
+      top: 0 !important; 
+      z-index: 7 !important; 
+      background-color: #101E26 !important;
+      width: 50px; min-width: 50px; max-width: 50px;
+  }
+
+  /* Header Nama ASN */
+  #pakTable thead th:nth-child(2) { 
+      position: sticky !important; 
+      left: 50px !important; 
+      top: 0 !important; 
+      z-index: 7 !important; 
+      background-color: #101E26 !important;
+      min-width: 200px;
+  }
+
+  /* --- PENGATURAN PERATAAN KOLOM KHUSUS --- */
+  
+  /* Rata Kiri (Left) */
+  /* Kolom 2 (Nama) sudah diatur di atas (sticky) */
+  /* Kolom 4: Pangkat */
+  #pakTable tbody td:nth-child(4) { text-align: left !important; }
+  /* Kolom 6: Jabatan */
+  #pakTable tbody td:nth-child(6) { text-align: left !important; }
+  /* Kolom 10: Keterangan */
+  #pakTable tbody td:nth-child(10) { text-align: left !important; }
+  /* Kolom 11: Aksi (Isi tombol biasanya center, tapi user minta kiri?) */
+  /* Mari kita set center untuk tombol agar rapi, kecuali jika user ingin align tombol ke kiri */
+  /* Request user: "Buatkan rata kiri untuk kolom... 11" */
+  /* Oke, kita set kiri untuk container tombol di kolom 11 */
+  #pakTable tbody td:nth-child(11) { text-align: left !important; }
+  #pakTable tbody td:nth-child(11) .action-buttons { justify-content: flex-start; } /* Tombol mulai dari kiri */
+
+  /* Rata Kanan (Right) */
+  /* Kolom 8: Angka Kredit */
+  #pakTable tbody td:nth-child(8) { text-align: right !important; padding-right: 15px !important; }
+
+  /* Sisanya (3-NIP, 5-TMT, 7-Tahun, 9-Dok, 12-Tgl, 13-Update) tetap Rata Tengah (Default) */
+
+  /* --- KHUSUS --- */
+  
+  /* Wrap Text Keterangan agar tidak terlalu lebar */
+  #pakTable td:nth-child(10) {
+      white-space: pre-wrap; 
+      min-width: 150px; 
+      max-width: 300px;
+  }
+
+  /* Lebar Kolom Aksi */
+  #pakTable th:nth-child(11), 
+  #pakTable td:nth-child(11) { 
+      min-width: 180px; 
+  }
+
+  /* Status Colors */
+  .status-ok { color: #2ecc71; font-weight: bold; }
+  .status-tolak { color: #e74c3c; font-weight: bold; }
+  .status-proses { color: #f1c40f; font-style: italic; }
+  .status-revisi { color: #e67e22; font-weight: bold; }
+
+  /* Hover Effect */
+  #pakTable tbody tr:hover td { background-color: rgba(255, 255, 255, 0.08); }
+  
+  /* Hover Konsisten untuk Kolom Beku */
+  #pakTable tbody tr:hover td:nth-child(1), 
+  #pakTable tbody tr:hover td:nth-child(2) { 
+      background-color: #2a4152 !important; 
+  }
+</style>

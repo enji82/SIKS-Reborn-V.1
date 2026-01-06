@@ -1,0 +1,244 @@
+<?!= include('css'); ?>
+
+<style>
+  :root { --page-accent: #00c3ff; } 
+  
+  /* Pengaturan Otomatis (JANGAN UBAH) */
+  .page-title { border-left-color: var(--page-accent) !important; }
+  .spinner-bar { background-color: var(--page-accent) !important; }
+  .data-table thead th { border-bottom: 2px solid var(--page-accent) !important; }
+</style>
+
+<div class="main-wrapper" style="animation: fadeIn 0.4s ease-in-out; height: 100%; display: flex; flex-direction: column;">
+  
+  <div class="page-title-container" style="margin-bottom: 20px;">
+    <h2 class="page-title" style="border-left: 5px solid; padding-left: 15px;">
+        [JUDUL HALAMAN]
+    </h2>
+  </div>
+
+  <div class="filter-container items-bottom">
+      
+      <div class="search-box-modern" style="flex: 0 0 250px; margin-right: auto;">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Cari Data...">
+      </div>
+
+      <select id="filterSatu" class="custom-select" style="min-width: 160px;"></select>
+      <select id="filterDua" class="custom-select" style="min-width: 160px;"></select>
+      
+      <button onclick="refreshPage()" class="btn-refresh-glass" title="Reset & Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+  </div>
+
+  <main class="table-view-container" style="flex:1; display:flex; flex-direction:column; min-height:0; overflow: hidden;">
+
+    <div id="loadingStatus" style="display:none; flex-direction:column; justify-content:center; align-items:center; height: 100%;">
+        <div class="spinner-container" style="display:flex; gap:6px;">
+            <div class="spinner-bar" style="width:4px; height:20px; animation: bounce 1s infinite;"></div>
+            <div class="spinner-bar" style="width:4px; height:20px; animation: bounce 1s infinite 0.2s;"></div>
+            <div class="spinner-bar" style="width:4px; height:20px; animation: bounce 1s infinite 0.4s;"></div>
+        </div>
+        <p style="color: #bbb; margin-top: 15px; font-size: 12px; letter-spacing: 1px;">MEMUAT DATA...</p>
+    </div>
+
+    <div id="tableWrapper" style="display:flex; flex-direction:column; height:100%;">
+        <div class="table-container" style="flex:1; overflow:auto;">
+            <table id="mainTable" class="data-table" style="width:100%; border-collapse:collapse;">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    </thead>
+                <tbody style="color:#ddd; font-size: 14px;">
+                    </tbody>
+            </table>
+        </div>
+        <div style="padding: 10px; color: #7f8c8d; font-size: 12px; text-align: right; border-top: 1px solid #2c3e50;">
+            Total Data: <strong id="totalDataCount" style="color: #fff;">0</strong>
+        </div>
+    </div>
+    
+  </main>
+</div>
+
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:99999; backdrop-filter: blur(5px);">
+    <div style="position:relative; width:95%; height:90%; margin:2.5% auto; background:#1e272e; border-radius:8px; overflow:hidden; border: 1px solid #34495e;">
+        <div style="padding:10px 20px; background:#000; color:#fff; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #34495e;">
+            <span style="font-weight:bold; font-size: 14px;"><i class="fas fa-file-pdf"></i> PREVIEW DOKUMEN</span>
+            <button onclick="closePreview()" style="background:transparent; border:none; color:#e74c3c; cursor:pointer; font-size: 20px;"><i class="fas fa-times"></i></button>
+        </div>
+        <iframe id="previewIframe" src="" style="width:100%; height:calc(100% - 45px); border:none;"></iframe>
+    </div>
+</div>
+
+<script>
+  // --- A. VARIABEL GLOBAL ---
+  var allDataRows = []; 
+
+  // --- B. INIT PAGE ---
+  // Ganti 'initStandardPage' dengan nama unik halaman (misal: initPtkPage)
+  window.initStandardPage = function() {
+      $('#loadingStatus').css('display', 'flex'); 
+      $('#tableWrapper').hide();
+      
+      // Panggil Fungsi Backend (Code.gs)
+      google.script.run
+        .withSuccessHandler(renderTable)
+        .withFailureHandler(function(err) {
+           $('#loadingStatus').hide();
+           Swal.fire('Gagal', 'Error: ' + err.message, 'error');
+        })
+        .getBackendData(); // [GANTI INI] dengan nama fungsi di Code.gs
+  };
+
+  // --- C. REFRESH DATA ---
+  window.refreshPage = function() {
+      $('#filterSatu').val('Semua');
+      $('#filterDua').val('Semua');
+      $('#searchInput').val('');
+      window.initStandardPage();
+  }
+
+  // --- D. RENDER TABEL ---
+  function renderTable(data) {
+    allDataRows = data.rows || [];
+    var $thead = $('#mainTable thead').empty();
+    
+    // [GANTI INI] Definisi Kolom Header
+    var h = `<tr>
+        <th class="text-center" width="40">No</th>
+        <th class="text-left">Kolom Satu</th>
+        <th class="text-center">Kolom Dua</th>
+        <th class="text-center">Status</th>
+        <th class="text-center" width="100">Dokumen</th>
+        <th class="text-center" width="200">Aksi</th>
+    </tr>`;
+    $thead.append(h);
+
+    // [GANTI INI] Setup Filter (Hanya jika kosong)
+    if($('#filterSatu').children().length <= 0) {
+        // Format: populateFilter('ID_HTML', 'Nama_Key_Data', 'Label_Tampilan');
+        populateFilter('filterSatu', 'Key1', 'Kategori'); 
+        populateFilter('filterDua', 'Key2', 'Tahun');
+    }
+    
+    applyFilter();
+    
+    $('#loadingStatus').hide();
+    $('#tableWrapper').fadeIn(300);
+  }
+
+  // --- E. LOGIKA FILTER & RENDER BODY ---
+  function applyFilter() {
+    var f1 = $('#filterSatu').val() || 'Semua';
+    var f2 = $('#filterDua').val() || 'Semua';
+    var search = $('#searchInput').val().toLowerCase();
+
+    var filtered = allDataRows.filter(function(r) {
+      // [GANTI INI] Logic Filter
+      var match1 = (f1 === 'Semua' || r['Key1'] === f1);
+      var match2 = (f2 === 'Semua' || r['Key2'] === f2);
+      var matchSearch = !search || 
+                        (r['Key1'] && r['Key1'].toLowerCase().includes(search));
+      
+      return match1 && match2 && matchSearch;
+    });
+    
+    var $tbody = $('#mainTable tbody').empty();
+    
+    if (filtered.length === 0) {
+        $tbody.append('<tr><td colspan="6" class="text-center" style="padding:30px; color:#7f8c8d;">Data tidak ditemukan.</td></tr>');
+    } else {
+        filtered.forEach(function(r, i) {
+          
+          // [OPSIONAL] Logika Badge Status
+          var status = r['Status'] || '';
+          var badgeClass = 'status-diproses';
+          if(status.match(/tolak/i)) badgeClass = 'status-ditolak';
+          else if(status.match(/terima|ok/i)) badgeClass = 'status-ok';
+          var statusBadge = `<span class="status-badge ${badgeClass}">${status}</span>`;
+
+          // [STANDARD] Tombol Lihat
+          var btnLihat = r['LinkFile'] && r['LinkFile'] !== '#' ? 
+            `<button onclick="openPreview('${r['LinkFile']}')" class="btn-lihat-premium">
+                <i class="fas fa-eye"></i> Lihat
+             </button>` : '<span style="color:#555;">-</span>';
+
+          // [STANDARD] Tombol Aksi (Edit & Hapus)
+          var btnAksi = `
+            <div class="action-buttons">
+                <button onclick="editData(${r.rowIndex})" class="action-btn edit-btn" title="Edit">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="hapusData(${r.rowIndex}, '${r['Key1']}')" class="action-btn delete-btn" title="Hapus">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                </button>
+            </div>`;
+
+          // Render Baris (Class text-center / text-left sesuai header)
+          var tr = `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td class="text-center">${i+1}</td>
+              <td class="text-left">${r['Key1']||'-'}</td>
+              <td class="text-center">${r['Key2']||'-'}</td>
+              <td class="text-center">${statusBadge}</td>
+              <td class="text-center">${btnLihat}</td>
+              <td class="text-center">${btnAksi}</td>
+          </tr>`;
+          $tbody.append(tr);
+        });
+    }
+    $('#totalDataCount').text(filtered.length);
+  }
+
+  // --- F. HELPER POPULATE (Label Masuk Dropdown) ---
+  function populateFilter(id, key, judul) {
+    var unique = [...new Set(allDataRows.map(r => r[key]))].filter(v => v).sort();
+    var $sel = $('#' + id);
+    $sel.empty();
+    // Format Label: "Semua Tahun", "Semua Sekolah"
+    $sel.append(`<option value="Semua">Semua ${judul}</option>`);
+    unique.forEach(function(v){ $sel.append(`<option value="${v}">${v}</option>`) });
+    $sel.val('Semua');
+  }
+
+  // --- G. EVENT LISTENER ---
+  $('#filterSatu, #filterDua, #searchInput').off('change input').on('change input', applyFilter);
+
+  // --- H. FUNGSI STANDAR (Edit, Hapus, Preview) ---
+  window.editData = function(rowIndex) {
+      // App.loadPage('page_edit', { rowIndex: rowIndex });
+      console.log('Edit Baris:', rowIndex);
+  }
+
+  window.hapusData = function(rowIndex, nama) {
+      Swal.fire({
+          title: 'Hapus Data?',
+          text: "Yakin menghapus: " + nama + "?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Ya, Hapus'
+      }).then((res) => {
+          if (res.isConfirmed) {
+             // Panggil Backend Delete
+             console.log('Hapus Baris:', rowIndex);
+          }
+      });
+  }
+
+  window.openPreview = function(url) {
+    if (!url) return;
+    var id = url.match(/[-\w]{25,}/); 
+    if(id) {
+        $('#previewIframe').attr('src', "https://drive.google.com/file/d/" + id[0] + "/preview");
+        $('#previewModal').fadeIn(200);
+    } else { Swal.fire('Error', 'Link invalid', 'error'); }
+  }
+
+  window.closePreview = function() {
+    $('#previewModal').fadeOut(200);
+    $('#previewIframe').attr('src', '');
+  }
+
+  // START
+  window.initStandardPage();
+</script>

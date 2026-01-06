@@ -1,0 +1,175 @@
+<header>
+  <h2>DATA MURID SD MENURUT ROMBEL</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterStatus">Status:</label>
+    <select id="filterStatus"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="loadingStatus" class="loading-container">
+      <div class="spinner-container">
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+        <div class="spinner-bar"></div>
+    </div>
+      <p>Memuat data, mohon tunggu...</p>
+  </div>
+  
+  <div id="tableWrapper" style="display:none;">
+    <div class="table-container">
+        <table id="muridSdRombelTable" class="data-table">
+          <thead></thead>
+          <tbody></tbody>
+          <tfoot></tfoot> 
+        </table>
+    </div>
+    <div class="table-footer-note">
+      Sumber data: laporan bulan terakhir.
+    </div>
+  </div>
+</main>
+
+<style>
+  /* Mengatur layout dan scrollbar internal */
+  .main-content {
+    overflow-y: hidden;
+  }
+  main.table-view-container, #tableWrapper {
+    flex-grow: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #tableWrapper .table-container {
+    overflow-y: auto;
+    flex-grow: 1;
+  }
+
+  /* =================================================================== */
+  /* ====== PENGATURAN TAMPILAN & FREEZE PANE (FINAL) ====== */
+  /* =================================================================== */
+
+  /* 1. Atur perataan teks dan lebar otomatis */
+  #muridSdRombelTable th,
+  #muridSdRombelTable td {
+    text-align: center;
+    vertical-align: middle;
+  }
+  #muridSdRombelTable td:nth-child(2),
+  #muridSdRombelTable td:nth-child(4) {
+    text-align: left;
+  }
+  #muridSdRombelTable th {
+    white-space: normal;
+  }
+
+  /* 2. Pengaturan Freeze Pane (Header, Footer, Kolom 1 & 2) */
+  #muridSdRombelTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  #muridSdRombelTable tfoot td {
+    position: sticky;
+    bottom: 0;
+    background-color: #101E26; /* Warna solid untuk footer */
+    z-index: 2;
+    border-top: 2px solid rgba(0, 195, 255, 0.5); 
+  }
+  #muridSdRombelTable thead tr:first-child th { top: 0; }
+  #muridSdRombelTable thead tr:nth-child(2) th { top: 40px; }
+  #muridSdRombelTable tfoot td { bottom: 0; }
+
+  #muridSdRombelTable tbody td:nth-child(1),
+  #muridSdRombelTable tbody td:nth-child(2) {
+    position: sticky;
+    background-color: #1c2e3a;
+  }
+  #muridSdRombelTable thead th:nth-child(1),
+  #muridSdRombelTable tbody td:nth-child(1),
+  #muridSdRombelTable tfoot td:nth-child(1) {
+    left: 0;
+  }
+  #muridSdRombelTable thead th:nth-child(2),
+  #muridSdRombelTable tbody td:nth-child(2),
+  #muridSdRombelTable tfoot td:nth-child(2) {
+    left: 50px; /* Lebar kolom No. */
+  }
+
+  /* 3. Hirarki z-index yang Benar */
+  #muridSdRombelTable tbody td { z-index: 1; }
+  #muridSdRombelTable thead th { z-index: 2; }
+  #muridSdRombelTable tfoot td { 
+    z-index: 3; 
+  }
+  #muridSdRombelTable thead tr:first-child th:nth-child(1),
+  #muridSdRombelTable thead tr:first-child th:nth-child(2) {
+    z-index: 4;
+  }
+  #muridSdRombelTable tfoot td:nth-child(1),
+  #muridSdRombelTable tfoot td:nth-child(2) {
+    z-index: 5;
+  }
+
+  /* 4. Efek hover untuk kolom beku */
+  #muridSdRombelTable tbody tr:hover td:nth-child(1),
+  #muridSdRombelTable tbody tr:hover td:nth-child(2) {
+    background-color: #2a4152;
+  }
+  
+  /* =================================================================== */
+  /* ====== PEWARNAAN ISI KOLOM & FONT BOLD (PERBAIKAN FINAL) ====== */
+  /* =================================================================== */
+
+  /* 5. Beri warna pada kolom "Jml. Murid" (ISI TABEL) - INI SUDAH BENAR */
+  #muridSdRombelTable td:nth-child(12),
+  #muridSdRombelTable td:nth-child(18),
+  #muridSdRombelTable td:nth-child(24),
+  #muridSdRombelTable td:nth-child(30),
+  #muridSdRombelTable td:nth-child(36),
+  #muridSdRombelTable td:nth-child(42) {
+    color: var(--color-blue);
+    font-weight: bold;
+  }
+
+  /* 6. Beri warna pada SUBHEADER yang sesuai - DIGESER -1 (PERBAIKAN) */
+  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(6),
+  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(12),
+  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(18),
+  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(24),
+  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(30),
+  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(36) {
+    color: var(--color-blue);
+    font-weight: bold;
+  }
+
+  /* 7. Buat teks di kolom terakhir menjadi tebal dan berwarna lain - INI SUDAH BENAR */
+  #muridSdRombelTable thead tr:first-child th:last-child,
+  #muridSdRombelTable td:last-child {
+    font-weight: bold;
+    color: var(--color-orange);
+  }
+
+  /* 8. Beri warna pada grup kolom Kelas di dalam body tabel - INI SUDAH BENAR */
+  #muridSdRombelTable tbody td:nth-child(n+7):nth-child(-n+12) { background-color: rgba(52, 152, 219, 0.1); }
+  #muridSdRombelTable tbody td:nth-child(n+13):nth-child(-n+18) { background-color: rgba(46, 204, 113, 0.1); }
+  #muridSdRombelTable tbody td:nth-child(n+19):nth-child(-n+24) { background-color: rgba(155, 89, 182, 0.1); }
+  #muridSdRombelTable tbody td:nth-child(n+25):nth-child(-n+30) { background-color: rgba(241, 196, 15, 0.1); }
+  #muridSdRombelTable tbody td:nth-child(n+31):nth-child(-n+36) { background-color: rgba(230, 126, 34, 0.1); }
+  #muridSdRombelTable tbody td:nth-child(n+37):nth-child(-n+42) { background-color: rgba(26, 188, 156, 0.1); }
+  #muridSdRombelTable tbody td:nth-child(43) { background-color: rgba(231, 76, 60, 0.1); }
+
+  /* 9. Pastikan efek hover tetap berfungsi di atas warna latar */
+  #muridSdRombelTable tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+  }
+  #muridSdRombelTable tbody tr:hover td:nth-child(1),
+  #muridSdRombelTable tbody tr:hover td:nth-child(2) {
+    background-color: #2a4152 !important;
+  }
+</style>

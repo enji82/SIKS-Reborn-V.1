@@ -1,0 +1,32 @@
+<header>
+  <h2>KELOLA DATA LAPORAN BULAN</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group"><label for="filterTahun">Tahun:</label><select id="filterTahun"></select></div>
+  <div class="filter-group"><label for="filterBulan">Bulan:</label><select id="filterBulan"></select></div>
+  <div class="filter-group"><label for="filterJenjang">Jenjang:</label><select id="filterJenjang"></select></div>
+  <div class="filter-group"><label for="filterNamaSekolah">Nama Sekolah:</label><select id="filterNamaSekolah"></select></div>
+</div>
+
+<main class="table-view-container">
+    
+    <div id="loadingStatus" class="loading-container" style="display: flex;">
+        <div class="spinner-container">
+            <div class="spinner-bar"></div><div class="spinner-bar"></div>
+            <div class="spinner-bar"></div><div class="spinner-bar"></div>
+        </div>
+        <p>Memuat data...</p>
+    </div>
+    
+    <div id="tableWrapper" style="display:none;">
+      <div class="table-container">
+          <table id="lapbulKelolaTable" class="data-table freeze-pane-table">
+            <thead></thead>
+            <tbody id="lapbulKelolaTableBody"></tbody>
+          </table>
+      </div>
+    </div>
+    
+    <div id="pagination-container" class="pagination-container"></div>
+</main>

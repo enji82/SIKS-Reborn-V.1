@@ -1,0 +1,85 @@
+<header>
+  <h2>CEK INPUT SURAT PERNYATAAN</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahunCek">Tahun:</label>
+    <select id="filterTahunCek"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulanCek">Bulan:</label>
+    <select id="filterBulanCek"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitKerjaCek">Unit Kerja:</label>
+    <select id="filterUnitKerjaCek"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="tableWrapperCek" style="display:flex; position: relative;"> 
+    
+    <div id="tableOverlayLoaderCek" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
+    </div>
+
+    <div class="table-container">
+        <table id="lupaCekTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+    </div>
+  </div> 
+</main>
+
+<style>
+  /* Layout Utama */
+  #main-content { overflow-y: hidden !important; }
+  main.table-view-container { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+  
+  /* Wrapper */
+  #tableWrapperCek { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0; }
+  
+  /* Scroll Area */
+  #tableWrapperCek .table-container { flex-grow: 1 !important; overflow: auto !important; border-radius: 10px; border-bottom: none; }
+  
+  /* Freeze Pane */
+  #lupaCekTable thead th { position: sticky; top: 0; z-index: 5 !important; }
+  #lupaCekTable thead tr:first-child th:nth-child(1), #lupaCekTable thead tr:first-child th:nth-child(2) { z-index: 7 !important; }
+  
+  /* Scrollbar Hide */
+  #tableWrapperCek .table-container::-webkit-scrollbar { display: none !important; }
+  #tableWrapperCek .table-container { scrollbar-width: none !important; }
+
+  /* Rata Kiri Nama */
+  #lupaCekTable tbody td:nth-child(2) { text-align: left !important; padding-left: 10px; }
+  
+  /* Button Lihat Styling */
+  .view-doc-btn {
+      display: inline-block;
+      padding: 4px 10px;
+      background-color: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+      border: 1px solid rgba(52, 152, 219, 0.4);
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.85em;
+      transition: all 0.2s;
+  }
+  .view-doc-btn:hover {
+      background-color: rgba(52, 152, 219, 0.4);
+      color: #fff;
+  }
+  /* TAMBAHAN: Styling Status "Cek" */
+  .status-ok { color: #2ecc71; font-weight: bold; }
+  .status-tolak { color: #e74c3c; font-weight: bold; }
+  .status-proses { color: #f1c40f; font-style: italic; }
+</style>

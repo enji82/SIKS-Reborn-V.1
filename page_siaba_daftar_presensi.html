@@ -1,0 +1,82 @@
+<header>
+  <h2>DAFTAR PRESENSI SIABA ASN</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahun">Tahun:</label>
+    <select id="filterTahun"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulan">Bulan:</label>
+    <select id="filterBulan"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitKerja">Unit Kerja:</label>
+    <select id="filterUnitKerja"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="tableWrapper" style="display:flex; position: relative;"> 
+    
+    <div id="tableOverlayLoader" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memproses Data...</p>
+    </div>
+    <div class="table-container">
+        <table id="presensiTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+    </div>
+  </div> 
+  
+  <div class="table-footer-note" id="keterangan-siaba" style="line-height: 1.6; display: none; flex-shrink: 0;"> 
+      <strong>Keterangan:</strong><br>
+      TP: Tidak Presensi, HK: Hari Kerja, H: Hadir, HA: Hari Apel, APL: Apel, TAp: Tidak Apel, HU: Hari Upacara, U: Upacara, TU: Tidak Upacara, CT: Cuti Tahunan, CAP: Cuti Alasan Penting, CS: Cuti Sakit, CM: Cuti Melahirkan, DD: Dinas Dalam, DL: Dinas Luar, TA: Terlambat, PLA: Pulang Awal, LA: Lupa Absen
+  </div>
+</main>
+
+<style>
+  /* Layout Utama */
+  #main-content { overflow-y: hidden !important; }
+  main.table-view-container { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+  
+  /* Wrapper (Pastikan flex grow aktif) */
+  #tableWrapper { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; margin-bottom: 5px; }
+  
+  /* Scroll Area */
+  #tableWrapper .table-container { flex-grow: 1 !important; overflow: auto !important; border-radius: 0 0 10px 10px; border-bottom: none; }
+  
+  /* Footer */
+  .table-footer-note { border-radius: 0 0 10px 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2); margin-top: 0; padding: 10px 15px; font-size: 0.85em; }
+
+  /* Freeze Pane */
+  #presensiTable thead th { position: sticky; top: 0; z-index: 5 !important; }
+  #presensiTable thead tr:first-child th:nth-child(1), #presensiTable thead tr:first-child th:nth-child(2) { z-index: 7 !important; }
+  
+  /* Scrollbar Hide */
+  #tableWrapper .table-container::-webkit-scrollbar { display: none !important; }
+  #tableWrapper .table-container { scrollbar-width: none !important; }
+
+  /* Format Warna */
+  .cell-negative { background-color: rgba(231, 76, 60, 0.25) !important; font-weight: bold; color: #ffffff !important; }
+  .cell-bg-cream { background-color: rgba(248, 243, 212, 0.15); }
+  .cell-bg-green { background-color: rgba(46, 204, 113, 0.15); }
+  .cell-bg-blue { background-color: rgba(52, 152, 219, 0.15); }
+  .cell-bg-yellow { background-color: rgba(241, 196, 15, 0.15); }
+  .cell-bg-purple { background-color: rgba(155, 89, 182, 0.15); }
+  .cell-bg-red { background-color: rgba(231, 76, 60, 0.25); }
+  .cell-bg-gray { background-color: rgba(128, 128, 128, 0.15); }
+  .font-red { color: #ff5757 !important; font-weight: bold; }
+  .font-green { color: #2ecc71 !important; font-weight: bold; }
+  .font-blue { color: #3498db !important; font-weight: bold; }
+  #presensiTable tbody tr:hover .cell-negative { background-color: rgba(231, 76, 60, 0.4) !important; }
+  #presensiTable tbody td:nth-child(2) { text-align: left !important; padding-left: 10px; }
+</style>

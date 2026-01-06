@@ -1,0 +1,262 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-database text-maroon mr-2"></i>Arsip Data SK Pembagian Tugas
+        </h5>
+        <hr class="mt-2 mb-3" style="border-top: 2px solid #800000;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        
+        <div class="control-bar mb-3 d-flex flex-wrap justify-content-between align-items-center bg-white p-3 shadow-sm rounded">
+          
+          <div class="d-flex align-items-center flex-wrap" style="gap: 10px;">
+            <button type="button" class="btn btn-default border shadow-sm rounded-circle" onclick="refreshTabelSK()" title="Refresh" style="width: 38px; height: 38px;">
+              <i class="fas fa-sync-alt text-maroon"></i>
+            </button>
+
+            <div style="height: 25px; width: 1px; background: #dee2e6;"></div>
+
+            <select id="filterSD" class="form-control filter-select shadow-sm border-0 bg-light" style="height: 38px;">
+              <option value="">- Semua Sekolah -</option>
+            </select>
+            <select id="filterTahun" class="form-control filter-select shadow-sm border-0 bg-light" style="height: 38px;">
+              <option value="">- Tahun -</option>
+            </select>
+            <select id="filterSemester" class="form-control filter-select shadow-sm border-0 bg-light" style="height: 38px;">
+              <option value="">- Smt -</option>
+            </select>
+            <select id="filterStatus" class="form-control filter-select shadow-sm border-0 bg-light" style="height: 38px;">
+              <option value="">- Status -</option>
+            </select>
+          </div>
+
+          <div class="mt-2 mt-md-0 position-relative">
+            <input type="text" id="customSearch" class="search-premium" placeholder="Cari Data..." style="min-width: 250px;">
+            <i class="fas fa-search position-absolute text-muted" style="right: 15px; top: 10px;"></i>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+            
+            <div class="table-responsive">
+              <table id="tabelDataSK" class="table table-hover table-premium table-sticky-first mb-0" style="width:100%;">
+                <thead>
+                  <tr>
+                    <th>Nama Sekolah</th>
+                    <th>Tahun</th>
+                    <th>Smt</th>
+                    <th>Nomor SK</th>
+                    <th>Tgl SK</th>
+                    <th>Kriteria</th>
+                    <th class="text-center">Dokumen</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Aksi</th>
+                    <th>Tgl Unggah</th>
+                    <th>User Input</th>
+                    <th>Update</th>
+                    <th>User Upd</th>
+                    <th>Verval</th>
+                    <th>Verifikator</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="bodyTabelSK">
+                  </tbody>
+              </table>
+            </div>
+
+            <div class="p-3 bg-light border-top small" id="customPagination"></div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="modalPreviewSK" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document" style="height: 90vh;">
+    <div class="modal-content h-100 border-0">
+      <div class="modal-header py-2 bg-light">
+        <h6 class="modal-title font-weight-bold"><i class="fas fa-file-pdf mr-2 text-maroon"></i> Preview Dokumen</h6>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="framePreview" src="" style="width:100%; height:100%; border:none;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  muatDataTabel();
+  
+  $('#filterSD').on('change', function() { filterTabel(0, this.value); });
+  $('#filterTahun').on('change', function() { filterTabel(1, this.value); });
+  $('#filterSemester').on('change', function() { filterTabel(2, this.value); });
+  $('#filterStatus').on('change', function() { filterTabel(7, this.value); });
+  
+  $('#customSearch').on('keyup', function() {
+      $('#tabelDataSK').DataTable().search(this.value).draw();
+  });
+});
+
+function filterTabel(colIdx, val) {
+  $('#tabelDataSK').DataTable().column(colIdx).search(val).draw();
+}
+
+function refreshTabelSK() {
+  if ($.fn.DataTable.isDataTable('#tabelDataSK')) {
+      $('#tabelDataSK').DataTable().destroy();
+  }
+  muatDataTabel();
+}
+
+function muatDataTabel() {
+  NotifSultan.loading("Sinkronisasi Data...");
+  google.script.run
+    .withSuccessHandler(function(data) {
+      Swal.close(); 
+      renderTabel(data || []);
+    })
+    .withFailureHandler(function(err) {
+      NotifSultan.alert('error', 'GAGAL', err.message);
+    })
+    .getDaftarSK();
+}
+
+function renderTabel(data) {
+  var sesi = localStorage.getItem("siksUser");
+  var user = sesi ? JSON.parse(sesi) : { role: 'User' }; 
+  var isAdmin = (user.role === 'Admin' || user.role === 'Super Admin');
+
+  var tbody = $('#bodyTabelSK');
+  tbody.empty();
+  
+  let sSd = new Set(), sTh = new Set(), sSm = new Set(), sSt = new Set();
+
+  data.forEach(function(row) {
+    if(row.namaSd) sSd.add(row.namaSd);
+    if(row.tahun) sTh.add(row.tahun);
+    if(row.semester) sSm.add(row.semester);
+    if(row.status) sSt.add(row.status);
+
+    // LOGIKA WARNA STATUS
+    var badgeClass = 'badge-secondary'; 
+    if(row.status === 'Diproses') badgeClass = 'badge-primary';
+    else if(row.status === 'Revisi') badgeClass = 'badge-warning';
+    else if(row.status === 'Ditolak') badgeClass = 'badge-danger';
+    else if(row.status === 'OK' || row.status === 'Valid' || row.status === 'Disetujui') badgeClass = 'badge-success';
+
+    var labelStatus = `<span class="badge ${badgeClass}" style="padding: 6px 10px; font-weight: 500;">${row.status || 'Draft'}</span>`;
+
+    // Tombol Aksi
+    var btnAksi = '<div class="btn-group">';
+    btnAksi += `<button class="btn btn-sm btn-light border" onclick="editSK('${row.rowBaris}')" title="Edit"><i class="fas fa-pencil-alt text-warning"></i></button>`;
+    if (isAdmin) {
+      btnAksi += `<button class="btn btn-sm btn-light border" onclick="verifikasiSK('${row.rowBaris}')" title="Verif"><i class="fas fa-check text-success"></i></button>`;
+      btnAksi += `<button class="btn btn-sm btn-light border" onclick="hapusSK('${row.rowBaris}', '${row.namaSd}')" title="Hapus"><i class="fas fa-trash-alt text-danger"></i></button>`;
+    } else {
+       btnAksi += `<button class="btn btn-sm btn-light border" onclick="hapusSK('${row.rowBaris}', '${row.namaSd}')"><i class="fas fa-trash-alt text-danger"></i></button>`;
+    }
+    btnAksi += '</div>';
+
+    var btnDoc = row.fileUrl ? 
+      `<button class="btn btn-sm btn-outline-dark" onclick="previewPDF('${row.fileUrl}')" style="border-radius: 20px; font-size: 13px;"><i class="fas fa-eye mr-1"></i> Lihat</button>` : '-';
+
+    var tr = `
+      <tr>
+        <td class="font-weight-bold text-dark">${row.namaSd}</td>
+        <td>${row.tahun}</td>
+        <td>${row.semester}</td>
+        <td>${row.noSk}</td>
+        <td>${row.tglSk}</td>
+        <td>${row.kriteria}</td>
+        <td class="text-center">${btnDoc}</td>
+        <td class="text-center">${labelStatus}</td>
+        <td class="text-center">${btnAksi}</td>
+        <td class="small text-muted">${row.tglUnggah}</td>
+        <td class="small text-muted">${row.userInput}</td>
+        <td>${row.tglUpdate}</td>
+        <td>${row.userUpdate}</td>
+        <td>${row.tglVerval}</td>
+        <td>${row.verifikator}</td>
+        <td>${row.keterangan}</td>
+      </tr>
+    `;
+    tbody.append(tr);
+  });
+
+  isiOpsi('filterSD', sSd);
+  isiOpsi('filterTahun', sTh);
+  isiOpsi('filterSemester', sSm);
+  isiOpsi('filterStatus', sSt);
+
+  // --- KONFIGURASI DATATABLES (10 BARIS) ---
+  var table = $('#tabelDataSK').DataTable({
+    "scrollY": "60vh",        
+    "scrollCollapse": true,   
+    "scrollX": true,          
+    
+    "responsive": false, 
+    "ordering": false,
+    "autoWidth": false,
+    "pageLength": 10,         // <-- SUDAH DIUBAH JADI 10
+    "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json" },
+    "dom": 't<"d-flex justify-content-between align-items-center mt-3 px-2 bg-white border-top py-2"ip>',
+    
+    "initComplete": function(settings, json) {
+        setTimeout(function() { $('#tabelDataSK').DataTable().columns.adjust(); }, 300);
+    },
+    "drawCallback": function(settings) {
+        setTimeout(function() { $('#tabelDataSK').DataTable().columns.adjust(); }, 100);
+    }
+  });
+}
+
+function isiOpsi(id, set) {
+    const el = document.getElementById(id);
+    const first = el.options[0];
+    el.innerHTML = '';
+    el.appendChild(first);
+    Array.from(set).sort().forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.text = item;
+        el.appendChild(opt);
+    });
+}
+// ... fungsi previewPDF, hapusSK, editSK, verifikasiSK tetap sama ...
+function previewPDF(url) {
+  var previewUrl = url.replace('/view?usp=drivesdk', '/preview').replace('/view?usp=sharing', '/preview');
+  $('#framePreview').attr('src', previewUrl);
+  $('#modalPreviewSK').modal('show');
+}
+function hapusSK(rowId, namaDoc) {
+  NotifSultan.konfirmasi("HAPUS DATA?", `Yakin ingin menghapus data ${namaDoc}?`)
+    .then((result) => {
+      if (result.isConfirmed) {
+        NotifSultan.loading("Menghapus...");
+        google.script.run.withSuccessHandler(function(res) {
+             if(res.success) {
+               NotifSultan.alert('success', 'TERHAPUS', res.message).then(() => refreshTabelSK());
+             } else { NotifSultan.alert('error', 'GAGAL', res.message); }
+          }).hapusDataSK(rowId);
+      }
+    });
+}
+function editSK(id) { NotifSultan.alert('info','Info', 'Fitur Edit segera hadir.'); }
+function verifikasiSK(id) { NotifSultan.alert('info','Info', 'Fitur Verifikasi segera hadir.'); }
+</script>

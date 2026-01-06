@@ -1,0 +1,247 @@
+<?!= include('css'); ?>
+
+<style>
+/* STYLE KHUSUS ARSIP */
+.icon-folder { color: #f1c40f; font-size: 1.2em; margin-right: 8px; }
+.icon-pdf { color: #e74c3c; font-size: 1.2em; margin-right: 8px; }
+.icon-img { color: #9b59b6; font-size: 1.2em; margin-right: 8px; }
+.icon-doc { color: #3498db; font-size: 1.2em; margin-right: 8px; }
+.icon-default { color: #95a5a6; font-size: 1.2em; margin-right: 8px; }
+
+/* Baris Tabel Arsip */
+.row-clickable {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.row-clickable:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Navigasi Atas */
+.arsip-nav {
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    background: #1a252f; 
+    padding: 10px 15px; 
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 15px;
+}
+.current-path {
+    font-weight: bold; color: #fff; font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.btn-nav {
+    background: #34495e; border: 1px solid rgba(255,255,255,0.1); color: #fff;
+    padding: 6px 12px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; display: flex; align-items: center; gap: 5px;
+    transition: 0.2s;
+}
+.btn-nav:hover { background: #5d6d7e; }
+.btn-nav:active { transform: scale(0.95); }
+
+</style>
+
+<div class="main-wrapper" style="animation: fadeIn 0.4s ease-in-out; height: 100%; display: flex; flex-direction: column;">
+  
+  <div class="page-title-container" style="margin-bottom: 20px;">
+    <h2 class="page-title" style="border-left: 5px solid #9b59b6; padding-left: 15px;">Arsip Digital SK</h2>
+  </div>
+
+  <div class="arsip-nav">
+      <button class="btn-nav" onclick="goHome()" title="Ke Folder Utama">
+          <i class="fas fa-home"></i>
+      </button>
+
+      <button id="btnBack" class="btn-nav" onclick="navigateUp()" style="display:none;">
+          <i class="fas fa-arrow-left"></i>
+      </button>
+      
+      <div style="width:1px; height:20px; background:rgba(255,255,255,0.2); margin:0 5px;"></div>
+
+      <div class="current-path">
+          <i class="fas fa-folder-open" style="color: #f1c40f;"></i> 
+          <span id="folderNameLabel">Memuat...</span>
+      </div>
+
+      <div style="flex:1;"></div> 
+
+      <button onclick="refreshCurrentFolder()" class="btn-refresh-glass" title="Refresh Folder Ini">
+          <i class="fas fa-sync-alt"></i>
+      </button>
+  </div>
+
+  <main class="table-view-container" style="flex:1; display:flex; flex-direction:column; min-height:0; overflow: hidden;">
+
+    <div id="arsipLoading" style="display:none; flex-direction:column; justify-content:center; align-items:center; height: 100%;">
+        <div class="spinner-container" style="display:flex; gap:6px;">
+            <div class="spinner-bar" style="background:#9b59b6; width:4px; height:20px; animation: bounce 1s infinite;"></div>
+            <div class="spinner-bar" style="background:#9b59b6; width:4px; height:20px; animation: bounce 1s infinite 0.2s;"></div>
+            <div class="spinner-bar" style="background:#9b59b6; width:4px; height:20px; animation: bounce 1s infinite 0.4s;"></div>
+        </div>
+        <p style="color: #bbb; margin-top: 15px; font-size: 12px;">MEMBUKA FOLDER...</p>
+    </div>
+
+    <div id="arsipTableWrapper" style="display:flex; flex-direction:column; height:100%;">
+        <div class="table-container">
+            <table id="arsipTable" class="data-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th style="width:50px; text-align:center;">No</th>
+                        <th style="text-align:left;">Nama File / Folder</th>
+                        <th style="width:150px; text-align:center;">Tanggal</th>
+                        <th style="width:100px; text-align:center;">Ukuran</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size: 13px;"></tbody>
+            </table>
+        </div>
+        <div style="padding: 10px; color: #7f8c8d; font-size: 12px; text-align: right; border-top: 1px solid #2c3e50;">
+            Total Item: <strong id="totalItemCount" style="color: #fff;">0</strong>
+        </div>
+    </div>
+    
+  </main>
+</div>
+
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:99999; backdrop-filter: blur(5px);">
+    <div style="position:relative; width:95%; height:90%; margin:2.5% auto; background:#1e272e; border-radius:8px; overflow:hidden; border: 1px solid #34495e;">
+        <div style="padding:10px 20px; background:#000; color:#fff; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #34495e;">
+            <span style="font-weight:bold; font-size: 14px;"><i class="fas fa-file-pdf"></i> PREVIEW DOKUMEN</span>
+            <button onclick="closePreview()" style="background:transparent; border:none; color:#e74c3c; cursor:pointer; font-size: 20px;"><i class="fas fa-times"></i></button>
+        </div>
+        <iframe id="previewIframe" src="" style="width:100%; height:calc(100% - 45px); border:none;"></iframe>
+    </div>
+</div>
+
+<script>
+  var currentFolderId = null; 
+  var parentFolderId = null;
+
+  // 1. INIT
+  window.initSkArsipPage = function() {
+      // Selalu mulai dari Root jika baru dibuka
+      goHome();
+  };
+
+  // 2. LOAD FOLDER LOGIC
+  function loadFolder(folderId) {
+      // Tampilkan loading & sembunyikan tabel agar terasa "Refresh"
+      $('#arsipLoading').css('display', 'flex'); 
+      $('#arsipTableWrapper').hide();
+      $('#folderNameLabel').text('Memuat...');
+      
+      google.script.run
+        .withSuccessHandler(renderArsipTable)
+        .withFailureHandler(function(err) {
+           $('#arsipLoading').hide();
+           Swal.fire('Gagal', err.message, 'error');
+        })
+        .getArsipData(folderId);
+  }
+
+  // 3. RENDER TABEL
+  function renderArsipTable(data) {
+      currentFolderId = data.currentId;
+      parentFolderId = data.parentId;
+      
+      // Update Judul Folder
+      $('#folderNameLabel').text(data.currentName);
+
+      // Tombol Back Logic
+      if (data.isRoot) {
+          $('#btnBack').hide();
+      } else {
+          $('#btnBack').show();
+          // Tombol Back akan memanggil parentId
+      }
+
+      var items = data.items || [];
+      var $tbody = $('#arsipTable tbody').empty();
+
+      if (items.length === 0) {
+          $tbody.append('<tr><td colspan="4" style="text-align:center; padding:30px; color:#7f8c8d;">Folder kosong.</td></tr>');
+      } else {
+          items.forEach(function(item, i) {
+              var tr = $('<tr>').addClass('row-clickable');
+              
+              // Tentukan Ikon
+              var iconHtml = '<i class="fas fa-file icon-default"></i>';
+              if (item.type === 'folder') iconHtml = '<i class="fas fa-folder icon-folder"></i>';
+              else if (item.mimeType.includes('pdf')) iconHtml = '<i class="fas fa-file-pdf icon-pdf"></i>';
+              else if (item.mimeType.includes('image')) iconHtml = '<i class="fas fa-image icon-img"></i>';
+              else if (item.mimeType.includes('word') || item.mimeType.includes('doc')) iconHtml = '<i class="fas fa-file-word icon-doc"></i>';
+
+              // Kolom No
+              tr.append(`<td style="text-align:center; color:#aaa;">${i+1}</td>`);
+              
+              // Kolom Nama (Klik Seluruh Baris)
+              var nameTd = $(`<td style="font-weight:500;">${iconHtml} ${item.name}</td>`);
+              tr.append(nameTd);
+
+              // Kolom Tanggal
+              tr.append(`<td style="text-align:center;">${item.date}</td>`);
+              
+              // Kolom Ukuran
+              tr.append(`<td style="text-align:center;">${item.size}</td>`);
+
+              // KLIK BARIS
+              tr.on('click', function() { handleItemClick(item); });
+
+              $tbody.append(tr);
+          });
+      }
+      
+      $('#totalItemCount').text(items.length);
+      $('#arsipLoading').hide();
+      $('#arsipTableWrapper').fadeIn(200);
+  }
+
+  // 4. NAVIGASI
+  function handleItemClick(item) {
+      if (item.type === 'folder') {
+          loadFolder(item.id);
+      } else {
+          openPreview(item.url);
+      }
+  }
+
+  window.navigateUp = function() {
+      if (parentFolderId) {
+          loadFolder(parentFolderId);
+      }
+  }
+
+  window.goHome = function() {
+      loadFolder(null); // Null artinya Root/Config Awal
+  }
+
+  window.refreshCurrentFolder = function() {
+      // Muat ulang ID yang sedang aktif
+      loadFolder(currentFolderId);
+  }
+
+  // 5. PREVIEW
+  window.openPreview = function(url) {
+    if (!url) return;
+    // Cek apakah PDF google drive
+    var id = url.match(/[-\w]{25,}/); 
+    if(id) {
+        var previewUrl = "https://drive.google.com/file/d/" + id[0] + "/preview";
+        $('#previewIframe').attr('src', previewUrl);
+        $('#previewModal').fadeIn(200);
+    } else {
+        window.open(url, '_blank'); 
+    }
+  }
+
+  window.closePreview = function() {
+    $('#previewModal').fadeOut(200);
+    $('#previewIframe').attr('src', '');
+  }
+
+  // START
+  window.initSkArsipPage();
+</script>

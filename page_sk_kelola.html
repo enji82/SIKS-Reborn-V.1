@@ -1,0 +1,244 @@
+<?!= include('css'); ?>
+
+<div class="main-wrapper" style="animation: fadeIn 0.4s ease-in-out; height: 100%; display: flex; flex-direction: column;">
+  
+  <div class="page-title-container" style="margin-bottom: 20px;">
+    <h2 class="page-title" style="border-left: 5px solid #00c3ff; padding-left: 15px;">Kelola Data SK</h2>
+  </div>
+
+  <div class="filter-container items-bottom">
+      
+      <div class="search-box-modern" style="margin-right: auto;">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Cari Nomor SK / Sekolah...">
+      </div>
+
+      <select id="filterTahun" class="custom-select" style="min-width: 160px;"></select>
+      <select id="filterSemester" class="custom-select" style="min-width: 140px;"></select>
+      <select id="filterNamaSekolah" class="custom-select" style="min-width: 200px;"></select>
+      
+      <button onclick="refreshKelolaData()" class="btn-refresh-glass" title="Reset & Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+  </div>
+
+  <main class="table-view-container" style="flex:1; display:flex; flex-direction:column; min-height:0; overflow: hidden;">
+
+    <div id="loadingStatus" style="display:none; flex-direction:column; justify-content:center; align-items:center; height: 100%;">
+        <div class="spinner-container" style="display:flex; gap:6px;">
+            <div class="spinner-bar" style="background:#00c3ff; width:4px; height:20px; animation: bounce 1s infinite;"></div>
+            <div class="spinner-bar" style="background:#00c3ff; width:4px; height:20px; animation: bounce 1s infinite 0.2s;"></div>
+            <div class="spinner-bar" style="background:#00c3ff; width:4px; height:20px; animation: bounce 1s infinite 0.4s;"></div>
+        </div>
+        <p style="color: #bbb; margin-top: 15px; font-size: 12px; letter-spacing: 1px;">MEMUAT DATA KELOLA...</p>
+    </div>
+
+    <div id="tableWrapper" style="display:flex; flex-direction:column; height:100%;">
+        <div class="table-container" style="flex:1; overflow:auto;">
+            <table id="kelolaTable" class="data-table" style="width:100%; border-collapse:collapse;">
+                <thead style="position: sticky; top: 0; z-index: 10;"></thead>
+                <tbody style="color:#ddd; font-size: 14px;"></tbody>
+            </table>
+        </div>
+        <div style="padding: 10px; color: #7f8c8d; font-size: 12px; text-align: right; border-top: 1px solid #2c3e50;">
+            Total Data: <strong id="totalDataCount" style="color: #fff;">0</strong>
+        </div>
+    </div>
+    
+  </main>
+</div>
+
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:99999; backdrop-filter: blur(5px);">
+    <div style="position:relative; width:95%; height:90%; margin:2.5% auto; background:#1e272e; border-radius:8px; overflow:hidden; border: 1px solid #34495e;">
+        <div style="padding:10px 20px; background:#000; color:#fff; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #34495e;">
+            <span style="font-weight:bold; font-size: 14px;"><i class="fas fa-file-pdf"></i> PREVIEW DOKUMEN</span>
+            <button onclick="closePreview()" style="background:transparent; border:none; color:#e74c3c; cursor:pointer; font-size: 20px;"><i class="fas fa-times"></i></button>
+        </div>
+        <iframe id="previewIframe" src="" style="width:100%; height:calc(100% - 45px); border:none;"></iframe>
+    </div>
+</div>
+
+<script>
+  // --- VARIABEL GLOBAL ---
+  var allKelolaData = []; 
+
+  // --- 1. INIT PAGE ---
+  window.initSkKelolaPage = function() {
+      $('#loadingStatus').css('display', 'flex'); 
+      $('#tableWrapper').hide();
+      
+      google.script.run
+        .withSuccessHandler(renderKelolaTable)
+        .withFailureHandler(function(err) {
+           $('#loadingStatus').hide();
+           Swal.fire('Gagal', 'Error: ' + err.message, 'error');
+        })
+        .getSKKelolaData(); 
+  };
+
+  // --- 2. REFRESH ---
+  window.refreshKelolaData = function() {
+      $('#filterTahun').val('Semua');
+      $('#filterSemester').val('Semua');
+      $('#filterNamaSekolah').val('Semua');
+      $('#searchInput').val('');
+      window.initSkKelolaPage();
+  }
+
+  // --- 3. RENDER TABEL ---
+  function renderKelolaTable(data) {
+    allKelolaData = data.rows || [];
+    var $thead = $('#kelolaTable thead').empty();
+    
+    // Header Tabel
+    var h = `<tr>
+        <th style="padding:15px; text-align:center; width: 40px;">No</th>
+        <th style="padding:15px; text-align:left;">Nama Sekolah</th>
+        <th style="padding:15px; text-align:center;">Tahun</th>
+        <th style="padding:15px; text-align:center;">Semester</th>
+        <th style="padding:15px; text-align:left;">Nomor SK</th>
+        <th style="padding:15px; text-align:center; width: 100px;">Dokumen</th>
+        <th style="padding:15px; text-align:center; width: 220px;">Aksi</th>
+    </tr>`;
+    $thead.append(h);
+
+    // ISI FILTER (Gunakan Helper Baru dengan Judul)
+    if($('#filterTahun').children().length <= 1) {
+        populateFilter('filterTahun', 'Tahun Ajaran', 'Tahun Pelajaran'); 
+        populateFilter('filterSemester', 'Semester', 'Semester');         
+        populateFilter('filterNamaSekolah', 'Nama SD', 'Sekolah');        
+    }
+    
+    applyKelolaFilter();
+    
+    $('#loadingStatus').hide();
+    $('#tableWrapper').fadeIn(300);
+  }
+
+  // --- 4. LOGIKA FILTER & BODY (VERSI BERSIH: TANPA STYLE INLINE) ---
+  function applyKelolaFilter() {
+    var fTahun = $('#filterTahun').val() || 'Semua';
+    var fSem = $('#filterSemester').val() || 'Semua';
+    var fSekolah = $('#filterNamaSekolah').val() || 'Semua';
+    var search = $('#searchInput').val().toLowerCase();
+
+    var filtered = allKelolaData.filter(function(r) {
+      var matchTahun = (fTahun === 'Semua' || r['Tahun Ajaran'] === fTahun);
+      var matchSem = (fSem === 'Semua' || r['Semester'] === fSem);
+      var matchSekolah = (fSekolah === 'Semua' || r['Nama SD'] === fSekolah);
+      var matchSearch = !search || 
+                        (r['Nomor SK'] && r['Nomor SK'].toLowerCase().includes(search)) ||
+                        (r['Nama SD'] && r['Nama SD'].toLowerCase().includes(search));
+      
+      return matchTahun && matchSem && matchSekolah && matchSearch;
+    });
+    
+    var $tbody = $('#kelolaTable tbody').empty();
+    
+    if (filtered.length === 0) {
+        $tbody.append('<tr><td colspan="7" class="text-center" style="padding:30px; color:#7f8c8d;">Data tidak ditemukan.</td></tr>');
+    } else {
+        filtered.forEach(function(r, i) {
+          
+          // Tombol Lihat (Class Global)
+          var btnLihat = r['Dokumen'] && r['Dokumen'] !== '#' ? 
+            `<button onclick="openPreview('${r['Dokumen']}')" class="btn-lihat-premium">
+                <i class="fas fa-eye"></i> Lihat
+             </button>` : 
+            '<span style="color:#555;">-</span>';
+
+          // Tombol Aksi (Class Global)
+          var btnAksi = `
+            <div class="action-buttons">
+                <button onclick="editSK(${r.rowIndex})" class="action-btn edit-btn" title="Edit Data">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="hapusSK(${r.rowIndex}, '${r['Nomor SK']}')" class="action-btn delete-btn" title="Hapus Data">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                </button>
+            </div>
+          `;
+
+          // Baris Tabel (BERSIH: Mengandalkan CSS Global .data-table td)
+          var tr = `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td class="text-center">${i+1}</td>
+              <td class="text-left">${r['Nama SD']||'-'}</td>
+              <td class="text-center">${r['Tahun Ajaran']||'-'}</td>
+              <td class="text-center">${r['Semester']||'-'}</td>
+              <td class="text-left">${r['Nomor SK']||'-'}</td>
+              <td class="text-center">${btnLihat}</td>
+              <td class="text-center">${btnAksi}</td>
+          </tr>`;
+          $tbody.append(tr);
+        });
+    }
+    $('#totalDataCount').text(filtered.length);
+  }
+
+  // --- 5. HELPER FILTER POPULATE ---
+  function populateFilter(id, key, judul) {
+    var unique = [...new Set(allKelolaData.map(r => r[key]))].filter(v => v).sort();
+    var $sel = $('#' + id);
+    $sel.empty();
+    
+    // Format: "Semua Tahun Pelajaran"
+    $sel.append(`<option value="Semua">Semua ${judul}</option>`);
+    
+    unique.forEach(function(v){ $sel.append(`<option value="${v}">${v}</option>`) });
+    $sel.val('Semua');
+  }
+
+  // --- 6. EVENT LISTENER ---
+  $('#filterTahun, #filterSemester, #filterNamaSekolah, #searchInput').off('change input').on('change input', applyKelolaFilter);
+
+  // --- 7. FUNGSI EDIT & HAPUS & PREVIEW ---
+  window.editSK = function(rowIndex) {
+      App.loadPage('sk_edit', { rowIndex: rowIndex });
+  }
+
+  window.hapusSK = function(rowIndex, nomorSK) {
+      Swal.fire({
+          title: 'Hapus Data?',
+          text: "Anda akan menghapus SK No: " + nomorSK,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Ya, Hapus!',
+          cancelButtonText: 'Batal'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              Swal.fire({title: 'Menghapus...', didOpen: () => Swal.showLoading()});
+              google.script.run
+                .withSuccessHandler(function() {
+                    Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+                    window.refreshKelolaData();
+                })
+                .withFailureHandler(function(err) {
+                    Swal.fire('Gagal', err.message, 'error');
+                })
+                .deleteSKData(rowIndex);
+          }
+      });
+  }
+
+  window.openPreview = function(url) {
+    if (!url) return;
+    var id = url.match(/[-\w]{25,}/); 
+    if(id) {
+        var previewUrl = "https://drive.google.com/file/d/" + id[0] + "/preview";
+        $('#previewIframe').attr('src', previewUrl);
+        $('#previewModal').fadeIn(200);
+    } else {
+        Swal.fire('Error', 'Link dokumen tidak valid', 'error');
+    }
+  }
+
+  window.closePreview = function() {
+    $('#previewModal').fadeOut(200);
+    $('#previewIframe').attr('src', '');
+  }
+
+  // START
+  window.initSkKelolaPage();
+</script>

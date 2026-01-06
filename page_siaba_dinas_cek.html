@@ -1,0 +1,124 @@
+<header>
+  <h2>CEK UNGGAHAN PERJALANAN DINAS</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahunDinas">Tahun:</label>
+    <select id="filterTahunDinas"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterBulanDinas">Bulan:</label>
+    <select id="filterBulanDinas"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitDinas">Unit Kerja:</label>
+    <select id="filterUnitDinas"></select>
+  </div>
+</div>
+
+<main class="table-view-container">
+  <div id="tableWrapperDinas" style="display:flex; position: relative;"> 
+    <div id="tableOverlayLoaderDinas" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
+    </div>
+
+    <div class="table-container">
+        <table id="dinasCekTable" class="data-table freeze-pane-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+    </div>
+  </div> 
+</main>
+
+<style>
+  /* Layout Dasar */
+  #main-content { overflow-y: hidden !important; }
+  main.table-view-container { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+  #tableWrapperDinas { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0; }
+  #tableWrapperDinas .table-container { flex-grow: 1 !important; overflow: auto !important; border-radius: 10px; border-bottom: none; }
+  #tableWrapperDinas .table-container::-webkit-scrollbar { display: none !important; }
+
+
+
+  /* --- FREEZE PANE (Kiri) --- */
+  
+/* Freeze Pane Header */
+  #dinasCekTable thead th { position: sticky; top: 0; z-index: 5; background-color: #101E26; border-bottom: 2px solid rgba(0, 195, 255, 0.5); }
+  
+  /* Freeze Pane Body (Nama & NIP) */
+  #dinasCekTable tbody td:nth-child(1), 
+  #dinasCekTable tbody td:nth-child(2) { position: sticky; background-color: #1c2e3a; z-index: 3; }
+  
+  /* Koordinat Header Kiri Atas */
+  #dinasCekTable thead th:nth-child(1) { left: 0; z-index: 7; }
+  #dinasCekTable thead th:nth-child(2) { left: 50px; z-index: 7; } /* Kolom Nama geser stlh No */
+  
+  /* Koordinat Body Kiri */
+  #dinasCekTable tbody td:nth-child(1) { left: 0; }
+  #dinasCekTable tbody td:nth-child(2) { left: 50px; text-align: left !important; }
+
+  /* --- PENGATURAN SPESIFIK KOLOM (SESUAI REQUEST) --- */
+
+  /* 1. Rata Kiri untuk Kolom 2, 5, 9, 10, 13, 14 */
+  #dinasCekTable tbody td:nth-child(2),  /* Nama ASN */
+  #dinasCekTable tbody td:nth-child(5),  /* Nomor SPT */
+  #dinasCekTable tbody td:nth-child(9),  /* Lokasi Tujuan */
+  #dinasCekTable tbody td:nth-child(10), /* Kegiatan */
+  #dinasCekTable tbody td:nth-child(13), /* Cek */
+  #dinasCekTable tbody td:nth-child(14)  /* Keterangan */
+  {
+      text-align: left !important;
+  }
+
+  /* 2. Lebar Fix & Wrap Text untuk Lokasi (9) dan Kegiatan (10) */
+  #dinasCekTable td:nth-child(9), 
+  #dinasCekTable td:nth-child(10) {
+      white-space: pre-wrap !important; /* Izinkan turun baris */
+      word-wrap: break-word;
+      min-width: 200px; /* Lebar minimal */
+      max-width: 300px; /* Lebar maksimal (agar tidak terlalu lebar) */
+  }
+  
+  /* Keterangan (14) juga sebaiknya di-wrap agar rapi */
+  #dinasCekTable td:nth-child(14) {
+      white-space: pre-wrap !important;
+      min-width: 150px;
+      max-width: 250px;
+  }
+
+  /* Status Warna */
+  .status-ok { color: #2ecc71; font-weight: bold; }
+  .status-tolak { color: #e74c3c; font-weight: bold; }
+  .status-proses { color: #f1c40f; font-style: italic; }
+  
+  /* 3. TOMBOL LIHAT (Disamakan dengan Action Button) */
+  .view-doc-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 24px;           /* Tinggi sama dengan tombol Edit/Hapus */
+      padding: 0 14px;        /* Padding sama */
+      border-radius: 5px;     /* Radius sama */
+      font-size: 13px;        /* Font sama */
+      font-weight: bold;
+      cursor: pointer; 
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      box-sizing: border-box;
+      
+      /* Warna Biru Khas Tombol Lihat */
+      background-color: rgba(52, 152, 219, 0.2); 
+      border: 1px solid rgba(52, 152, 219, 0.5);
+      color: #3498db; 
+  }
+  .view-doc-btn i { margin-right: 6px; }
+  .view-doc-btn:hover { background-color: rgba(52, 152, 219, 0.4); color: white; }
+  
+</style>

@@ -1,0 +1,211 @@
+<header>
+  <h2>TAMBAH DATA PTK PAUD</h2>
+</header>
+
+<main class="manual-form form-tab-container">
+  
+  <!-- SKELETON SEKARANG BERADA DI LUAR FORM -->
+  <div id="skeleton-loader">
+    <div class="skeleton-tabs">
+      <div class="skeleton skeleton-tab" style="width: 150px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 150px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 180px;"></div>
+    </div>
+    
+    <div class="tab-content-wrapper" style="padding-top: 15px;">
+      <h3 class="skeleton skeleton-text" style="width: 200px;"></h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 120px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 200px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      
+      <h3 class="skeleton skeleton-text" style="width: 220px; margin-top: 30px;"></h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 100px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      
+      <div class="skeleton-footer">
+        <div class="skeleton skeleton-button" style="width: 120px; margin-left: auto;"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- FORM UTAMA: Awalnya tersembunyi, akan muncul setelah data siap -->
+  <form id="addPtkPaudForm" style="display: none;">
+    
+    <div id="tab-nav" class="tabs-container">
+      <button type="button" class="tab-link active" data-tab="dataLembaga">1. Data Lembaga</button>
+      <button type="button" class="tab-link" data-tab="dataPribadi" disabled>2. Data Pribadi</button>
+      <button type="button" class="tab-link" data-tab="dataKepegawaian" disabled>3. Data Kepegawaian</button>
+    </div>
+
+    <div id="tab-content-wrapper" class="tab-content-wrapper">
+
+      <div id="dataLembaga" class="tab-content-form active">
+        <h3 class="sub-section-title">Data Lembaga</h3>
+        <div class="form-group">
+          <label for="jenjang">Jenjang</label>
+          <select id="jenjang" name="Jenjang" required>
+            <option value="" disabled selected>-- Pilih Jenjang --</option>
+            <option value="KB">KB</option>
+            <option value="TK">TK</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="namaLembaga">Nama Lembaga</label>
+          <select id="namaLembaga" name="Nama Lembaga" required disabled>
+            <option value="">-- Pilih Jenjang Dahulu --</option>
+          </select>
+        </div>
+        <div class="tab-form-footer">
+          <button type="button" class="submit-btn next-tab-btn" style="width: auto; margin-left: auto;">Berikutnya</button>
+        </div>
+      </div>
+
+      <div id="dataPribadi" class="tab-content-form">
+        <h3 class="sub-section-title">Data Pribadi PTK</h3>
+        
+        <div class="form-group">
+          <label for="nama">Nama</label>
+          <input type="text" id="nama" name="Nama" required>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="jenisKelamin">L/P</label>
+            <select id="jenisKelamin" name="L/P" required>
+              <option value="" disabled selected>-- Pilih --</option>
+              <option value="L">L</option>
+              <option value="P">P</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ttl">Tempat, Tanggal Lahir</label>
+            <input type="text" id="ttl" name="Tempat, Tanggal Lahir" required>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="pendidikan">Pendidikan</label>
+            <select id="pendidikan" name="Pendidikan" required>
+              <option value="" disabled selected>-- Pilih Pendidikan --</option>
+              <option value="S2">S2</option>
+              <option value="S1">S1</option>
+              <option value="D4">D4</option>
+              <option value="D3">D3</option>
+              <option value="D2">D2</option>
+              <option value="SMA">SMA</option>
+              <option value="SMK">SMK</option>
+              <option value="MA">MA</option>
+              <option value="Paket C">Paket C</option>
+              <option value="SMP">SMP</option>
+              <option value="MTs">MTs</option>
+              <option value="Paket B">Paket B</option>
+              <option value="SD">SD</option>
+              <option value="MI">MI</option>
+              <option value="Paket A">Paket A</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tahunLulus">Tahun Lulus</label>
+            <input type="text" id="tahunLulus" name="Tahun Lulus" 
+                   pattern="(19|20)\d{2}" maxlength="4" title="Tahun harus 4 digit (diawali 19 atau 20)" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="jurusan">Jurusan</label>
+          <input type="text" id="jurusan" name="Jurusan">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="serdik">Sertifikat Pendidik (Serdik)</label>
+            <select id="serdik" name="Serdik" required>
+              <option value="" disabled selected>-- Pilih --</option>
+              <option value="Sudah">Sudah</option>
+              <option value="Sedang PPG">Sedang PPG</option>
+              <option value="Belum">Belum</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dapodik">Dapodik</label>
+            <select id="dapodik" name="Dapodik" required>
+              <option value="" disabled selected>-- Pilih --</option>
+              <option value="Sudah">Sudah</option>
+              <option value="Belum">Belum</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="nuptk">NUPTK</label>
+          <input type="text" id="nuptk" name="NUPTK" pattern="\d{16}" title="NUPTK harus 16 digit angka (atau kosongkan)">
+          <p class="input-hint">Isi 16 digit angka atau kosongkan.</p>
+        </div>
+
+        <div class="tab-form-footer">
+            <button type="button" class="submit-btn prev-tab-btn" style="width: auto;">Sebelumnya</button>
+            <button type="button" class="submit-btn next-tab-btn" style="width: auto; margin-left: auto;">Berikutnya</button>
+        </div>
+      </div>
+
+      <div id="dataKepegawaian" class="tab-content-form">
+        <h3 class="sub-section-title">Data Kepegawaian</h3>
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" name="Status" required>
+             <option value="" disabled selected>-- Memuat... --</option>
+          </select>
+        </div>
+         <div class="form-group">
+          <label for="nipNiy">NIP/NIY</label>
+          <input type="text" id="nipNiy" name="NIP/NIY">
+        </div>
+        <div class="form-group">
+          <label for="pangkat">Pangkat, Gol./Ruang</label>
+          <input type="text" id="pangkat" name="Pangkat, Gol./Ruang">
+        </div>
+        <div class="form-group">
+          <label for="jabatan">Jabatan</label>
+          <select id="jabatan" name="Jabatan" required>
+             <option value="" disabled selected>-- Memuat... --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="tmt">TMT</label>
+          <input type="date" id="tmt" name="TMT" required>
+        </div>
+        <div class="tab-form-footer">
+            <button type="button" class="submit-btn prev-tab-btn" style="width: auto;">Sebelumnya</button>
+            <button type="submit" class="submit-btn" id="finalSubmitBtn" style="width: auto; margin-left: auto;">Simpan Data PTK</button>
+        </div>
+      </div>
+      
+    </div>
+  </form>
+</main>

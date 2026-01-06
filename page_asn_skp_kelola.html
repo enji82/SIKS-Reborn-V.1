@@ -1,0 +1,115 @@
+<header>
+  <h2>KELOLA DATA SKP</h2>
+</header>
+
+<div class="filter-container">
+  <div class="filter-group">
+    <label for="filterTahunSkp">Tahun:</label>
+    <select id="filterTahunSkp"></select>
+  </div>
+  <div class="filter-group">
+    <label for="filterUnitSkp">Unit Kerja:</label>
+    <select id="filterUnitSkp"></select>
+  </div>
+  
+  <div class="filter-group" style="margin-left: auto;">
+    <label for="searchSkp" class="search-icon-label"><i class="fas fa-search"></i></label>
+    <input type="search" id="searchSkp" class="search-input" placeholder="Cari Nama/NIP...">
+  </div>
+</div>
+
+<main class="table-view-container">
+  
+  <div id="tableWrapperSkp" style="display:flex; position: relative;"> 
+    <div id="tableOverlayLoaderSkp" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
+        <div class="spinner-container">
+            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
+            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
+            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
+            <div class="spinner-bar" style="background-color: #3498db;"></div>
+        </div>
+        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
+    </div>
+
+    <div class="table-container">
+      <table id="skpTable" class="data-table freeze-pane-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+           <th>Nama ASN</th>   <th>NIP</th>        <th>Status</th>     <th>Tahun</th>      <th>Dokumen</th>    <th>Cek</th>        <th>Keterangan</th> <th>Aksi</th>       <th>Tgl Unggah</th> <th>Update</th>     </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<style>
+  /* Reuse Global Layout */
+  #main-content { overflow-y: hidden !important; }
+  main.table-view-container { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+  #tableWrapperSkp { flex-grow: 1 !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; margin-bottom: 0; }
+  #tableWrapperSkp .table-container { flex-grow: 1 !important; overflow: auto !important; border-radius: 10px; border-bottom: none; }
+  #tableWrapperSkp .table-container::-webkit-scrollbar { display: none !important; }
+
+  /* Tabel Config */
+  #skpTable { border-collapse: separate; border-spacing: 0; width: 100%; }
+
+  #skpTable th, #skpTable td { 
+      padding: 8px 12px; 
+      vertical-align: middle; 
+      border-bottom: 1px solid rgba(255,255,255,0.1); 
+      border-right: 1px solid rgba(255,255,255,0.1); 
+      font-size: 13px; 
+      white-space: nowrap; /* Default satu baris */
+      text-align: center; 
+  }
+
+  /* Sticky Header */
+  #skpTable thead th { position: sticky; top: 0; z-index: 5; background-color: #101E26; border-bottom: 2px solid rgba(0, 195, 255, 0.5); }
+
+  /* Freeze Pane (No & Unit Kerja) - Kolom 1 & 2 */
+  /* Note: Kolom Unit Kerja (Kolom 2) sudah dihapus dari tabel di langkah sebelumnya, 
+     jadi sekarang Kolom 2 adalah Nama ASN. Mari sesuaikan freeze-nya */
+
+  /* Kolom 1: No */
+  #skpTable tbody td:nth-child(1) { position: sticky; left: 0; z-index: 3; background-color: #1c2e3a; }
+  #skpTable thead th:nth-child(1) { left: 0; z-index: 7; }
+
+  /* Kolom 2: Nama ASN (Sekarang jadi kolom ke-2 setelah Unit dihapus) */
+  #skpTable tbody td:nth-child(2) { position: sticky; left: 50px; z-index: 3; background-color: #1c2e3a; text-align: left !important; }
+  #skpTable thead th:nth-child(2) { left: 50px; z-index: 7; }
+
+  /* Rata Kiri */
+  #skpTable tbody td:nth-child(2), /* Nama */
+  #skpTable tbody td:nth-child(7), /* NIP */
+  #skpTable tbody td:nth-child(8)  /* Ket (Geser index krn unit hapus: 9 -> 8) */
+  { text-align: left; }
+  
+  /* Wrap Keterangan */
+  #skpTable td:nth-child(8) {
+      white-space: pre-wrap; min-width: 150px; max-width: 300px; text-align: left;
+  }
+  
+  /* Lebar Aksi */
+  #skpTable th:nth-child(9), #skpTable td:nth-child(9) { min-width: 180px; }
+
+  /* --- PERBAIKAN KOLOM TANGGAL --- */
+  /* Kolom 10 (Tgl Unggah) dan 11 (Update) */
+  #skpTable th:nth-child(10), #skpTable td:nth-child(10),
+  #skpTable th:nth-child(11), #skpTable td:nth-child(11) {
+      width: auto; /* Biarkan otomatis */
+      min-width: 120px; /* Lebar minimal agar tanggal terbaca */
+      white-space: nowrap; /* Jangan turun baris (agar rapi) */
+  }
+
+  /* Status Colors */
+  .status-ok { color: #2ecc71; font-weight: bold; }
+  .status-tolak { color: #e74c3c; font-weight: bold; }
+  .status-proses { color: #f1c40f; font-style: italic; }
+  .status-revisi { color: #e67e22; font-weight: bold; }
+
+  /* Hover */
+  #skpTable tbody tr:hover td { background-color: rgba(255, 255, 255, 0.08); }
+  #skpTable tbody tr:hover td:nth-child(1), #skpTable tbody tr:hover td:nth-child(2) { background-color: #2a4152; }
+</style>

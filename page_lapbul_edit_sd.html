@@ -1,0 +1,302 @@
+<header>
+  <h2 id="main-form-title">FORMULIR EDIT LAPORAN BULAN SD</h2>
+</header>
+
+<div id="loading-data">
+  <div class="manual-form form-tab-container">
+    
+    <div class="skeleton-tabs">
+      <div class="skeleton skeleton-tab" style="width: 150px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 180px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 150px;"></div>
+      <div class="skeleton skeleton-tab" style="width: 120px;"></div>
+    </div>
+    
+    <div class="tab-content-wrapper" style="padding-top: 25px;">
+      <h3 class="skeleton skeleton-text" style="width: 250px;"></h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+        <div class="form-group">
+          <div class="skeleton skeleton-text" style="width: 150px;"></div>
+          <div class="skeleton skeleton-input"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="skeleton skeleton-text" style="width: 200px;"></div>
+        <div class="skeleton skeleton-input"></div>
+      </div>
+      <div class="form-footer">
+        <div class="skeleton skeleton-button" style="width: 120px; margin-left: auto;"></div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<main class="manual-form form-tab-container" id="edit-lapbul-sd-container" style="display: none;">
+  
+  <form id="lapbulEditFormSd">
+    <input type="hidden" name="rowIndex">
+    <input type="hidden" name="source" value="SD">
+    
+    <div id="tab-nav" class="tabs-container">
+      <button type="button" class="tab-link active" data-tab="dataSekolah">1. Data Sekolah</button>
+      <button type="button" class="tab-link" data-tab="dataMurid">2. Data Murid</button>
+      <button type="button" class="tab-link" data-tab="dataPtk">3. Data PTK</button>
+      <button type="button" class="tab-link" data-tab="dataUnggah">4. Dokumen</button>
+    </div>
+
+    <div id="tab-content-wrapper" class="tab-content-wrapper">
+
+      <div id="dataSekolah" class="tab-content-form active">
+        <h3 class="sub-section-title">Data Sekolah</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Laporan Bulan</label><select name="Bulan" required></select></div>
+          <div class="form-group"><label>Tahun</label><select name="Tahun" required></select></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Status Sekolah</label><select id="statusSekolah" name="Status" required><option value="" disabled selected>-- Pilih Status --</option><option value="Negeri">Negeri</option><option value="Swasta">Swasta</option></select></div>
+          <div class="form-group"><label>Nama SD</label><input type="text" name="Nama Sekolah" required></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>NPSN</label><input type="text" name="NPSN" pattern="[0-9]{8}" title="NPSN harus 8 digit angka" required></div>
+          <div class="form-group"><label>Jumlah Rombel (Total)</label><input type="number" name="Rombel" min="0" required></div>
+        </div>
+        <div class="tab-form-footer">
+          <button type="button" class="submit-btn next-tab-btn" style="width: auto; margin-left: auto;">Berikutnya</button>
+        </div>
+      </div>
+
+      <div id="dataMurid" class="tab-content-form">
+        <div id="edit-kelas-tabs" class="tabs-container">
+            <button type="button" class="sub-tab-link active" data-kelas="1">Kelas 1</button>
+            <button type="button" class="sub-tab-link" data-kelas="2">Kelas 2</button>
+            <button type="button" class="sub-tab-link" data-kelas="3">Kelas 3</button>
+            <button type="button" class="sub-tab-link" data-kelas="4">Kelas 4</button>
+            <button type="button" class="sub-tab-link" data-kelas="5">Kelas 5</button>
+            <button type="button" class="sub-tab-link" data-kelas="6">Kelas 6</button>
+        </div>
+        <div id="edit-kelas-content-container">
+          
+          <div id="kelas-content-1" class="tab-content" style="display: block;"></div>
+          <div id="kelas-content-2" class="tab-content" style="display: none;"></div>
+          <div id="kelas-content-3" class="tab-content" style="display: none;"></div>
+          <div id="kelas-content-4" class="tab-content" style="display: none;"></div>
+          <div id="kelas-content-5" class="tab-content" style="display: none;"></div>
+          <div id="kelas-content-6" class="tab-content" style="display: none;"></div>
+
+        </div>
+      </div>
+
+      <div id="dataPtk" class="tab-content-form">
+        
+        <fieldset class="ptk-fieldset">
+          <legend>Kepala Sekolah</legend>
+          <div class="ptk-row has-label">
+            <label>Jumlah Kepala Sekolah</label>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_kepsek_pns" min="0" max="1" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_kepsek_pppk" min="0" max="1" value="0"></div>
+              <div class="form-group"><label>Non ASN</label><input type="number" name="ptk_kepsek_nonasn" min="0" max="1" value="0"></div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="ptk-fieldset">
+          <legend>Guru</legend>
+          
+          <div class="ptk-row has-label"><label>Guru Kelas</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_kelas_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_kelas_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_kelas_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_kelas_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_kelas_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Guru PAI</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_pai_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_pai_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_pai_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_pai_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_pai_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Guru PJOK</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_pjok_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_pjok_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_pjok_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_pjok_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_pjok_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Guru PA Kristen</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_kristen_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_kristen_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_kristen_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_kristen_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_kristen_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Guru PA Katolik</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_katolik_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_katolik_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_katolik_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_katolik_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_katolik_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Guru Bhs. Inggris</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_inggris_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_inggris_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_inggris_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_inggris_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_inggris_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Guru Mapel Lain</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_guru_lainnya_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_guru_lainnya_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_guru_lainnya_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>GTY</label><input type="number" name="ptk_guru_lainnya_gty" min="0" value="0"></div>
+              <div class="form-group"><label>GTT</label><input type="number" name="ptk_guru_lainnya_gtt" min="0" value="0"></div>
+            </div>
+          </div>
+
+        </fieldset>
+
+        <fieldset class="ptk-fieldset">
+          <legend>Tenaga Kependidikan</legend>
+          
+          <div class="ptk-row has-label"><label>Pengelola Umum Operasional</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_pengelola_umum_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_pengelola_umum_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_pengelola_umum_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_pengelola_umum_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_pengelola_umum_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+
+          <div class="ptk-row has-label"><label>Operator Layanan Operasional</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_operator_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_operator_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_operator_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_operator_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_operator_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Pengelola Layanan Operasional</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_pengelola_layanan_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_pengelola_layanan_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_pengelola_layanan_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_pengelola_layanan_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_pengelola_layanan_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Penata Layanan Operasional</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_penata_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_penata_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_penata_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_penata_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_penata_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Administrasi Perkantoran</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_adm_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_adm_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_adm_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_adm_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_adm_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Penjaga</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_penjaga_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_penjaga_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_penjaga_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_penjaga_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_penjaga_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Tenaga Administrasi</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_tas_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_tas_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_tas_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_tas_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_tas_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Pustakawan</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_pustakawan_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_pustakawan_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_pustakawan_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_pustakawan_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_pustakawan_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+          <div class="ptk-row has-label"><label>Tendik Lainnya</label>
+            <div>
+              <div class="form-group"><label>PNS</label><input type="number" name="ptk_tendik_lainnya_pns" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK</label><input type="number" name="ptk_tendik_lainnya_pppk" min="0" value="0"></div>
+              <div class="form-group"><label>PPPK PW</label><input type="number" name="ptk_tendik_lainnya_pppkpw" min="0" value="0"></div>
+              <div class="form-group"><label>PTY</label><input type="number" name="ptk_tendik_lainnya_pty" min="0" value="0"></div>
+              <div class="form-group"><label>PTT</label><input type="number" name="ptk_tendik_lainnya_ptt" min="0" value="0"></div>
+            </div>
+          </div>
+          
+        </fieldset>
+
+        <div class="tab-form-footer">
+          <button type="button" class="submit-btn prev-tab-btn" style="width: auto;">Sebelumnya</button>
+          <button type="button" class="submit-btn next-tab-btn" style="width: auto; margin-left: auto;">Berikutnya</button>
+        </div>
+      </div>
+      
+      <div id="dataUnggah" class="tab-content-form">
+        <h3 class="sub-section-title">Perbarui Dokumen (Opsional)</h3>
+        <div class="form-group">
+            <label>File Saat Ini</label>
+            <p id="existingFileLink" class="input-hint" style="margin-top: 10px; font-size: 1em;">Memuat...</p>
+        </div>
+        <div class="form-group">
+            <label for="fileLapbul">Ganti Scan PDF Laporan (Maks. 300 KB)</label>
+            <input type="file" id="fileLapbul" name="fileData" accept=".pdf">
+        </div>
+        <div class="tab-form-footer">
+            <button type="button" class="submit-btn prev-tab-btn" style="width: auto;">Sebelumnya</button>
+            <button type="submit" class="submit-btn" id="edit-lapbul-sd-submit" style="width: auto; margin-left: auto;">Simpan Perubahan</button>
+        </div>
+      </div>
+      
+    </div> 
+  </form>
+</main>

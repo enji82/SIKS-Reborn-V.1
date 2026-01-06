@@ -1,0 +1,67 @@
+<header>
+  <h2>UNDUH REKAP BULANAN</h2>
+</header>
+
+<main class="archive-container" style="height: calc(100vh - 140px); display: flex; flex-direction: column;">
+  
+  <div class="breadcrumb-nav">
+    <ul id="rekapBreadcrumb" class="breadcrumb">
+        </ul>
+  </div>
+
+  <div id="rekapContentArea" class="archive-content">
+      <div id="rekapLoader" style="display: flex; justify-content: center; align-items: center; height: 200px;">
+          <div class="spinner-container">
+            <div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div><div class="spinner-bar"></div>
+          </div>
+      </div>
+      
+      <div id="rekapGrid" class="file-grid" style="display: none;"></div>
+  </div>
+
+</main>
+
+<style>
+  /* Style khusus Arsip (Mirip Laporan Bulan) */
+  .breadcrumb-nav {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+  }
+  .breadcrumb {
+      list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap;
+  }
+  .breadcrumb li { color: #bdc3c7; font-size: 0.95em; }
+  .breadcrumb li + li:before { content: "/"; padding: 0 8px; color: #7f8c8d; }
+  .breadcrumb li a { color: #3498db; text-decoration: none; cursor: pointer; font-weight: 600; }
+  .breadcrumb li a:hover { text-decoration: underline; }
+  
+  .archive-content {
+      flex-grow: 1; overflow-y: auto; 
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px; padding: 20px;
+  }
+  .archive-content::-webkit-scrollbar { display: none; }
+
+  /* Grid Layout */
+  .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+  }
+
+  /* Item Folder/File */
+  .grid-item {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 15px; border-radius: 8px; cursor: pointer; transition: background 0.2s;
+      color: #ecf0f1;
+  }
+  .grid-item:hover { background: rgba(255, 255, 255, 0.1); }
+  
+  .item-icon { font-size: 3em; margin-bottom: 10px; }
+  .icon-folder { color: #f1c40f; }
+  .icon-pdf { color: #e74c3c; }
+  
+  .item-name { font-size: 0.9em; word-break: break-word; line-height: 1.4; }
+</style>

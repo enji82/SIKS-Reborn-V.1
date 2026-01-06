@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SIKS - REBORN</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css">
+  
+  <script>
+    // FIX: Matikan eror autoIframeMode sebelum AdminLTE dimuat
+    localStorage.setItem('AdminLTE:IFrame:Options', JSON.stringify({autoIframeMode:false}));
+  </script>
+
+  <?!= include('css'); ?>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed layout-navbar-fixed">
+
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png" alt="Loading" height="60" width="60">
+  </div>
+
+  <div id="gerbang-login">
+    <?!= include('page_login'); ?>
+  </div>
+
+  <div class="wrapper" id="konten-aplikasi" style="display:none;">
+    <nav class="main-header navbar navbar-expand navbar-dark">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-none d-md-block">
+          <span class="nav-link font-weight-bold text-white" style="cursor: default; letter-spacing: 0.5px;">
+            Ruang Edukasi dan Layanan Berbasis Online Terintegrasi
+          </span>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown user-menu">
+          
+          <a href="#" class="nav-link d-flex align-items-center" data-toggle="dropdown">
+            <div class="user-capsule">
+              <img id="nav-user-photo" src="https://ui-avatars.com/api/?name=User" alt="User">
+              <span id="nav-user-name">Loading...</span>
+              <i class="fas fa-angle-down ml-2" style="font-size: 0.7rem; opacity: 0.7;"></i>
+            </div>
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <li class="user-header">
+              <img id="dropdown-user-photo" src="" class="img-circle" alt="User Image">
+              <div>
+                <p class="user-header-name" id="dropdown-user-name-big">Nama Lengkap</p>
+                <small class="user-header-role" id="dropdown-user-role">Jabatan</small>
+              </div>
+            </li>
+            <li class="user-footer">
+              <a href="#" class="btn btn-default btn-flat text-muted shadow-sm"><i class="fas fa-user-cog mr-1"></i> Profil</a>
+              <button type="button" class="btn btn-danger btn-flat shadow-sm" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-1"></i> Logout</button>
+            </li>
+          </ul>
+
+        </li>
+      </ul>
+    </nav>
+
+    <aside class="main-sidebar elevation-4">
+      <a href="#" class="brand-link">
+        <i class="fa-solid fa-paperclip ml-3 mr-2 text-warning"></i>
+        <span class="brand-text font-weight-bold text-white">SIKS-REBORN</span>
+      </a>
+      <div id="sidebar-container">
+        <?!= include('sidebar'); ?>
+      </div>
+    </aside>
+
+    <div class="content-wrapper">
+      <div id="main-content" class="p-3"></div>
+    </div>
+
+    <footer class="main-footer">
+      <strong>Copyright &copy; 2026 <span class="text-maroon">Korwil Disdikbud Kecamatan Secang</span>.</strong>
+      <span class="ml-1">All rights reserved.</span>
+      <small class="text-muted ml-2" style="font-size: 0.7rem; opacity: 0.6;">(v2.0)</small>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js"></script>
+
+  <?!= include('dropdown_data.js'); ?>
+  <?!= include('javascript'); ?>
+</body>
+</html>
