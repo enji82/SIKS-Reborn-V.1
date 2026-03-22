@@ -1,32 +1,1783 @@
-<header>
-  <h2>KELOLA DATA LAPORAN BULAN</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group"><label for="filterTahun">Tahun:</label><select id="filterTahun"></select></div>
-  <div class="filter-group"><label for="filterBulan">Bulan:</label><select id="filterBulan"></select></div>
-  <div class="filter-group"><label for="filterJenjang">Jenjang:</label><select id="filterJenjang"></select></div>
-  <div class="filter-group"><label for="filterNamaSekolah">Nama Sekolah:</label><select id="filterNamaSekolah"></select></div>
-</div>
-
-<main class="table-view-container">
-    
-    <div id="loadingStatus" class="loading-container" style="display: flex;">
-        <div class="spinner-container">
-            <div class="spinner-bar"></div><div class="spinner-bar"></div>
-            <div class="spinner-bar"></div><div class="spinner-bar"></div>
-        </div>
-        <p>Memuat data...</p>
-    </div>
-    
-    <div id="tableWrapper" style="display:none;">
-      <div class="table-container">
-          <table id="lapbulKelolaTable" class="data-table freeze-pane-table">
-            <thead></thead>
-            <tbody id="lapbulKelolaTableBody"></tbody>
-          </table>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-calendar-alt text-maroon mr-2"></i>Kelola Data Laporan Bulan
+        </h5>
+        <hr class="style-sultan-solid">
       </div>
     </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#lapbulkelola_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold"><i class="fas fa-info-circle mr-2"></i> Informasi</div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="lapbulkelola_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3 text-dark mt-2" style="font-size:14px;">
+                    <li>Laporan bulan diunggah melalui tombol <b>+ Tambah</b> setiap bulan sebelum tanggal 10.</li>
+                    <li>Laporan yang sudah ditandatangani Kepala Sekolah dan Korwil discan dalam format PDF dengan ukuran maksimal 500 kb.</li>
+                    <li>Pencarian data dilakukan per <b>Tahun</b>. Ubah filter Bulan/Status untuk memilah data secara instan.</li>
+                    <li>Klik tombol <span class="badge badge-outline-danger">💬 Baca Catatan</span> untuk melihat alasan admin jika laporan direvisi/ditolak.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="lapbulkelola_filterJenjang" class="form-control form-control-sultan input-auto-width d-none">
+                    <option value="">- Semua Jenjang -</option>
+                    <option value="SD">SD</option>
+                    <option value="TK">TK</option>
+                    <option value="KB">KB</option>
+                </select>
+
+                <select id="lapbulkelola_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <select id="lapbulkelola_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80"></select>
+                
+                <select id="lapbulkelola_filterBulan" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Bulan -</option>
+                    <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Maret">Maret</option>
+                    <option value="April">April</option><option value="Mei">Mei</option><option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option><option value="Agustus">Agustus</option><option value="September">September</option>
+                    <option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                </select>
+
+                <select id="lapbulkelola_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Status -</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Revisi">Revisi</option>
+                    <option value="Ditolak">Ditolak</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="lapbulkelola_btnCari" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="lapbulkelola_btnTambah" class="btn btn-maroon text-white font-weight-bold shadow-sm" disabled>
+                    <i class="fas fa-plus mr-1"></i> Tambah
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="lapbulkelola_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="lapbulkelola_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="lapbulkelola_tableState" style="display: none;">
+                  <table id="lapbulkelola_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="col-sticky-left border-right text-center" style="width: 1%; white-space: nowrap; z-index: 5;">Aksi</th>
+                            <th class="text-left align-middle">Unit Kerja</th>
+                            <th class="text-center align-middle">Bulan</th>
+                            <th class="text-center align-middle">Tahun</th>
+                            <th class="text-center align-middle">Status Sek.</th>
+                            <th class="text-center align-middle">Jenjang</th>
+                            <th class="text-center align-middle">Rombel</th>
+                            <th class="text-center align-middle">Dokumen</th>
+                            <th class="text-left align-middle">Status Laporan</th>
+                            <th class="text-left align-middle">Dikirim</th>
+                            <th class="text-left align-middle">Diubah</th>
+                            <th class="text-left align-middle">Verifikasi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="lapbulkelola_modalPreview" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-full" role="document">
+        <div class="modal-content modal-content-sultan border-0 shadow-lg" style="height: 100%;">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title font-weight-bold"><i class="fas fa-file-pdf mr-2"></i>Pratinjau Dokumen Laporan</h6>
+                <div class="ml-auto">
+                    <a id="lapbulkelola_btnUnduh" href="#" class="btn btn-xs btn-light text-danger font-weight-bold shadow-sm mr-2 rounded-pill px-3" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Buka di Tab Baru</a>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body bg-dark position-relative p-0" style="height: calc(100vh - 55px);">
+                <iframe id="lapbulkelola_framePreview" class="w-100 h-100 border-0 d-none" src=""></iframe>
+                <div id="lapbulkelola_loadingPreviewPDF" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100">
+                    <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lapbulkelola_modalTambahData" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content modal-content-sultan border-0 shadow-lg" style="min-height: 85vh;">
+            <div class="modal-header bg-maroon text-white py-3" id="lapbulkelola_headerModalForm">
+                <h5 class="modal-title font-weight-bold" id="lapbulkelola_judulModalForm"><i class="fas fa-plus-circle mr-2"></i>Form Laporan Bulan</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" id="lapbulkelola_btnTutupModalForm"><span>&times;</span></button>
+            </div>
+            <div class="modal-body bg-light p-0 position-relative">
+                
+                <div id="lapbulkelola_viewPilihJenjang" class="d-flex align-items-center justify-content-center h-100 w-100 p-5">
+                    <div class="row w-100 justify-content-center">
+                        <div class="col-12 text-center mb-5">
+                            <h3 class="font-weight-bold text-dark">Pilih Jenjang Sekolah</h3>
+                            <p class="text-muted">Silakan pilih formulir sesuai jenjang sekolah Anda.</p>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card card-jenjang shadow-sm cursor-pointer hover-scale btn-pilih-jenjang" data-jenjang="PAUD">
+                                <div class="card-body text-center py-5">
+                                    <div class="icon-circle mb-4 bg-info text-white mx-auto"><i class="fas fa-cubes"></i></div>
+                                    <h4 class="font-weight-bold text-maroon">PAUD</h4>
+                                    <p class="mb-0 text-muted">TK, KB, SPS, TPA</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="card card-jenjang shadow-sm cursor-pointer hover-scale btn-pilih-jenjang" data-jenjang="SD">
+                                <div class="card-body text-center py-5">
+                                    <div class="icon-circle mb-4 bg-success text-white mx-auto"><i class="fas fa-school"></i></div>
+                                    <h4 class="font-weight-bold text-maroon">SD</h4>
+                                    <p class="mb-0 text-muted">Sekolah Dasar</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="lapbulkelola_viewFormContainer" class="d-none h-100 flex-column">
+                    <div class="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+                        <button id="lapbulkelola_btnKembaliPilih" class="btn btn-sm btn-outline-secondary font-weight-bold shadow-sm"><i class="fas fa-arrow-left mr-1"></i> Kembali</button>
+                        <span class="font-weight-bold text-maroon" id="lapbulkelola_labelFormAktif" style="font-size: 1.1rem;">FORMULIR</span>
+                        <div style="width: 80px;"></div>
+                    </div>
+                    <div id="lapbulkelola_formContentArea" class="p-0" style="flex: 1; overflow-y: auto;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/template" id="lapbulkelola_tplFormSD">
+    <form id="lapbulkelola_formSD" class="h-100 d-flex flex-column">
+        <div class="bg-white px-3 pt-2 border-bottom shadow-sm sticky-top z-index-10">
+            <ul class="nav nav-tabs nav-fill font-weight-bold text-uppercase" style="font-size: 14px;" id="lapbulkelola_tabSD">
+                <li class="nav-item"><a class="nav-link active btn-tab-sd py-2" id="lapbulkelola_link-lapbulkelola_ts1" data-target="lapbulkelola_ts1" href="#">1. Sekolah</a></li>
+                <li class="nav-item"><a class="nav-link disabled-tab btn-tab-sd py-2" id="lapbulkelola_link-lapbulkelola_ts2" data-target="lapbulkelola_ts2" href="#">2. Data Murid</a></li>
+                <li class="nav-item"><a class="nav-link disabled-tab btn-tab-sd py-2" id="lapbulkelola_link-lapbulkelola_ts3" data-target="lapbulkelola_ts3" href="#">3. Data PTK</a></li>
+                <li class="nav-item"><a class="nav-link disabled-tab btn-tab-sd py-2" id="lapbulkelola_link-lapbulkelola_ts4" data-target="lapbulkelola_ts4" href="#">4. Unggah</a></li>
+            </ul>
+        </div>
+        <div class="tab-content p-3 bg-light flex-grow-1" style="overflow-y: auto;">
+            
+            <div class="tab-pane fade show active" id="lapbulkelola_ts1">
+                <div class="card card-sultan shadow-sm p-3">
+                    <div class="row border-bottom pb-3 mb-3 shadow-sm bg-white sticky-top pt-2" style="z-index:10; margin-top:-10px;">
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Cari Sekolah (Ketik NPSN/Nama)</label>
+                            <div class="position-relative">
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-white"><i class="fas fa-search text-maroon"></i></span></div>
+                                    <input type="text" id="lapbulkelola_inputSearchSekolah" class="form-control form-control-sultan input-cari-sekolah" data-tipe="SD" placeholder="Ketik lalu pilih..." autocomplete="off">
+                                </div>
+                                <div id="lapbulkelola_suggestionBoxSD" class="suggestion-box rounded-bottom shadow-lg" style="top:100%; position: absolute; z-index: 1000; width: 100%; display: none; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+                                <input type="hidden" name="npsn" id="lapbulkelola_val_npsn">
+                                <input type="hidden" name="nama_sekolah" id="lapbulkelola_val_nama">
+                                <input type="hidden" name="jenjang" id="lapbulkelola_val_jenjang">
+                                <input type="hidden" name="status_sekolah" id="lapbulkelola_val_status">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Periode Laporan</label>
+                            <div class="d-flex">
+                                <select name="bulan" id="lapbulkelola_sel_bulan" class="form-control form-control-sultan mr-2 border-maroon font-weight-bold" required></select>
+                                <select name="tahun" id="lapbulkelola_sel_tahun" class="form-control form-control-sultan border-maroon font-weight-bold" style="width: 100px;" required></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="lapbulkelola_dynamicFieldsSD">
+                        <div class="row">
+                            <div class="col-lg-4 col-md-12 mb-3"><div class="group-box h-100"><span class="group-title text-maroon"><i class="fas fa-building mr-2"></i>Legalitas</span><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Nama Yayasan</label><input type="text" name="yayasan" id="lapbulkelola_in_yayasan" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">No. SK Pendirian</label><input type="text" name="no_sk_pendirian" id="lapbulkelola_in_no_sk_pendirian" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Tgl Pendirian</label><input type="date" name="tgl_pendirian" id="lapbulkelola_in_tgl_pendirian" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">No. SK Ijin Ops</label><input type="text" name="no_sk_ijin" id="lapbulkelola_in_no_sk_ijin" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Tgl Ijin Ops</label><input type="date" name="tgl_ijin" id="lapbulkelola_in_tgl_ijin" class="form-control form-control-sultan form-control-sm"></div></div></div>
+                            <div class="col-lg-4 col-md-12 mb-3"><div class="group-box h-100"><span class="group-title text-maroon"><i class="fas fa-star mr-2"></i>Akreditasi</span><div class="row"><div class="col-6 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Akreditasi</label><select name="akreditasi" id="lapbulkelola_in_akreditasi" class="form-control form-control-sultan form-control-sm"><option value="-">-</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="Belum">Belum</option></select></div><div class="col-6 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Skor Nilai</label><input type="number" name="skor" id="lapbulkelola_in_skor" class="form-control form-control-sultan form-control-sm"></div></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">No. Sertifikat</label><input type="text" name="no_sertifikat" id="lapbulkelola_in_no_sertifikat" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Tanggal Sertifikat</label><input type="date" name="tgl_sertifikat" id="lapbulkelola_in_tgl_sertifikat" class="form-control form-control-sultan form-control-sm"></div></div></div>
+                            <div class="col-lg-4 col-md-12 mb-3"><div class="group-box h-100"><span class="group-title text-maroon"><i class="fas fa-address-book mr-2"></i>Kontak</span><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Alamat Sekolah</label><textarea name="alamat" id="lapbulkelola_in_alamat" class="form-control form-control-sultan form-control-sm" rows="3" style="resize:none;"></textarea></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Nomor Telepon</label><input type="text" name="telepon" id="lapbulkelola_in_telepon" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-0">Email Sekolah</label><input type="text" name="email" id="lapbulkelola_in_email" class="form-control form-control-sultan form-control-sm"></div></div></div>
+                        </div>
+                    </div>
+                    <div class="text-right mt-3 border-top pt-3">
+                        <button type="button" class="btn btn-primary px-4 font-weight-bold shadow-sm btn-val-sek-sd">DATA MURID <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="lapbulkelola_ts2"><div class="card card-sultan shadow-sm border-0"><div class="card-header bg-white p-0 border-bottom"><ul class="nav nav-pills nav-fill small font-weight-bold" id="lapbulkelola_subTabKelas"></ul></div><div class="card-body p-3 tab-content" id="lapbulkelola_kelasContainer"></div></div></div>
+            <div class="tab-pane fade" id="lapbulkelola_ts3"></div>
+            <div class="tab-pane fade" id="lapbulkelola_ts4">
+                <div class="card card-sultan shadow-sm p-4 text-center">
+                    <div id="lapbulkelola_boxFilePreviewSD" class="card border-left-info shadow-sm mb-4 d-none text-left"><div class="card-body py-3"><div class="d-flex justify-content-between align-items-center"><div class="d-flex align-items-center"><div class="icon-circle bg-light-info text-info mr-3" style="width:50px;height:50px;font-size:20px;"><i class="fas fa-file-pdf"></i></div><div><h6 class="font-weight-bold text-dark mb-0">Dokumen Tersimpan</h6></div></div><button type="button" class="btn btn-sm btn-outline-info font-weight-bold shadow-sm px-3 btn-aksi-preview"><i class="fas fa-eye mr-1"></i> Lihat Dokumen</button></div></div></div>
+                    <h5 class="font-weight-bold mt-2 text-maroon"><i class="fas fa-cloud-upload-alt mr-2"></i>Unggah Laporan SD</h5>
+                    <p class="text-muted mb-1">Format PDF, Maksimal 500 KB.</p>
+                    <p class="text-info font-italic mb-3 font-weight-bold d-none" id="lapbulkelola_msgEditFileSD"><i class="fas fa-info-circle mr-1"></i> Biarkan kosong jika tidak ingin mengganti file.</p>
+                    <div class="custom-file w-75 mx-auto text-left mb-4">
+                        <input type="file" class="custom-file-input border-maroon input-file-lapbul" id="lapbulkelola_fileSD" accept="application/pdf">
+                        <label class="custom-file-label text-truncate" for="lapbulkelola_fileSD">Pilih File Laporan...</label>
+                    </div>
+                    <div class="d-flex justify-content-between w-100 mt-4 border-top pt-4">
+                        <button type="button" class="btn btn-default font-weight-bold px-4 shadow-sm btn-back-tab" data-target="lapbulkelola_ts3"><i class="fas fa-arrow-left mr-1"></i> Data PTK</button>
+                        <button type="submit" id="lapbulkelola_btnFinalSD" class="btn btn-maroon text-white px-5 font-weight-bold shadow-sm"><i class="fas fa-paper-plane mr-2"></i>KIRIM DATA</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </form>
+</script>
+
+<script type="text/template" id="lapbulkelola_tplFormPAUD">
+    <form id="lapbulkelola_formPAUD" class="h-100 d-flex flex-column" novalidate>
+        <div class="bg-white px-3 pt-2 border-bottom shadow-sm sticky-top z-index-10">
+            <ul class="nav nav-tabs nav-fill font-weight-bold text-uppercase" style="font-size: 14px;" id="lapbulkelola_tabPAUD">
+                <li class="nav-item"><a class="nav-link active btn-tab-paud py-2" id="lapbulkelola_link-lapbulkelola_tp1" data-target="lapbulkelola_tp1" href="#">1. Sekolah</a></li>
+                <li class="nav-item"><a class="nav-link disabled-tab btn-tab-paud py-2" id="lapbulkelola_link-lapbulkelola_tp2" data-target="lapbulkelola_tp2" href="#">2. Data Murid</a></li>
+                <li class="nav-item"><a class="nav-link disabled-tab btn-tab-paud py-2" id="lapbulkelola_link-lapbulkelola_tp3" data-target="lapbulkelola_tp3" href="#">3. Data PTK</a></li>
+                <li class="nav-item"><a class="nav-link disabled-tab btn-tab-paud py-2" id="lapbulkelola_link-lapbulkelola_tp4" data-target="lapbulkelola_tp4" href="#">4. Unggah</a></li>
+            </ul>
+        </div>
+        <div class="tab-content p-4 bg-light flex-grow-1" style="overflow-y: auto;">
+            
+            <div class="tab-pane fade show active" id="lapbulkelola_tp1">
+                <div class="card card-sultan shadow-sm p-3">
+                    <div class="row border-bottom pb-3 mb-3 shadow-sm bg-white sticky-top pt-2" style="z-index:10; margin-top:-10px;">
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Cari Sekolah (Ketik NPSN/Nama)</label>
+                            <div class="position-relative">
+                                <div class="input-group">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-white"><i class="fas fa-search text-maroon"></i></span></div>
+                                    <input type="text" id="lapbulkelola_inputSearchSekolahPAUD" class="form-control form-control-sultan input-cari-sekolah" data-tipe="PAUD" placeholder="Ketik lalu pilih..." autocomplete="off">
+                                </div>
+                                <div id="lapbulkelola_suggestionBoxPAUD" class="suggestion-box rounded-bottom shadow-lg" style="top:100%; position: absolute; z-index: 1000; width: 100%; display: none; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto;"></div>
+                                <input type="hidden" name="npsn" id="lapbulkelola_val_npsn_paud">
+                                <input type="hidden" name="nama_sekolah" id="lapbulkelola_val_nama_paud">
+                                <input type="hidden" name="jenjang" id="lapbulkelola_val_jenjang_paud">
+                                <input type="hidden" name="status_sekolah" id="lapbulkelola_val_status_paud">
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Periode Laporan</label>
+                            <div class="d-flex">
+                                <select name="bulan" id="lapbulkelola_sel_bulan_paud" class="form-control form-control-sultan mr-2 border-maroon font-weight-bold" required></select>
+                                <select name="tahun" id="lapbulkelola_sel_tahun_paud" class="form-control form-control-sultan border-maroon font-weight-bold" style="width: 100px;" required></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="lapbulkelola_dynamicFieldsPAUD"></div>
+                    <div class="text-right mt-3 border-top pt-3">
+                        <button type="button" class="btn btn-primary px-4 font-weight-bold shadow-sm btn-val-sek-paud">DATA MURID <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="lapbulkelola_tp2">
+                <div class="card card-sultan shadow-sm p-4">
+                    <div class="form-group row border-bottom pb-3"><label class="col-md-3 form-label-sultan small font-weight-bold text-muted text-uppercase pt-1">Jumlah Rombel</label><div class="col-md-3"><input type="number" name="jumlah_rombel" class="form-control form-control-sultan form-control-sm text-center border-maroon" min="1" required placeholder="0"></div></div>
+                    <div class="row">
+                        <div class="col-md-6"><div class="group-box h-100"><span class="group-title text-maroon font-weight-bold"><i class="fas fa-child mr-2"></i>Menurut Usia</span><div id="lapbulkelola_gridUsia"></div></div></div>
+                        <div class="col-md-6" id="lapbulkelola_boxRombelTK" style="display:none;"><div class="group-box h-100"><span class="group-title text-maroon font-weight-bold"><i class="fas fa-users mr-2"></i>Menurut Kelompok (TK)</span><div class="alert alert-info py-1 px-2 mb-3 small font-weight-bold"><i class="fas fa-info-circle mr-1"></i> Total harus sama dengan Total Usia.</div><div id="lapbulkelola_gridRombelTK"></div></div></div>
+                    </div>
+                    <div class="alert alert-secondary border mt-3 d-flex justify-content-between align-items-center"><div class="small font-weight-bold text-dark">Total Usia: <span id="lapbulkelola_totUsia" class="text-maroon font-weight-bold" style="font-size:16px;">0</span> (L:<span id="lapbulkelola_totUsiaL">0</span> P:<span id="lapbulkelola_totUsiaP">0</span>)<span id="lapbulkelola_txtTotRombel" style="display:none;"> | Total Kelompok: <span id="lapbulkelola_totRom" class="text-maroon font-weight-bold" style="font-size:16px;">0</span></span></div><span class="badge badge-warning p-2 px-3" id="lapbulkelola_statusValPAUD">Belum Sesuai</span></div>
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-default font-weight-bold px-4 shadow-sm btn-back-tab-paud" data-target="lapbulkelola_tp1"><i class="fas fa-arrow-left mr-1"></i> Data Sekolah</button>
+                        <button type="button" class="btn btn-primary px-4 font-weight-bold shadow-sm btn-val-murid-paud">DATA PTK <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="lapbulkelola_tp3">
+                <div class="card card-sultan shadow-sm p-4">
+                    <div class="group-box mb-3"><span class="group-title text-maroon font-weight-bold">A. Kepala Sekolah</span><div class="row"><div class="col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">GTY</label><input type="number" name="ks_gty" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud val-ks-paud" min="0"></div><div class="col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">GTT</label><input type="number" name="ks_gtt" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud val-ks-paud" min="0"></div><div class="col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">PNS</label><input type="number" name="ks_pns" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud val-ks-paud" min="0"></div><div class="col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">PPPK</label><input type="number" name="ks_pppk" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud val-ks-paud" min="0"></div></div><div class="text-center mt-2"><small id="lapbulkelola_errKS_PAUD" class="text-danger font-weight-bold d-none"><i class="fas fa-exclamation-circle mr-1"></i> Jumlah Kepala Sekolah tidak boleh lebih dari 1!</small></div></div>
+                    <div class="group-box mb-3"><span class="group-title text-maroon font-weight-bold">B. Pendidik (Guru)</span><div class="table-responsive"><table class="table table-sm table-bordered text-center small mb-0"><thead class="bg-light"><tr><th class="text-left pl-3 align-middle">Jabatan</th><th class="align-middle">GTY</th><th class="align-middle">GTT</th><th class="align-middle">PNS</th><th class="align-middle">PPPK</th></tr></thead><tbody id="lapbulkelola_bodyGuruPAUD"><tr><td class="text-left pl-3 font-weight-bold align-middle">Guru Kelas</td><td><input type="number" name="gk_gty" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td><td><input type="number" name="gk_gtt" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td><td><input type="number" name="gk_pns" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td><td><input type="number" name="gk_pppk" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td></tr><tr><td class="text-left pl-3 font-weight-bold align-middle">Guru Pendamping</td><td><input type="number" name="gp_gty" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td><td><input type="number" name="gp_gtt" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td><td><input type="number" name="gp_pns" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td><td><input type="number" name="gp_pppk" class="form-control form-control-sm form-control-sultan val-ptk-paud text-center bg-transparent" min="0"></td></tr></tbody></table></div></div>
+                    <div class="group-box"><span class="group-title text-maroon font-weight-bold">C. Tenaga Kependidikan</span><div class="row"><div class="col-6 col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Penjaga</label><input type="number" name="td_penjaga" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud" min="0"></div><div class="col-6 col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Tenaga Adm</label><input type="number" name="td_adm" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud" min="0"></div><div class="col-6 col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Pustakawan</label><input type="number" name="td_perpus" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud" min="0"></div><div class="col-6 col-md-3 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Lainnya</label><input type="number" name="td_lain" class="form-control form-control-sultan form-control-sm text-center val-ptk-paud" min="0"></div></div></div>
+                    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-default font-weight-bold px-4 shadow-sm btn-back-tab-paud" data-target="lapbulkelola_tp2"><i class="fas fa-arrow-left mr-1"></i> Data Murid</button>
+                        <button type="button" class="btn btn-primary px-4 font-weight-bold shadow-sm btn-val-ptk-paud">UNGGAH FILE <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="lapbulkelola_tp4">
+                <div class="card card-sultan shadow-sm p-4 text-center">
+                    <div id="lapbulkelola_boxFilePreviewPAUD" class="card border-left-info shadow-sm mb-4 d-none text-left"><div class="card-body py-3"><div class="d-flex justify-content-between align-items-center"><div class="d-flex align-items-center"><div class="icon-circle bg-light-info text-info mr-3" style="width:50px;height:50px;font-size:20px;"><i class="fas fa-file-pdf"></i></div><div><h6 class="font-weight-bold text-dark mb-0">Dokumen Tersimpan</h6></div></div><button type="button" class="btn btn-sm btn-outline-info font-weight-bold shadow-sm px-3 btn-aksi-preview"><i class="fas fa-eye mr-1"></i> Lihat Dokumen</button></div></div></div>
+                    <h5 class="font-weight-bold mt-2 text-maroon"><i class="fas fa-cloud-upload-alt mr-2"></i>Unggah Laporan PAUD</h5>
+                    <p class="text-muted mb-1">Format PDF, Maksimal 500 KB.</p>
+                    <p class="text-info font-italic mb-3 font-weight-bold d-none" id="lapbulkelola_msgEditFilePAUD"><i class="fas fa-info-circle mr-1"></i> Biarkan kosong jika tidak ingin mengganti file.</p>
+                    <div class="custom-file w-75 mx-auto text-left mb-4">
+                        <input type="file" class="custom-file-input border-maroon input-file-lapbul" id="lapbulkelola_filePAUD" accept="application/pdf">
+                        <label class="custom-file-label text-truncate" for="lapbulkelola_filePAUD">Pilih File Laporan...</label>
+                    </div>
+                    <div class="d-flex justify-content-between w-100 mt-4 border-top pt-4">
+                        <button type="button" class="btn btn-default font-weight-bold px-4 shadow-sm btn-back-tab-paud" data-target="lapbulkelola_tp3"><i class="fas fa-arrow-left mr-1"></i> Data PTK</button>
+                        <button type="submit" id="lapbulkelola_btnFinalPAUD" class="btn btn-maroon text-white px-5 font-weight-bold shadow-sm"><i class="fas fa-paper-plane mr-2"></i>KIRIM DATA</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </form>
+</script>
+
+<div class="modal fade" id="lapbulkelola_modalKonfirmasiGuru" tabindex="-1" role="dialog" data-backdrop="static" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3"><i class="fas fa-exclamation-triangle text-warning fa-3x"></i></div>
+                <h5 class="font-weight-bold text-dark">Data Guru Kosong</h5>
+                <p class="text-muted small mb-4">Jumlah Pendidik (Guru) belum diisi (0).<br>Apakah Anda yakin ingin melanjutkan?</p>
+                <div class="d-flex justify-content-center">
+                    <button type="button" class="btn btn-default shadow-sm mr-2 px-4 font-weight-bold" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-maroon text-white shadow-sm px-4 font-weight-bold btn-paksa-lanjut">Ya, Lanjut</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lapbulkelola_modalKonfirmasiPeriode" tabindex="-1" role="dialog" data-backdrop="static" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3"><div class="icon-circle bg-light-maroon mx-auto text-maroon"><i class="fas fa-calendar-alt fa-2x"></i></div></div>
+                <h5 class="font-weight-bold text-dark mb-3">Konfirmasi Periode</h5>
+                <p class="text-muted mb-4">Anda akan memproses laporan bulan:<br><span id="lapbulkelola_textPeriodeKonfirmasi" class="font-weight-bold text-maroon h5 d-block mt-2"></span></p>
+                <div class="d-flex justify-content-center">
+                    <button type="button" class="btn btn-default shadow-sm mr-2 px-4 font-weight-bold" data-dismiss="modal">Kembali</button>
+                    <button type="button" class="btn btn-maroon text-white shadow-sm px-4 font-weight-bold" id="lapbulkelola_btnKonfirmLanjutTab2">Lanjut <i class="fas fa-arrow-right ml-1"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lapbulkelola_modalHapus" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Konfirmasi Hapus</h6>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3"><div class="icon-circle bg-light-danger mx-auto text-danger"><i class="fas fa-trash-alt fa-2x"></i></div></div>
+                <h5 class="font-weight-bold text-dark">Hapus Data Laporan?</h5>
+                <p class="text-muted small mb-3">Sekolah: <span id="lapbulkelola_lblHapusSekolah" class="font-weight-bold text-dark">-</span><br>Data akan dihapus permanen.</p>
+                <div class="bg-light p-3 rounded border mb-3">
+                    <label class="form-label-sultan small font-weight-bold text-secondary mb-1 text-uppercase">Kode Otorisasi Keamanan:</label>
+                    <input type="password" id="lapbulkelola_inputKodeHapus" class="form-control form-control-sultan text-center font-weight-bold letter-spacing-1" placeholder="Ketik kode hapus..." autocomplete="off">
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-default border shadow-sm px-3 font-weight-bold" data-dismiss="modal">Batal</button>
+                    <button type="button" id="lapbulkelola_btnEksekusiHapus" class="btn btn-danger px-4 font-weight-bold shadow-sm"><i class="fas fa-trash mr-1"></i> Hapus Permanen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lapbulkelola_modalVerifikasi" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan d-flex flex-column" style="height: 90vh;">
+            <div class="modal-header bg-primary text-white py-2 flex-shrink-0">
+                <h5 class="modal-title font-weight-bold h6 mb-0"><i class="fas fa-clipboard-check mr-2"></i>Verifikasi Laporan Bulan</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="lapbulkelola_formVerifLapbul" class="h-100 p-0 m-0 d-flex flex-column">
+                <div class="modal-body p-0 bg-light flex-grow-1 overflow-hidden">
+                    <div class="row no-gutters h-100">
+                        <div class="col-lg-8 bg-dark d-flex align-items-center justify-content-center position-relative border-right h-100">
+                            <div id="lapbulkelola_loaderPreview" class="text-white text-center position-absolute w-100">
+                                <i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p>
+                            </div>
+                            <iframe id="lapbulkelola_frameFileVerif" class="d-none w-100 h-100 border-0" src=""></iframe>
+                            <div id="lapbulkelola_noFileVerif" class="d-none text-center text-white-50 position-absolute w-100">
+                                <i class="fas fa-file-excel fa-4x mb-3 opacity-50"></i><p>Tidak ada lampiran dokumen PDF.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 bg-white d-flex flex-column h-100">
+                            <div class="p-4 overflow-auto flex-grow-1">
+                                <h6 class="text-primary font-weight-bold border-bottom pb-2 mb-3"><i class="fas fa-school mr-1"></i> Data Laporan</h6>
+                                <table class="table table-sm table-borderless small mb-3 text-dark">
+                                    <tr><td class="text-muted font-weight-bold" width="35%">Sekolah</td><td class="font-weight-bold text-dark text-wrap" id="lapbulkelola_vNamaSekolah">-</td></tr>
+                                    <tr><td class="text-muted font-weight-bold">Periode</td><td><span class="font-weight-bold" id="lapbulkelola_vBulan">-</span> <span id="lapbulkelola_vTahun">-</span></td></tr>
+                                </table>
+                                <div class="card bg-light border-0 shadow-sm mt-3">
+                                    <div class="card-body p-3">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Keputusan Verifikasi <span class="text-danger">*</span></label>
+                                            <select class="form-control form-control-sultan font-weight-bold text-dark" id="lapbulkelola_selStatusVerif" required>
+                                                <option value="">-- Pilih Status --</option>
+                                                <option value="Disetujui">✅ Disetujui</option>
+                                                <option value="Revisi">🔄 Revisi</option>
+                                                <option value="Ditolak">❌ Ditolak</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Catatan Admin</label>
+                                            <textarea class="form-control form-control-sultan" id="lapbulkelola_txtKetVerif" rows="4" placeholder="Wajib diisi jika Ditolak/Revisi..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-white border-top shadow-lg d-flex justify-content-between flex-shrink-0 z-index-10">
+                                <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4 py-2" data-dismiss="modal">Tutup</button>
+                                <button type="submit" id="lapbulkelola_btnSimpanVerif" class="btn btn-primary font-weight-bold shadow-sm px-4 py-2"><i class="fas fa-check-double mr-2"></i> Eksekusi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// =================================================================
+// ISOLASI VARIABEL GLOBAL & VAKSINASI EVENT SPA (BAB I)
+// =================================================================
+var LAPBULKELOLA_CACHE_DATA = []; 
+var LAPBULKELOLA_CACHE_TAHUN = "";   
+var LAPBULKELOLA_TABEL_INSTANCE = null;
+var LAPBULKELOLA_MASTER_SEKOLAH = []; 
+
+var LAPBULKELOLA_IS_EDIT_MODE = false;
+var LAPBULKELOLA_EDIT_ROW_ID = null;
+var lapbulkelola_URL_FILE_LAMA = "";
+var LAPBULKELOLA_V_TARGET_ID = null;
+var LAPBULKELOLA_V_TARGET_SOURCE = null;
+
+var LAPBULKELOLA_USER_AKTIF = "";
+var LAPBULKELOLA_IS_ADMIN = false;
+var LAPBULKELOLA_UNIT_TERKUNCI = ""; 
+var LAPBULKELOLA_USER_NPSN = "";
+
+$(document).ready(function() {
+    LAPBULKELOLA_TABEL_INSTANCE = null;
+    $('#lapbulkelola_tableState').hide();
+    $('#lapbulkelola_loadingState').show();
+
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        LAPBULKELOLA_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        LAPBULKELOLA_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        LAPBULKELOLA_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { LAPBULKELOLA_USER_NPSN = ""; LAPBULKELOLA_IS_ADMIN = false; }
     
-    <div id="pagination-container" class="pagination-container"></div>
-</main>
+    // VAKSINASI SPA: EVENT DELEGATION JQUERY (PENGGANTI ONCLICK)
+    $(document).off('change', '#lapbulkelola_filterJenjang').on('change', '#lapbulkelola_filterJenjang', function() { lapbulkelola_updateDropdownSekolah(); lapbulkelola_terapkanFilterLokal(); });
+    $(document).off('change', '#lapbulkelola_filterTahun').on('change', '#lapbulkelola_filterTahun', function() { lapbulkelola_prosesCariData(false); });
+    $(document).off('change', '#lapbulkelola_filterBulan, #lapbulkelola_filterStatus, #lapbulkelola_filterUnit').on('change', '#lapbulkelola_filterBulan, #lapbulkelola_filterStatus, #lapbulkelola_filterUnit', lapbulkelola_terapkanFilterLokal);
+    
+    $(document).off('click', '#lapbulkelola_btnCari').on('click', '#lapbulkelola_btnCari', function() { lapbulkelola_prosesCariData(true); });
+    $(document).off('click', '#lapbulkelola_btnTambah').on('click', '#lapbulkelola_btnTambah', lapbulkelola_bukaModalTambah);
+    $(document).off('click', '#lapbulkelola_btnKembaliPilih').on('click', '#lapbulkelola_btnKembaliPilih', lapbulkelola_kembaliKePilih);
+    
+    $(document).off('click', '.btn-pilih-jenjang').on('click', '.btn-pilih-jenjang', function(){ lapbulkelola_pilihJenjang($(this).data('jenjang')); });
+    $(document).off('keyup', '.input-cari-sekolah').on('keyup', '.input-cari-sekolah', function(){ lapbulkelola_filterSekolah(this, $(this).data('tipe')); });
+    $(document).off('click', '.item-sekolah-sugesti').on('click', '.item-sekolah-sugesti', function() { lapbulkelola_pilihSekolah($(this).attr('data-sekolah'), $(this).data('tipe')); });
+    
+    // Event Form Navigasi Tab (Vaksinasi onclick string)
+    $(document).off('click', '.btn-tab-sd').on('click', '.btn-tab-sd', function(){ lapbulkelola_handleTabClick($(this).data('target')); });
+    $(document).off('click', '.btn-tab-paud').on('click', '.btn-tab-paud', function(){ lapbulkelola_handleTabClickPAUD($(this).data('target')); });
+    $(document).off('click', '.btn-back-tab').on('click', '.btn-back-tab', function(){ lapbulkelola_handleTabClick($(this).data('target')); });
+    $(document).off('click', '.btn-back-tab-paud').on('click', '.btn-back-tab-paud', function(){ lapbulkelola_handleTabClickPAUD($(this).data('target')); });
+    $(document).off('click', '.btn-nav-tk').on('click', '.btn-nav-tk', function() { $('#lapbulkelola_subTabKelas a[href="' + $(this).data('target') + '"]').tab('show'); });
+    $(document).off('click', '.btn-nav-ptk').on('click', '.btn-nav-ptk', function() { $('#lapbulkelola_subTabPTK a[href="' + $(this).data('target') + '"]').tab('show'); });
+
+    $(document).off('change', '.sel-rombel').on('change', '.sel-rombel', function(){ lapbulkelola_renderInputRombel($(this).data('kelas')); });
+    $(document).off('keyup change', '.hitung-siswa').on('keyup change', '.hitung-siswa', function(){ lapbulkelola_hitungValidasiKelas($(this).data('kelas')); });
+    $(document).off('change', '.sel-toggle-agama').on('change', '.sel-toggle-agama', function() { lapbulkelola_toggleAgama(this, $(this).data('prefix'), $(this).data('kelas')); });
+    $(document).off('keyup change', '.hitung-paud').on('keyup change', '.hitung-paud', function() { lapbulkelola_hitungValidasiPAUD(); });
+
+    $(document).off('click', '.btn-val-sek-sd').on('click', '.btn-val-sek-sd', function(){ lapbulkelola_validateSekolahAndNext('SD'); });
+    $(document).off('click', '.btn-val-sek-paud').on('click', '.btn-val-sek-paud', function(){ lapbulkelola_validateSekolahAndNext('PAUD'); });
+    $(document).off('click', '.btn-val-murid-sd').on('click', '.btn-val-murid-sd', lapbulkelola_validateMuridAndNext);
+    $(document).off('click', '.btn-val-ptk-sd').on('click', '.btn-val-ptk-sd', lapbulkelola_validatePTKAndNext);
+    $(document).off('click', '.btn-val-murid-paud').on('click', '.btn-val-murid-paud', function(){ lapbulkelola_validateMuridPAUD(); });
+    $(document).off('click', '.btn-val-ptk-paud').on('click', '.btn-val-ptk-paud', function(){ lapbulkelola_validatePTKPAUD(); });
+    $(document).off('click', '.btn-paksa-lanjut').on('click', '.btn-paksa-lanjut', lapbulkelola_paksaLanjutKeUpload);
+
+    // Event Aksi Tabel
+    $(document).off('click', '.btn-aksi-preview').on('click', '.btn-aksi-preview', function(){ lapbulkelola_previewPDF(lapbulkelola_URL_FILE_LAMA); });
+    $(document).off('click', '.btn-preview-dokumen').on('click', '.btn-preview-dokumen', function(){ lapbulkelola_previewPDF($(this).data('url')); });
+    $(document).off('click', '.btn-aksi-edit').on('click', '.btn-aksi-edit', function(){ lapbulkelola_editLapbul($(this).data('source'), String($(this).data('id'))); });
+    $(document).off('click', '.btn-aksi-hapus').on('click', '.btn-aksi-hapus', function(){ lapbulkelola_hapusLapbul($(this).data('source'), String($(this).data('id')), $(this).data('nama')); });
+    $(document).off('click', '.btn-aksi-verif').on('click', '.btn-aksi-verif', function(){ lapbulkelola_verifikasiLapbul($(this).data('source'), String($(this).data('id')), $(this).data('nama'), $(this).data('bulan'), $(this).data('tahun'), $(this).data('file')); });
+    $(document).off('click', '.btn-baca-catatan').on('click', '.btn-baca-catatan', function() { lapbulkelola_lihatCatatanSultan($(this).data('pesan')); });
+    
+    $(document).off('change', '.input-file-lapbul').on('change', '.input-file-lapbul', function() {
+        $(this).next().html('<i class="fas fa-check text-success mr-1"></i> ' + this.files[0].name).addClass('text-success font-weight-bold');
+    });
+
+    $(document).off('submit', '#lapbulkelola_formSD').on('submit', '#lapbulkelola_formSD', lapbulkelola_submitFormSD);
+    $(document).off('submit', '#lapbulkelola_formPAUD').on('submit', '#lapbulkelola_formPAUD', lapbulkelola_submitFormPAUD);
+    $(document).off('submit', '#lapbulkelola_formVerifLapbul').on('submit', '#lapbulkelola_formVerifLapbul', lapbulkelola_submitVerifikasi);
+    $(document).off('click', '#lapbulkelola_btnEksekusiHapus').on('click', '#lapbulkelola_btnEksekusiHapus', lapbulkelola_submitHapus);
+
+    // RESET MODAL
+    $('#lapbulkelola_modalTambahData').on('hidden.bs.modal', function () {
+        LAPBULKELOLA_IS_EDIT_MODE = false; LAPBULKELOLA_EDIT_ROW_ID = null; lapbulkelola_URL_FILE_LAMA = "";
+        $('#lapbulkelola_btnFinalSD, #lapbulkelola_btnFinalPAUD').prop('disabled', false).html('<i class="fas fa-paper-plane mr-2"></i>KIRIM DATA');
+        setTimeout(function(){ $('#lapbulkelola_formContentArea').empty(); }, 500);
+    });
+    
+    $('#lapbulkelola_modalPreview').on('hidden.bs.modal', function () { 
+        $('#lapbulkelola_framePreview').attr('src', '').addClass('d-none'); 
+        $('#lapbulkelola_loadingPreviewPDF').removeClass('d-none');
+    });
+
+    // INISIASI
+    lapbulkelola_initFilters(); 
+    lapbulkelola_refreshMasterSekolah(); 
+});
+
+function lapbulkelola_refreshMasterSekolah() {
+    google.script.run.withSuccessHandler(function(data){
+        LAPBULKELOLA_MASTER_SEKOLAH = data || [];
+        if (LAPBULKELOLA_IS_ADMIN) lapbulkelola_updateDropdownSekolah();
+    }).getAllSchoolsList();
+}
+
+function lapbulkelola_initFilters() {
+    var now = new Date();
+    var curYear = now.getFullYear();
+    
+    var htmlTahun = '<option value="">- Tahun -</option>';
+    for(var y = 2022; y <= curYear + 1; y++) {
+        var sel = (y === curYear) ? 'selected' : '';
+        htmlTahun += `<option value="${y}" ${sel}>${y}</option>`;
+    }
+    $('#lapbulkelola_filterTahun').html(htmlTahun);
+    $('#lapbulkelola_filterBulan').val("");
+    $('#lapbulkelola_filterStatus').val(""); 
+    
+    lapbulkelola_validasiAksesUser();
+}
+
+function lapbulkelola_validasiAksesUser() {
+    $('#lapbulkelola_loadingText').html('Mempersiapkan Akses...');
+
+    if (LAPBULKELOLA_IS_ADMIN) {
+        $('#lapbulkelola_filterJenjang').removeClass('d-none');
+        $('#lapbulkelola_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#lapbulkelola_btnCari, #lapbulkelola_btnTambah').prop('disabled', false);
+        lapbulkelola_prosesCariData(false); 
+    } else {
+        $('#lapbulkelola_filterJenjang').addClass('d-none');
+        if (!LAPBULKELOLA_USER_NPSN) {
+            $('#lapbulkelola_filterUnit').empty().append('<option value="">AKSES DITOLAK (NPSN KOSONG)</option>');
+            $('#lapbulkelola_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#lapbulkelola_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#lapbulkelola_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${lapbulkelola_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                LAPBULKELOLA_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#lapbulkelola_filterUnit').empty().append($('<option>', {value: LAPBULKELOLA_UNIT_TERKUNCI, text: LAPBULKELOLA_UNIT_TERKUNCI})).prop('disabled', true);
+                $('#lapbulkelola_btnCari, #lapbulkelola_btnTambah').prop('disabled', false);
+                
+                lapbulkelola_prosesCariData(false);
+            })
+            .withFailureHandler(function(err) {
+                $('#lapbulkelola_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#lapbulkelola_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Database Induk Terputus: ${lapbulkelola_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNpsnPTK(LAPBULKELOLA_USER_NPSN); 
+    }
+}
+
+function lapbulkelola_updateDropdownSekolah() {
+    if (!LAPBULKELOLA_IS_ADMIN) return;
+
+    var selectedJenjang = String($('#lapbulkelola_filterJenjang').val() || "").trim().toUpperCase();
+    var unique = new Set();
+    
+    LAPBULKELOLA_MASTER_SEKOLAH.forEach(function(row) {
+        var unit = String(row.nama || "").trim();
+        var jenjang = String(row.jenjang || "").trim().toUpperCase();
+        
+        if (unit) {
+            if (selectedJenjang === "" || jenjang === selectedJenjang) {
+                unique.add(unit);
+            }
+        }
+    });
+    
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#lapbulkelola_filterUnit');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Sekolah -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${lapbulkelola_escapeHtml(u)}">${lapbulkelola_escapeHtml(u)}</option>`); });
+    
+    select.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    
+    if(currentVal && unique.has(currentVal)) { 
+        select.val(currentVal); 
+    } else {
+        select.val("SEMUA");
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA & FILTER TAHUNAN (PERFORMA TINGGI)
+// =================================================================
+function lapbulkelola_prosesCariData(isForceSync) {
+    var valTahun = $('#lapbulkelola_filterTahun').val();
+    if (!valTahun) { Sultan.notif.info('Pilih Tahun terlebih dahulu.'); return; }
+
+    if (isForceSync === true) {
+        LAPBULKELOLA_CACHE_TAHUN = ""; 
+    }
+
+    if (LAPBULKELOLA_CACHE_TAHUN === valTahun && LAPBULKELOLA_CACHE_DATA.length > 0) {
+        lapbulkelola_terapkanFilterLokal();
+        return;
+    }
+
+    var btn = $('#lapbulkelola_btnCari');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+
+    if (!$.fn.DataTable.isDataTable('#lapbulkelola_tabelUtama') || isForceSync) {
+        $('#lapbulkelola_tableState').hide();
+        $('#lapbulkelola_loadingText').html(`Mengambil Data Laporan Tahun ${valTahun}...`);
+        $('#lapbulkelola_loadingState').show();
+    }
+
+    var valKeyword = LAPBULKELOLA_IS_ADMIN ? "" : LAPBULKELOLA_USER_NPSN;
+
+    google.script.run.withSuccessHandler(function(data) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+
+        if (!data) data = [];
+        if (data.error) {
+            $('#lapbulkelola_tableState').hide();
+            $('#lapbulkelola_loadingState').show();
+            $('#lapbulkelola_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + lapbulkelola_escapeHtml(data.error) + '</span>');
+            return;
+        }
+
+        var finalData = Array.isArray(data) ? data : (data.rows || []);
+        LAPBULKELOLA_CACHE_DATA = finalData;
+        LAPBULKELOLA_CACHE_TAHUN = valTahun; 
+
+        lapbulkelola_terapkanFilterLokal();
+
+    }).withFailureHandler(function(e) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        Sultan.notif.gagal('Koneksi Terputus: ' + e.message);
+    }).getLapbulKelolaData("", "", valTahun, "", valKeyword); 
+}
+
+// =================================================================
+// 4. FILTER LOKAL (ZERO-BLINK)
+// =================================================================
+function lapbulkelola_terapkanFilterLokal() {
+    var fB = String($('#lapbulkelola_filterBulan').val() || "").trim().toLowerCase();
+    var fS = String($('#lapbulkelola_filterStatus').val() || "").trim().toLowerCase();
+    var fJ = LAPBULKELOLA_IS_ADMIN ? String($('#lapbulkelola_filterJenjang').val() || "").trim().toLowerCase() : "";
+    
+    var tAdminUnit = LAPBULKELOLA_IS_ADMIN ? String($('#lapbulkelola_filterUnit').val() || "").toUpperCase() : "";
+    var tNpsnUser  = String(LAPBULKELOLA_USER_NPSN || "").trim().toUpperCase();
+
+    var hasil = LAPBULKELOLA_CACHE_DATA.filter(function(r) {
+        var rB = String(r.bulan || "").trim().toLowerCase();
+        var rJ = String(r.jenjang || "").trim().toLowerCase();
+        var rSt = String(r.statusData || "").trim().toLowerCase(); 
+        var rSd = String(r.namaSekolah || "").trim().toUpperCase();
+        var rNpsn = String(r.npsn || "").trim().toUpperCase();
+
+        var passUnit = false;
+        if (LAPBULKELOLA_IS_ADMIN) { 
+            passUnit = (tAdminUnit === "SEMUA" || tAdminUnit === "" || rSd === tAdminUnit); 
+        } else { 
+            passUnit = (rNpsn === tNpsnUser); 
+        }
+
+        var passB = (fB === "" || rB === fB);
+        var passJ = (fJ === "" || rJ === fJ);
+        
+        var passSt = true;
+        if(fS !== "") {
+            if(fS === "diproses") { passSt = (rSt === "" || rSt.includes("proses") || rSt === "-"); } 
+            else if(fS === "disetujui") { passSt = (rSt.includes("ok") || rSt.includes("setuju") || rSt.includes("terima")); } 
+            else { passSt = rSt.includes(fS); }
+        }
+
+        return passUnit && passB && passJ && passSt;
+    });
+
+    lapbulkelola_renderTabel(hasil);
+}
+
+function lapbulkelola_parseIndoDate(str) {
+    if (!str || str === "-" || str === "") return 0;
+    try {
+        var cleanStr = String(str).replace(/['"]/g, "").trim();
+        if(cleanStr === "") return 0;
+
+        var parts = cleanStr.split(' ');
+        var dateParts = parts[0].split(/[-/]/); 
+        if (dateParts.length !== 3) return 0;
+
+        var timeParts = (parts[1] || "00:00:00").split(':');
+        
+        var y, m, d;
+        if(dateParts[0].length === 4) { 
+            y = parseInt(dateParts[0], 10); 
+            m = parseInt(dateParts[1], 10) - 1; 
+            d = parseInt(dateParts[2], 10); 
+        } else { 
+            d = parseInt(dateParts[0], 10); 
+            m = parseInt(dateParts[1], 10) - 1; 
+            y = parseInt(dateParts[2], 10); 
+        }
+        
+        var hr = parseInt(timeParts[0] || 0, 10); 
+        var mn = parseInt(timeParts[1] || 0, 10); 
+        var sc = parseInt(timeParts[2] || 0, 10);
+        
+        var finalDate = new Date(y, m, d, hr, mn, sc);
+        return isNaN(finalDate.getTime()) ? 0 : finalDate.getTime();
+    } catch (e) { return 0; }
+}
+
+function lapbulkelola_renderTabel(data) {
+    var dtArray = []; 
+    
+    data.forEach(function(row) {
+        row.sortTime = Math.max(
+            lapbulkelola_parseIndoDate(row.tglKirim), 
+            lapbulkelola_parseIndoDate(row.tglEdit), 
+            lapbulkelola_parseIndoDate(row.tglVerif)
+        );
+    });
+    
+    data.sort(function(a, b) { return (b.sortTime || 0) - (a.sortTime || 0); });
+
+    data.forEach(function(row) {
+        var stButton = String(row.statusData || "Diproses").toLowerCase();
+        
+        var badgeStatusData = lapbulkelola_buildBadgeStatus(row.statusData, row.keterangan);
+        var isLocked = (stButton.includes('ok') || stButton.includes('setuju') || stButton.includes('terima')) && !LAPBULKELOLA_IS_ADMIN;
+
+        var safeNama = lapbulkelola_escapeJs(row.namaSekolah);
+        
+        // VAKSIN DYNAMIC UI: Membedakan Aksi Admin dan User
+        var txtEdit = LAPBULKELOLA_IS_ADMIN ? "" : " Edit";
+        var txtHapus = LAPBULKELOLA_IS_ADMIN ? "" : " Hapus";
+        var marginIcon = LAPBULKELOLA_IS_ADMIN ? "" : "mr-1";
+
+        var btnEdit = isLocked 
+            ? `<button class="btn btn-sm btn-light border text-muted shadow-sm" disabled style="opacity:0.6; cursor:not-allowed;" title="Terkunci"><i class="fas fa-lock ${marginIcon}"></i>${txtEdit}</button>`
+            : `<button class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm btn-aksi-edit" data-source="${row.source}" data-id="${row.rowId}" title="Edit"><i class="fas fa-pencil-alt ${marginIcon}"></i>${txtEdit}</button>`;
+
+        var btnHapus = isLocked
+            ? `<button class="btn btn-sm btn-light border text-muted shadow-sm" disabled style="opacity:0.6; cursor:not-allowed;" title="Terkunci"><i class="fas fa-trash-alt ${marginIcon}"></i>${txtHapus}</button>`
+            : `<button class="btn btn-sm btn-danger font-weight-bold shadow-sm btn-aksi-hapus" data-source="${row.source}" data-id="${row.rowId}" data-nama="${safeNama}" title="Hapus"><i class="fas fa-trash-alt ${marginIcon}"></i>${txtHapus}</button>`;
+
+        var btnVerif = "";
+        if (LAPBULKELOLA_IS_ADMIN) {
+            var safeFile = lapbulkelola_escapeJs(row.fileUrl || "");
+            btnVerif = `<button class="btn btn-sm btn-primary font-weight-bold shadow-sm btn-aksi-verif" data-source="${row.source}" data-id="${row.rowId}" data-nama="${safeNama}" data-bulan="${row.bulan}" data-tahun="${row.tahun}" data-file="${safeFile}" title="Verifikasi"><i class="fas fa-clipboard-check"></i></button>`;
+        }
+        // VAKSIN TATA LETAK flex-nowrap
+        var aksiHTML = `<div class="d-flex flex-nowrap justify-content-center" style="gap:5px;">${btnVerif} ${btnEdit} ${btnHapus}</div>`;
+
+        var btnFile = '<span class="text-muted small">-</span>';
+        if (row.fileUrl && row.fileUrl.length > 5) {
+            var safeFile2 = lapbulkelola_escapeJs(row.fileUrl);
+            btnFile = `<button class="btn btn-sm btn-outline-danger font-weight-bold shadow-sm btn-preview-dokumen" data-url="${safeFile2}" title="Lihat Laporan"><i class="fas fa-file-pdf mr-1"></i> Laporan</button>`;
+        }
+
+        var metaKirim = `<div style="line-height:1.2;font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglKirim || '-'}</span><span class="d-block text-muted text-nowrap">${lapbulkelola_escapeHtml(row.userKirim)}</span></div>`;
+        var metaEdit  = `<div style="line-height:1.2;font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglEdit || '-'}</span><span class="d-block text-muted text-nowrap">${lapbulkelola_escapeHtml(row.userEdit)}</span></div>`;
+        var metaVerif = `<div style="line-height:1.2;font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglVerif || '-'}</span><span class="d-block text-muted text-nowrap">${lapbulkelola_escapeHtml(row.verifikator)}</span></div>`;
+
+        // VAKSIN LEBAR KOLOM: Menggunakan text-nowrap agar membentang 100%
+        var uiUnit = `<div class="font-weight-bold text-dark text-nowrap">${lapbulkelola_escapeHtml(row.namaSekolah)}</div><div class="small text-muted text-nowrap">${lapbulkelola_escapeHtml(row.npsn || '-')}</div>`;
+
+        dtArray.push([ 
+            aksiHTML, 
+            uiUnit,
+            `<div class="font-weight-bold text-dark">${lapbulkelola_escapeHtml(row.bulan)}</div>`,
+            lapbulkelola_escapeHtml(row.tahun),
+            lapbulkelola_escapeHtml(row.statusSekolah || '-'), 
+            lapbulkelola_escapeHtml(row.jenjang),
+            lapbulkelola_escapeHtml(row.rombel || row.totalRombel || '0'),
+            btnFile,
+            badgeStatusData,
+            metaKirim,
+            metaEdit,
+            metaVerif
+        ]);
+    });
+
+    $('#lapbulkelola_loadingState').hide();
+    $('#lapbulkelola_tableState').show();
+
+    if (!$.fn.DataTable.isDataTable('#lapbulkelola_tabelUtama')) {
+        LAPBULKELOLA_TABEL_INSTANCE = $('#lapbulkelola_tabelUtama').DataTable({
+            "data": dtArray,
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, 
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "columnDefs": [ 
+                { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-center", "style": "width: 1%; white-space: nowrap; z-index: 5;" }, 
+                { "targets": 1, "width": "auto", "className": "text-left align-middle" }, // VAKSIN LEBAR KOLOM AUTO
+                { "targets": [8,9,10,11], "className": "text-left align-middle" },
+                { "targets": [2,3,4,5,6,7], "className": "text-center align-middle" }
+            ],
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ditemukan data laporan." }
+        });
+    } else {
+        LAPBULKELOLA_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        setTimeout(function() { LAPBULKELOLA_TABEL_INSTANCE.columns.adjust(); }, 50);
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: ANTI-XSS & EXPLICIT NOTE BUTTON
+// =================================================================
+function lapbulkelola_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+function lapbulkelola_escapeJs(str) { 
+    if (!str) return ""; 
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, " "); 
+}
+
+function lapbulkelola_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Verifikasi',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+function lapbulkelola_buildBadgeStatus(status, ket) { 
+    var s = String(status || "Diproses").toLowerCase(); 
+    var style = 'badge-sultan-light-warning'; 
+    var icon = 'clock'; 
+    var label = "DIPROSES";
+    
+    if (s.includes('ok') || s.includes('setuju') || s.includes('terima')) { 
+        style = 'badge-sultan-light-success'; icon = 'check-circle'; label = "DISETUJUI"; 
+    } 
+    else if (s.includes('revisi')) { 
+        style = 'badge-sultan-light-info'; icon = 'sync-alt'; label = "REVISI"; 
+    } 
+    else if (s.includes('tolak')) { 
+        style = 'badge-sultan-light-danger'; icon = 'times-circle'; label = "DITOLAK"; 
+    } 
+    else if (s.includes('hapus')) { 
+        style = 'badge-secondary'; icon = 'trash'; label = "DIHAPUS"; 
+    }
+    
+    var badgeHtml = `<span class="badge badge-sultan ${style}"><i class="fas fa-${icon} mr-1"></i>${label}</span>`;
+
+    if (ket && ket.trim().length > 2 && (s.includes('revisi') || s.includes('tolak'))) {
+        var safeKet = lapbulkelola_escapeJs(ket);
+        var btnCatatan = `<div class="mt-2"><button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm btn-baca-catatan" style="font-size:10px; border-radius:4px;" data-pesan="${safeKet}"><i class="fas fa-comment-dots mr-1"></i> Baca Catatan</button></div>`;
+        return badgeHtml + btnCatatan;
+    }
+
+    return badgeHtml; 
+}
+
+function lapbulkelola_previewPDF(url) {
+    if (!url || url.length < 5) { Sultan.notif.gagal("Link file kosong."); return; }
+    var previewUrl = url.includes('/view') ? url.replace(/\/view.*/, '/preview') : url;
+    
+    $('#lapbulkelola_loadingPreviewPDF').removeClass('d-none');
+    $('#lapbulkelola_framePreview').addClass('d-none').attr('src', previewUrl);
+    $('#lapbulkelola_btnUnduh').attr('href', url);
+    $('#lapbulkelola_modalPreview').modal('show');
+
+    $('#lapbulkelola_framePreview').off('load').on('load', function() {
+        $('#lapbulkelola_loadingPreviewPDF').addClass('d-none');
+        $(this).removeClass('d-none');
+    });
+    
+    // Fallback 2.5 Detik sesuai BAB V
+    setTimeout(function() {
+        $('#lapbulkelola_loadingPreviewPDF').addClass('d-none');
+        $('#lapbulkelola_framePreview').removeClass('d-none');
+    }, 2500);
+}
+
+// =================================================================
+// 6. LOGIKA MODAL WIZARD & HIERARKI MENU UI
+// =================================================================
+
+// VAKSIN TEMPLATE DOM: Fungsi penyuntik form dari <script> template
+function lapbulkelola_suntikTemplateKeForm(jenis) {
+    var tplId = (jenis === 'SD') ? '#lapbulkelola_tplFormSD' : '#lapbulkelola_tplFormPAUD';
+    var htmlContent = $(tplId).html();
+    $('#lapbulkelola_formContentArea').html(htmlContent);
+}
+
+function lapbulkelola_bukaModalTambah() {
+    LAPBULKELOLA_IS_EDIT_MODE = false; LAPBULKELOLA_EDIT_ROW_ID = null;
+    
+    $('#lapbulkelola_headerModalForm').removeClass('bg-warning').addClass('bg-maroon');
+    $('#lapbulkelola_judulModalForm').css('color', '#fff').html('<i class="fas fa-plus-circle mr-2"></i>Form Laporan Bulan');
+
+    window.sekolahData = null;
+
+    if (!LAPBULKELOLA_IS_ADMIN && LAPBULKELOLA_USER_NPSN) {
+        var mySchool = LAPBULKELOLA_MASTER_SEKOLAH.find(s => String(s.npsn) === String(LAPBULKELOLA_USER_NPSN));
+        if (mySchool) {
+            var isSD = String(mySchool.jenjang).toUpperCase().includes('SD');
+            var targetTipe = isSD ? 'SD' : 'PAUD';
+            
+            $('#lapbulkelola_btnKembaliPilih').hide(); 
+            lapbulkelola_pilihJenjang(targetTipe);
+            $('#lapbulkelola_modalTambahData').modal('show');
+            return; 
+        }
+    }
+
+    $('#lapbulkelola_btnKembaliPilih').show();
+    $('#lapbulkelola_viewPilihJenjang').removeClass('d-none').addClass('d-flex');
+    $('#lapbulkelola_viewFormContainer').addClass('d-none').removeClass('d-flex');
+    $('#lapbulkelola_modalTambahData').modal('show');
+}
+
+function lapbulkelola_kembaliKePilih() { 
+    $('#lapbulkelola_viewFormContainer').addClass('d-none').removeClass('d-flex'); 
+    $('#lapbulkelola_viewPilihJenjang').removeClass('d-none').addClass('d-flex'); 
+}
+
+function lapbulkelola_pilihJenjang(jenis) {
+    $('#lapbulkelola_viewPilihJenjang').removeClass('d-flex').addClass('d-none');
+    $('#lapbulkelola_viewFormContainer').removeClass('d-none').addClass('d-flex');
+    $('#lapbulkelola_labelFormAktif').text('FORMULIR ' + jenis);
+    
+    lapbulkelola_suntikTemplateKeForm(jenis);
+
+    if(jenis === 'SD') { lapbulkelola_initFormSD(); } else { lapbulkelola_initFormPAUD(); }
+}
+
+function lapbulkelola_handleTabClick(targetId) {
+    if ($(`#lapbulkelola_link-${targetId}`).hasClass('disabled-tab')) return false;
+    $('#lapbulkelola_tabSD .nav-link').removeClass('active'); $(`#lapbulkelola_link-${targetId}`).addClass('active');
+    $('#lapbulkelola_ts1, #lapbulkelola_ts2, #lapbulkelola_ts3, #lapbulkelola_ts4').removeClass('show active'); $(`#${targetId}`).addClass('show active');
+    if (targetId === 'lapbulkelola_ts2' && !$('#lapbulkelola_subTabKelas .nav-link.active').length) { $('#lapbulkelola_subTabKelas a[href="#lapbulkelola_tk1"]').tab('show'); }
+    if (targetId === 'lapbulkelola_ts3' && !$('#lapbulkelola_subTabPTK .nav-link.active').length) { $('#lapbulkelola_subTabPTK a[href="#lapbulkelola_ptk1"]').tab('show'); }
+}
+
+function lapbulkelola_handleTabClickPAUD(targetId) {
+    if ($(`#lapbulkelola_link-${targetId}`).hasClass('disabled-tab')) return false;
+    $('#lapbulkelola_tabPAUD .nav-link').removeClass('active'); $(`#lapbulkelola_link-${targetId}`).addClass('active');
+    $('#lapbulkelola_tp1, #lapbulkelola_tp2, #lapbulkelola_tp3, #lapbulkelola_tp4').removeClass('show active'); $(`#${targetId}`).addClass('show active');
+}
+
+function lapbulkelola_nextTab(targetId) { $(`#lapbulkelola_link-${targetId}`).removeClass('disabled-tab'); lapbulkelola_handleTabClick(targetId); }
+function lapbulkelola_nextTabPAUD(targetId) { $(`#lapbulkelola_link-${targetId}`).removeClass('disabled-tab'); lapbulkelola_handleTabClickPAUD(targetId); }
+
+function lapbulkelola_isiOtomatisSekolahUser(tipe) {
+    if (LAPBULKELOLA_IS_EDIT_MODE) return; 
+    if (!LAPBULKELOLA_IS_ADMIN && LAPBULKELOLA_USER_NPSN) {
+        var targetInput = (tipe === 'SD') ? '#lapbulkelola_inputSearchSekolah' : '#lapbulkelola_inputSearchSekolahPAUD';
+        $(targetInput).prop('disabled', true).addClass('bg-light').val('Mempersiapkan data sekolah...');
+
+        var attempt = 0;
+        var checkData = setInterval(function() {
+            if (LAPBULKELOLA_MASTER_SEKOLAH.length > 0) {
+                clearInterval(checkData);
+                var mySchool = LAPBULKELOLA_MASTER_SEKOLAH.find(s => String(s.npsn) === String(LAPBULKELOLA_USER_NPSN));
+                if (mySchool) {
+                    lapbulkelola_pilihSekolah(encodeURIComponent(JSON.stringify(mySchool)), tipe);
+                    $(targetInput).prop('disabled', true).addClass('bg-light text-maroon font-weight-bold');
+                } else {
+                    $(targetInput).val(LAPBULKELOLA_UNIT_TERKUNCI).prop('disabled', true).addClass('bg-light');
+                }
+            } else {
+                attempt++;
+                if (attempt > 20) { 
+                    clearInterval(checkData);
+                    $(targetInput).val(LAPBULKELOLA_UNIT_TERKUNCI).prop('disabled', true).addClass('bg-light');
+                }
+            }
+        }, 500);
+    }
+}
+
+function lapbulkelola_initFormSD() {
+    var now = new Date(); var curYear = now.getFullYear(); var curMonth = now.getMonth(); 
+    var targetMonthIdx = (curMonth === 0) ? 11 : (curMonth - 1);
+    var targetYear = (curMonth === 0) ? (curYear - 1) : curYear;
+    var htmlTahun = "";
+    for(var y = 2022; y <= curYear + 1; y++) { var sel = (y === targetYear) ? 'selected' : ''; htmlTahun += `<option value="${y}" ${sel}>${y}</option>`; }
+    $('#lapbulkelola_sel_tahun').html(htmlTahun);
+    var months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    
+    if($('#lapbulkelola_sel_bulan option').length <= 1) {
+        var htmlBulan = '<option value="">- Bulan -</option>';
+        months.forEach(function(m){ htmlBulan += `<option value="${m}">${m}</option>`; });
+        $('#lapbulkelola_sel_bulan').html(htmlBulan);
+    }
+    $('#lapbulkelola_sel_bulan').val(months[targetMonthIdx]);
+
+    var navHtml = ""; var contentHtml = "";
+    for (var i = 1; i <= 6; i++) {
+        var activeClass = (i === 1) ? "show active" : "";
+        var navActive = (i === 1) ? "active" : "";
+        navHtml += `<li class="nav-item"><a class="nav-link ${navActive} py-2 rounded-0" data-toggle="pill" href="#lapbulkelola_tk${i}">Kelas ${i}</a></li>`;
+        var footerBtn = "";
+        if (i === 1) { footerBtn = `<div class="d-flex justify-content-between mt-4 border-top pt-3"><button type="button" class="btn btn-default font-weight-bold shadow-sm btn-tab-sd" data-target="lapbulkelola_ts1"><i class="fas fa-arrow-left mr-1"></i> Data Sekolah</button><button type="button" class="btn btn-outline-primary btn-sm font-weight-bold btn-nav-tk" data-target="#lapbulkelola_tk2">Kelas 2 <i class="fas fa-chevron-right ml-1"></i></button></div>`; } 
+        else if (i === 6) { footerBtn = `<div class="d-flex justify-content-between mt-4 border-top pt-3"><button type="button" class="btn btn-outline-secondary btn-sm font-weight-bold btn-nav-tk" data-target="#lapbulkelola_tk5"><i class="fas fa-chevron-left mr-1"></i> Kelas 5</button><button type="button" class="btn btn-primary px-4 font-weight-bold shadow-sm btn-val-murid-sd">DATA PTK <i class="fas fa-arrow-right ml-1"></i></button></div>`; } 
+        else { var p = i - 1; var n = i + 1; footerBtn = `<div class="d-flex justify-content-between mt-4 border-top pt-3"><button type="button" class="btn btn-outline-secondary btn-sm font-weight-bold btn-nav-tk" data-target="#lapbulkelola_tk${p}"><i class="fas fa-chevron-left mr-1"></i> Kelas ${p}</button><button type="button" class="btn btn-outline-primary btn-sm font-weight-bold btn-nav-tk" data-target="#lapbulkelola_tk${n}">Kelas ${n} <i class="fas fa-chevron-right ml-1"></i></button></div>`; }
+
+        contentHtml += `<div class="tab-pane fade ${activeClass}" id="lapbulkelola_tk${i}"><div class="card card-sultan shadow-sm p-4 border-top-0 rounded-0"><div class="group-box"><span class="group-title text-maroon font-weight-bold"><i class="fas fa-layer-group mr-2"></i>A. Menurut Rombel</span><div class="row align-items-center mb-2"><div class="col-md-3"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Jumlah Rombel</label><select class="form-control form-control-sultan form-control-sm sel-rombel border-maroon" data-kelas="${i}" name="rombel_${i}"><option value="0">0 (Tidak Ada)</option><option value="1" selected>1 Rombel</option><option value="2">2 Rombel</option><option value="3">3 Rombel</option></select></div><div class="col-md-9"><div id="lapbulkelola_containerRombel${i}" class="mt-1"></div></div></div></div><div class="group-box"><span class="group-title text-maroon font-weight-bold"><i class="fas fa-praying-hands mr-2"></i>B. Menurut Agama</span><div class="row">${lapbulkelola_renderAgamaInput(i,'Islam','islam',true)}${lapbulkelola_renderAgamaInput(i,'Kristen','kristen')}${lapbulkelola_renderAgamaInput(i,'Katolik','katolik')}${lapbulkelola_renderAgamaInput(i,'Hindu','hindu')}${lapbulkelola_renderAgamaInput(i,'Buddha','buddha')}${lapbulkelola_renderAgamaInput(i,'Konghucu','konghucu')}</div></div><div class="alert alert-secondary border d-flex justify-content-between align-items-center py-2 px-3 m-0"><div class="small text-dark" style="line-height:1.2;"><div>Total Rombel: <strong><span id="lapbulkelola_totalRombel${i}" class="text-maroon" style="font-size:14px;">0</span></strong> <span class="text-muted small">(L:<span id="lapbulkelola_sumRL${i}">0</span> P:<span id="lapbulkelola_sumRP${i}">0</span>)</span></div><div>Total Agama: <strong><span id="lapbulkelola_totalAgama${i}" class="text-maroon" style="font-size:14px;">0</span></strong> <span class="text-muted small">(L:<span id="lapbulkelola_sumAL${i}">0</span> P:<span id="lapbulkelola_sumAP${i}">0</span>)</span></div></div><span class="badge badge-warning p-2 px-3 shadow-sm" id="lapbulkelola_statusVal${i}">Belum Sesuai</span></div>${footerBtn}</div></div>`;
+    }
+    $('#lapbulkelola_subTabKelas').html(navHtml); $('#lapbulkelola_kelasContainer').html(contentHtml);
+    for(var k=1; k<=6; k++) lapbulkelola_renderInputRombel(k);
+
+    var ptkHtml = `<div class="card card-sultan shadow-sm border-0"><div class="card-header bg-light p-0 border-bottom"><ul class="nav nav-pills nav-fill small font-weight-bold" id="lapbulkelola_subTabPTK"><li class="nav-item"><a class="nav-link active py-2" data-toggle="pill" href="#lapbulkelola_ptk1">1. Kepala Sekolah</a></li><li class="nav-item"><a class="nav-link py-2" data-toggle="pill" href="#lapbulkelola_ptk2">2. Pendidik (Guru)</a></li><li class="nav-item"><a class="nav-link py-2" data-toggle="pill" href="#lapbulkelola_ptk3">3. Tenaga Kependidikan</a></li></ul></div><div class="card-body p-3 tab-content"><div class="tab-pane fade show active" id="lapbulkelola_ptk1"><div class="alert alert-light border small mb-4"><i class="fas fa-info-circle mr-1"></i> Isikan jumlah Kepala Sekolah (Maksimal 1).</div><div class="row justify-content-center"><div class="col-md-3 text-center"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">PNS</label><input type="number" name="ks_pns" class="form-control form-control-sm form-control-sultan text-center val-ks mx-auto border-maroon" style="max-width:100px;" min="0"></div><div class="col-md-3 text-center"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">PPPK</label><input type="number" name="ks_pppk" class="form-control form-control-sm form-control-sultan text-center val-ks mx-auto border-maroon" style="max-width:100px;" min="0"></div><div class="col-md-3 text-center"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Non ASN</label><input type="number" name="ks_nonasn" class="form-control form-control-sm form-control-sultan text-center val-ks mx-auto border-maroon" style="max-width:100px;" min="0"></div></div><div class="text-center mt-2"><small id="lapbulkelola_errKS" class="text-danger font-weight-bold d-none"><i class="fas fa-exclamation-circle mr-1"></i> Jumlah KS tidak boleh lebih dari 1!</small></div><div class="d-flex justify-content-between mt-4 pt-3 border-top"><button type="button" class="btn btn-default btn-sm font-weight-bold shadow-sm btn-tab-sd" data-target="lapbulkelola_ts2"><i class="fas fa-arrow-left mr-1"></i> Data Murid</button><button type="button" class="btn btn-primary btn-sm px-4 font-weight-bold shadow-sm btn-nav-ptk" data-target="#lapbulkelola_ptk2">Pendidik <i class="fas fa-arrow-right ml-1"></i></button></div></div><div class="tab-pane fade" id="lapbulkelola_ptk2"><div class="table-responsive"><table class="table table-sm table-bordered table-striped table-matrix small mb-0"><thead class="bg-dark text-white text-center"><tr><th class="col-jabatan align-middle">Jabatan Guru</th><th class="align-middle">PNS</th><th class="align-middle">PPPK</th><th class="align-middle">PPPK PW</th><th class="align-middle">GTY</th><th class="align-middle">GTT</th></tr></thead><tbody id="lapbulkelola_bodyGuru"></tbody></table></div><div class="d-flex justify-content-between mt-3 pt-3 border-top"><button type="button" class="btn btn-outline-secondary btn-sm font-weight-bold btn-nav-ptk" data-target="#lapbulkelola_ptk1"><i class="fas fa-arrow-left mr-1"></i> Kepsek</button><button type="button" class="btn btn-primary btn-sm px-4 font-weight-bold shadow-sm btn-nav-ptk" data-target="#lapbulkelola_ptk3">Tendik <i class="fas fa-arrow-right ml-1"></i></button></div></div><div class="tab-pane fade" id="lapbulkelola_ptk3"><div class="table-responsive"><table class="table table-sm table-bordered table-striped table-matrix small mb-0"><thead class="bg-secondary text-white text-center"><tr><th class="col-jabatan align-middle">Jabatan Tendik</th><th class="align-middle">PNS</th><th class="align-middle">PPPK</th><th class="align-middle">PPPK PW</th><th class="align-middle">PTY</th><th class="align-middle">PTT</th></tr></thead><tbody id="lapbulkelola_bodyTendik"></tbody></table></div><div class="d-flex justify-content-between mt-3 pt-3 border-top"><button type="button" class="btn btn-outline-secondary btn-sm font-weight-bold btn-nav-ptk" data-target="#lapbulkelola_ptk2"><i class="fas fa-arrow-left mr-1"></i> Pendidik</button><button type="button" class="btn btn-maroon btn-sm text-white px-4 font-weight-bold shadow-sm btn-val-ptk-sd">UNGGAH FILE <i class="fas fa-arrow-right ml-1"></i></button></div></div></div></div>`;
+    $('#lapbulkelola_ts3').html(ptkHtml);
+
+    var guruMapel = [['Guru Kelas','gk'],['Guru PAI','gpai'],['Guru PJOK','gpjok'],['Guru PA Kristen','gkris'],['Guru PA Katolik','gkat'],['Guru Bhs. Inggris','gbing',true],['Guru Mapel Lainnya','gmap',true]];
+    var htmlG = "";
+    guruMapel.forEach(g => { var dis=g[2]?'readonly style="background:#eee;"':''; htmlG += `<tr><td class="font-weight-bold pl-3 text-left align-middle">${g[0]}</td><td><input type="number" name="${g[1]}_pns" class="form-control form-control-sm form-control-sultan val-ptk" min="0" ${dis}></td><td><input type="number" name="${g[1]}_pppk" class="form-control form-control-sm form-control-sultan val-ptk" min="0" ${dis}></td><td><input type="number" name="${g[1]}_pppk_pw" class="form-control form-control-sm form-control-sultan val-ptk" min="0" ${dis}></td><td><input type="number" name="${g[1]}_gty" class="form-control form-control-sm form-control-sultan val-ptk" min="0"></td><td><input type="number" name="${g[1]}_gtt" class="form-control form-control-sm form-control-sultan val-ptk" min="0"></td></tr>`; });
+    $('#lapbulkelola_bodyGuru').html(htmlG);
+
+    var tendik = [['Pengelola Umum Operasional','puo'],['Operator Layanan Operasional','olo'],['Pengelola Layanan Operasional','plo'],['Penata Layanan Operasional','ptlo'],['Administrasi Perkantoran','adm'],['Penjaga','pjg',true],['Tenaga Administrasi','tas',true],['Tenaga Perpustakaan','pust',true],['Tendik Lainnya','lain',true]];
+    var htmlT = "";
+    tendik.forEach(t => { var dis=t[2]?'readonly style="background:#eee;"':''; htmlT += `<tr><td class="font-weight-bold pl-3 text-left align-middle">${t[0]}</td><td><input type="number" name="${t[1]}_pns" class="form-control form-control-sm form-control-sultan val-ptk" min="0" ${dis}></td><td><input type="number" name="${t[1]}_pppk" class="form-control form-control-sm form-control-sultan val-ptk" min="0" ${dis}></td><td><input type="number" name="${t[1]}_pppk_pw" class="form-control form-control-sm form-control-sultan val-ptk" min="0" ${dis}></td><td><input type="number" name="${t[1]}_pty" class="form-control form-control-sm form-control-sultan val-ptk" min="0"></td><td><input type="number" name="${t[1]}_ptt" class="form-control form-control-sm form-control-sultan val-ptk" min="0"></td></tr>`; });
+    $('#lapbulkelola_bodyTendik').html(htmlT);
+
+    lapbulkelola_isiOtomatisSekolahUser('SD');
+}
+
+function lapbulkelola_renderInputRombel(k) {
+    var n = parseInt($(`.sel-rombel[data-kelas="${k}"]`).val());
+    var h = '<div class="row">';
+    if (n === 0) { h = '<span class="text-muted ml-3 small"><i>Tidak ada rombel</i></span>'; } 
+    else if (n === 1) { h += lapbulkelola_colInput(k, '', 'k'+k); } 
+    else if (n === 2) { h += lapbulkelola_colInput(k, 'A', 'k'+k+'a'); h += lapbulkelola_colInput(k, 'B', 'k'+k+'b'); } 
+    else if (n === 3) { h += lapbulkelola_colInput(k, 'A', 'k'+k+'a'); h += lapbulkelola_colInput(k, 'B', 'k'+k+'b'); h += lapbulkelola_colInput(k, 'C', 'k'+k+'c'); }
+    if (n > 0) h += '</div>';
+    $('#lapbulkelola_containerRombel'+k).html(h);
+    lapbulkelola_hitungValidasiKelas(k);
+}
+
+function lapbulkelola_colInput(k, suf, name) {
+    return `<div class="col-md-4 col-sm-6 mb-3"><div class="border rounded p-2 bg-white h-100 shadow-sm"><span class="d-block small font-weight-bold text-dark mb-2 border-bottom pb-1">Kelas ${k}${suf}</span><div class="d-flex align-items-center"><div class="input-group input-group-sm mr-2"><div class="input-group-prepend"><span class="input-group-text input-group-text-sm bg-light-maroon text-maroon">L</span></div><input type="number" name="${name}_l" data-kelas="${k}" class="form-control form-control-sultan hitung-siswa rombel-l-${k}" min="0"></div><div class="input-group input-group-sm"><div class="input-group-prepend"><span class="input-group-text input-group-text-sm bg-light-maroon text-maroon">P</span></div><input type="number" name="${name}_p" data-kelas="${k}" class="form-control form-control-sultan hitung-siswa rombel-p-${k}" min="0"></div></div></div></div>`;
+}
+
+function lapbulkelola_renderAgamaInput(k, label, prefix, isDefault) {
+    var show = isDefault ? '' : 'style="display:none;"';
+    var sel = isDefault ? 'selected' : '';
+    return `<div class="col-md-4 col-sm-6 mb-3"><div class="border rounded p-2 bg-light h-100"><div class="d-flex justify-content-between mb-2 pb-1 border-bottom"><span class="small font-weight-bold text-dark">${label}</span><select class="form-control form-control-sm w-50 py-0 sel-toggle-agama" data-prefix="${prefix}" data-kelas="${k}" style="height:22px; font-size:11px;"><option value="0">Tidak Ada</option><option value="1" ${sel}>Ada</option></select></div><div id="lapbulkelola_box_${prefix}${k}" ${show}><div class="d-flex align-items-center"><div class="input-group input-group-sm mr-2"><div class="input-group-prepend"><span class="input-group-text input-group-text-sm">L</span></div><input type="number" name="k${k}_${prefix}_l" data-kelas="${k}" class="form-control form-control-sultan hitung-siswa agama-l-${k}" min="0"></div><div class="input-group input-group-sm"><div class="input-group-prepend"><span class="input-group-text input-group-text-sm">P</span></div><input type="number" name="k${k}_${prefix}_p" data-kelas="${k}" class="form-control form-control-sultan hitung-siswa agama-p-${k}" min="0"></div></div></div></div></div>`;
+}
+
+function lapbulkelola_toggleAgama(el, prefix, k) {
+    var id = prefix + k;
+    if(el.value == "1") $(`#lapbulkelola_box_${id}`).show(); else { $(`#lapbulkelola_box_${id}`).hide().find('input').val(""); lapbulkelola_hitungValidasiKelas(k); }
+}
+
+function lapbulkelola_filterSekolah(input, tipe) {
+    var val = input.value.toLowerCase();
+    var boxId = (tipe === 'SD') ? '#lapbulkelola_suggestionBoxSD' : '#lapbulkelola_suggestionBoxPAUD';
+    var box = $(boxId);
+    if (val.length < 2) { box.hide(); return; }
+    var matches = LAPBULKELOLA_MASTER_SEKOLAH.filter(function(s) { return s.search_key.includes(val); }).slice(0, 10);
+    if (matches.length > 0) {
+        var html = '';
+        matches.forEach(function(s) {
+            var dataStr = encodeURIComponent(JSON.stringify(s));
+            html += `<div class="suggestion-item p-2 border-bottom cursor-pointer hover-bg-light item-sekolah-sugesti" data-sekolah="${dataStr}" data-tipe="${tipe}"><strong>${s.npsn}</strong> - ${s.nama}</div>`;
+        });
+        box.html(html).show();
+    } else {
+        box.html('<div class="p-2 small text-muted">Data tidak ditemukan</div>').show();
+    }
+}
+
+function lapbulkelola_pilihSekolah(dataStr, tipe) {
+    var s = JSON.parse(decodeURIComponent(dataStr));
+    var targetInput = (tipe === 'SD') ? '#lapbulkelola_inputSearchSekolah' : '#lapbulkelola_inputSearchSekolahPAUD';
+    $(targetInput).val(s.npsn + " - " + s.nama);
+    
+    var formId = (tipe === 'SD') ? '#lapbulkelola_formSD' : '#lapbulkelola_formPAUD';
+    var prefix = '#lapbulkelola_val_'; 
+    var suff = (tipe === 'SD') ? '' : '_paud';
+
+    $(prefix + 'npsn' + suff).val(s.npsn); 
+    $(prefix + 'nama' + suff).val(s.nama); 
+    $(prefix + 'jenjang' + suff).val(s.jenjang); 
+    $(prefix + 'status' + suff).val(s.status);
+    
+    $(formId + ' [name="yayasan"]').val(s.yayasan || "");
+    $(formId + ' [name="no_sk_pendirian"]').val(s.no_sk_pendirian || "");
+    $(formId + ' [name="tgl_pendirian"], ' + formId + ' [name="tanggal_pendirian"]').val(s.tgl_pendirian || "");
+    $(formId + ' [name="no_sk_ijin"]').val(s.no_sk_ijin || "");
+    $(formId + ' [name="tgl_ijin"]').val(s.tgl_ijin || "");
+    $(formId + ' [name="akreditasi"]').val(s.akreditasi || "-");
+    $(formId + ' [name="skor"]').val(s.skor || "");
+    $(formId + ' [name="no_sertifikat"]').val(s.no_sertifikat || "");
+    $(formId + ' [name="tgl_sertifikat"]').val(s.tgl_sertifikat || "");
+    $(formId + ' [name="alamat"]').val(s.alamat || "");
+    $(formId + ' [name="telepon"]').val(s.telepon || "");
+    $(formId + ' [name="email"]').val(s.email || "");
+
+    $('.suggestion-box').hide();
+    
+    if(tipe === 'PAUD') {
+        var valJenjang = String(s.jenjang).toUpperCase().trim();
+        if (valJenjang.includes("TK")) { 
+            $('#lapbulkelola_boxRombelTK, #lapbulkelola_txtTotRombel').show().removeClass('d-none'); 
+            $('#lapbulkelola_gridRombelTK input[name^="kel_"]').addClass('hitung-paud-rombel'); 
+        } 
+        else { 
+            $('#lapbulkelola_boxRombelTK, #lapbulkelola_txtTotRombel').hide().addClass('d-none'); 
+            $('#lapbulkelola_gridRombelTK input[name^="kel_"]').removeClass('hitung-paud-rombel'); 
+        }
+    }
+}
+
+function lapbulkelola_validateSekolahAndNext(tipe) {
+    var npsn = (tipe === 'SD') ? $('#lapbulkelola_val_npsn').val() : $('#lapbulkelola_val_npsn_paud').val();
+    if(!npsn) { Sultan.notif.gagal("Harap pilih Sekolah dari daftar!"); return; }
+
+    var bln = (tipe === 'SD') ? $('#lapbulkelola_sel_bulan').val() : $('#lapbulkelola_sel_bulan_paud').val();
+    var thn = (tipe === 'SD') ? $('#lapbulkelola_sel_tahun').val() : $('#lapbulkelola_sel_tahun_paud').val();
+    if(!bln || !thn) { Sultan.notif.gagal("Harap pilih Bulan dan Tahun Laporan!"); return; }
+
+    $('#lapbulkelola_textPeriodeKonfirmasi').text(bln + " " + thn);
+    $('#lapbulkelola_btnKonfirmLanjutTab2').off('click').on('click', function() {
+        if (tipe === 'SD') {
+            $('#lapbulkelola_modalKonfirmasiPeriode').modal('hide'); lapbulkelola_nextTab('lapbulkelola_ts2');
+        } else {
+            lapbulkelola_lanjutKeTabMuridPAUD();
+        }
+    });
+    $('#lapbulkelola_modalKonfirmasiPeriode').modal('show');
+}
+
+function lapbulkelola_hitungValidasiKelas(k) {
+    var rL=0, rP=0, aL=0, aP=0;
+    $(`.rombel-l-${k}`).each(function(){ rL += Number($(this).val()) }); $(`.rombel-p-${k}`).each(function(){ rP += Number($(this).val()) });
+    $(`.agama-l-${k}`).each(function(){ aL += Number($(this).val()) }); $(`.agama-p-${k}`).each(function(){ aP += Number($(this).val()) });
+    
+    $(`#lapbulkelola_sumRL${k}`).text(rL); $(`#lapbulkelola_sumRP${k}`).text(rP); $(`#lapbulkelola_sumAL${k}`).text(aL); $(`#lapbulkelola_sumAP${k}`).text(aP);
+    $(`#lapbulkelola_totalRombel${k}`).text(rL+rP); $(`#lapbulkelola_totalAgama${k}`).text(aL+aP);
+    
+    var elSt = $(`#lapbulkelola_statusVal${k}`);
+    if((rL+rP)>0 && (rL+rP)===(aL+aP)) { elSt.removeClass('badge-warning badge-danger badge-secondary').addClass('badge-success').html('<i class="fas fa-check-circle mr-1"></i> Sesuai'); return true; } 
+    else if((rL+rP)===0 && (aL+aP)===0) { elSt.removeClass('badge-warning badge-danger badge-success').addClass('badge-secondary').text('Kosong'); return true; } 
+    else { elSt.removeClass('badge-success badge-secondary').addClass('badge-danger').html('<i class="fas fa-times-circle mr-1"></i> Tidak Sama'); return false; }
+}
+
+function lapbulkelola_validateMuridAndNext() {
+    var valid = true; 
+    for(var i=1; i<=6; i++) { 
+        if(!lapbulkelola_hitungValidasiKelas(i)) { valid = false; $(`#lapbulkelola_subTabKelas a[href="#lapbulkelola_tk${i}"]`).tab('show'); Sultan.notif.gagal(`Data Kelas ${i} tidak sesuai!`); break; } 
+    }
+    if(valid) lapbulkelola_nextTab('lapbulkelola_ts3');
+}
+
+function lapbulkelola_validatePTKAndNext() {
+    var ks=0; $('.val-ks').each(function(){ ks += Number($(this).val()) });
+    if(ks > 1) { $('#lapbulkelola_errKS').removeClass('d-none'); $(`#lapbulkelola_subTabPTK a[href="#lapbulkelola_ptk1"]`).tab('show'); return; } else { $('#lapbulkelola_errKS').addClass('d-none'); }
+    
+    var guru=0; $('#lapbulkelola_bodyGuru input').each(function(){ guru += Number($(this).val()) });
+    if(guru === 0) { $('#lapbulkelola_modalKonfirmasiGuru').modal('show'); return; }
+    
+    lapbulkelola_nextTab('lapbulkelola_ts4');
+}
+
+function lapbulkelola_paksaLanjutKeUpload() { 
+    $('#lapbulkelola_modalKonfirmasiGuru').modal('hide'); 
+    if ($('#lapbulkelola_formSD').is(':visible')) { lapbulkelola_nextTab('lapbulkelola_ts4'); }
+    else { lapbulkelola_nextTabPAUD('lapbulkelola_tp4'); }
+}
+
+function lapbulkelola_submitFormSD(e) {
+    e.preventDefault();
+    $('input[type="date"], input[type="number"]').each(function() { if ($(this).val() === "-") { $(this).val(""); } });
+    if (LAPBULKELOLA_IS_EDIT_MODE) { lapbulkelola_submitUpdateSD(); return; }
+
+    var f = document.getElementById('lapbulkelola_fileSD');
+    if (f.files.length === 0) { Sultan.notif.gagal("Anda belum memilih file PDF Laporan!"); return; }
+    // VAKSIN KAPASITAS UPLOAD -> 500 KB
+    if(f.files[0].size > 500 * 1024) { Sultan.notif.gagal("Maksimal ukuran file 500 KB!"); return; }
+    
+    var b = $('#lapbulkelola_btnFinalSD'); var t = b.html();
+    b.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Mengirim...');
+    
+    var r = new FileReader();
+    r.onload = function(ev) {
+        var fd = { data: ev.target.result.split(',')[1], mimeType: f.files[0].type, name: f.files[0].name };
+        var d = {}; $('#lapbulkelola_formSD').serializeArray().forEach(function(item) { d[item.name] = item.value; });
+        var tr = 0; $('.sel-rombel').each(function() { tr += parseInt($(this).val()) }); d.total_rombel = tr;
+        d.user_login = LAPBULKELOLA_USER_AKTIF;
+        
+        google.script.run.withSuccessHandler(function(res) {
+            b.prop('disabled', false).html(t);
+            if(res.success) {
+                $('#lapbulkelola_modalTambahData').modal('hide'); Sultan.notif.sukses(res.message);
+                LAPBULKELOLA_CACHE_DATA = []; // Force refresh
+                lapbulkelola_prosesCariData(false); 
+            } else { Sultan.notif.gagal(res.message); }
+        }).withFailureHandler(function(err){
+            b.prop('disabled', false).html(t); Sultan.notif.gagal(err.message);
+        }).simpanLapbulSD_Complex(d, fd);
+    };
+    r.readAsDataURL(f.files[0]);
+}
+
+function lapbulkelola_submitUpdateSD() {
+    var bln = $('#lapbulkelola_sel_bulan').val(); var thn = $('#lapbulkelola_sel_tahun').val();
+    if(!bln || !thn) { lapbulkelola_handleTabClick('lapbulkelola_ts1'); Sultan.notif.gagal("Periode Laporan kosong."); return; }
+
+    for (var i = 1; i < 7; i++) {
+        var rombel = parseInt($(`[name="rombel_${i}"]`).val()) || 0;
+        var totalMurid = 0;
+        var religions = ['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'konghucu', 'penghayat'];
+        religions.forEach(function(ag) {
+            totalMurid += parseInt($(`[name="k${i}_${ag}_l"]`).val()) || 0;
+            totalMurid += parseInt($(`[name="k${i}_${ag}_p"]`).val()) || 0;
+        });
+
+        if (rombel > 0 && totalMurid === 0) { lapbulkelola_handleTabClick('lapbulkelola_ts2'); Sultan.notif.gagal(`Kelas ${i}: Ada Rombel tapi data Murid kosong!`); return; }
+        if (totalMurid > 0 && rombel === 0) { lapbulkelola_handleTabClick('lapbulkelola_ts2'); Sultan.notif.gagal(`Kelas ${i}: Ada Siswa terisi, tapi Jumlah Rombel 0.`); return; }
+    }
+
+    var f = document.getElementById('lapbulkelola_fileSD');
+    var hasFile = (f.files.length > 0);
+    // VAKSIN KAPASITAS UPLOAD -> 500 KB
+    if (hasFile && f.files[0].size > 500 * 1024) { lapbulkelola_handleTabClick('lapbulkelola_ts4'); Sultan.notif.gagal("Maksimal 500 KB."); return; }
+    
+    var b = $('#lapbulkelola_btnFinalSD'); var t = b.html();
+    b.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Mengupdate...');
+
+    var prosesKirim = function(fileData) {
+        var d = {}; $('#lapbulkelola_formSD').serializeArray().forEach(i => d[i.name] = i.value);
+        var tr = 0; $('.sel-rombel').each(function() { tr += parseInt($(this).val()) || 0; }); d.total_rombel = tr;
+        d.user_login = LAPBULKELOLA_USER_AKTIF;
+
+        google.script.run.withSuccessHandler(function(res) {
+            b.prop('disabled', false).html(t);
+            if (res.success) {
+                $('#lapbulkelola_modalTambahData').modal('hide'); Sultan.notif.sukses(res.message);
+                if(res.newData) {
+                    var c = LAPBULKELOLA_CACHE_DATA.find(r => r.rowId == d.EDIT_ROW_ID && r.source == 'SD');
+                    if(c) { c.tglEdit = res.newData.tglEdit; c.userEdit = res.newData.userEdit; c.statusData = res.newData.statusData; if(res.newData.fileUrl) c.fileUrl = res.newData.fileUrl; }
+                } else { LAPBULKELOLA_CACHE_DATA = []; }
+                lapbulkelola_prosesCariData(false); 
+            } else { Sultan.notif.gagal(res.message); }
+        }).withFailureHandler(function(err){
+             b.prop('disabled', false).html(t); Sultan.notif.gagal(err.message);
+        }).updateLapbulSD(d, fileData);
+    };
+
+    if (hasFile) {
+        var r = new FileReader();
+        r.onload = function(ev) { prosesKirim({ data: ev.target.result.split(',')[1], mimeType: f.files[0].type, name: f.files[0].name }); };
+        r.readAsDataURL(f.files[0]);
+    } else { prosesKirim(null); }
+}
+
+// ---------------- PAUD LOGIC ----------------
+function lapbulkelola_initFormPAUD() {
+    var now = new Date(); var curMonth = now.getMonth(); var targetMonthIdx = (curMonth === 0) ? 11 : (curMonth - 1);
+    var curYear = now.getFullYear(); var targetYear = (curMonth === 0) ? (curYear - 1) : curYear;
+
+    var htmlTahun = '<option value="">- Tahun -</option>';
+    for(var y = 2022; y <= curYear + 1; y++) { var sel = (y === targetYear) ? 'selected' : ''; htmlTahun += `<option value="${y}" ${sel}>${y}</option>`; }
+    $('#lapbulkelola_sel_tahun_paud').html(htmlTahun);
+    
+    var arrBulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    var htmlBulan = '<option value="">- Bulan -</option>';
+    arrBulan.forEach(function(b){ htmlBulan += `<option value="${b}">${b}</option>`; });
+    $('#lapbulkelola_sel_bulan_paud').html(htmlBulan);
+    $('#lapbulkelola_sel_bulan_paud').val(arrBulan[targetMonthIdx]);
+
+    lapbulkelola_generateGridMuridPAUD();
+    
+    lapbulkelola_generateDynamicFieldsPAUD();
+    lapbulkelola_isiOtomatisSekolahUser('PAUD');
+}
+
+function lapbulkelola_generateDynamicFieldsPAUD() {
+    var h = `
+    <div class="row">
+    <div class="col-lg-4 col-md-12 mb-3"><div class="group-box h-100"><span class="group-title text-maroon" style="font-size: 13px;"><i class="fas fa-building mr-2"></i>Legalitas</span><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Yayasan</label><input type="text" name="yayasan" id="lapbulkelola_in_yayasan_paud" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">No SK Pendirian</label><input type="text" name="no_sk_pendirian" id="lapbulkelola_in_no_sk_pendirian_paud" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Tgl Pendirian</label><input type="date" name="tgl_pendirian" id="lapbulkelola_in_tgl_pendirian_paud" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">No Ijin Ops</label><input type="text" name="no_sk_ijin" id="lapbulkelola_in_no_sk_ijin_paud" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Tgl Ijin Ops</label><input type="date" name="tgl_ijin" id="lapbulkelola_in_tgl_ijin_paud" class="form-control form-control-sultan form-control-sm"></div></div></div>
+    <div class="col-lg-4 col-md-12 mb-3"><div class="group-box h-100"><span class="group-title text-maroon" style="font-size: 13px;"><i class="fas fa-star mr-2"></i>Akreditasi</span><div class="row"><div class="col-6 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Akreditasi</label><select name="akreditasi" id="lapbulkelola_in_akreditasi_paud" class="form-control form-control-sultan form-control-sm"><option value="-">-</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="Belum">Belum</option></select></div><div class="col-6 mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">No Sertifikat</label><input type="text" name="no_sertifikat" id="lapbulkelola_in_no_sertifikat_paud" class="form-control form-control-sultan form-control-sm"></div></div></div></div>
+    <div class="col-lg-4 col-md-12 mb-3"><div class="group-box h-100"><span class="group-title text-maroon" style="font-size: 13px;"><i class="fas fa-address-book mr-2"></i>Kontak</span><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Alamat</label><textarea name="alamat" id="lapbulkelola_in_alamat_paud" class="form-control form-control-sultan form-control-sm" rows="3" style="resize:none;"></textarea></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Telepon</label><input type="text" name="telepon" id="lapbulkelola_in_telepon_paud" class="form-control form-control-sultan form-control-sm"></div><div class="form-group mb-2"><label class="form-label-sultan small font-weight-bold text-muted text-uppercase mb-1">Email</label><input type="email" name="email" id="lapbulkelola_in_email_paud" class="form-control form-control-sultan form-control-sm"></div></div></div>
+    </div>`;
+    $('#lapbulkelola_dynamicFieldsPAUD').html(h);
+}
+
+function lapbulkelola_generateGridMuridPAUD() {
+    var usia = [['0-1 Thn','u01'],['1-2 Thn','u12'],['2-3 Thn','u23'],['3-4 Thn','u34'],['4-5 Thn','u45'],['5-6 Thn','u56'],['> 6 Thn','u6']];
+    var hU = ""; usia.forEach(u => { hU += lapbulkelola_rowInputPaud(u[0], u[1]); }); $('#lapbulkelola_gridUsia').html(hU);
+    var rom = [['Kelompok A','kel_a'],['Kelompok B','kel_b']];
+    var hR = ""; rom.forEach(r => { hR += lapbulkelola_rowInputPaud(r[0], r[1]); }); $('#lapbulkelola_gridRombelTK').html(hR);
+}
+
+function lapbulkelola_rowInputPaud(label, prefix) {
+    return `<div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-1"><span class="small font-weight-bold text-dark w-50">${label}</span><div class="d-flex w-50"><div class="input-group input-group-sm mr-1"><div class="input-group-prepend"><span class="input-group-text px-2 font-weight-bold text-dark bg-light-maroon text-maroon">L</span></div><input type="number" name="${prefix}_l" class="form-control form-control-sm form-control-sultan hitung-paud paud-usia-l" min="0"></div><div class="input-group input-group-sm"><div class="input-group-prepend"><span class="input-group-text px-2 font-weight-bold text-dark bg-light-maroon text-maroon">P</span></div><input type="number" name="${prefix}_p" class="form-control form-control-sm form-control-sultan hitung-paud paud-usia-p" min="0"></div></div></div>`;
+}
+
+function lapbulkelola_lanjutKeTabMuridPAUD() {
+    $('#lapbulkelola_modalKonfirmasiPeriode').modal('hide');
+    var jenjang = $('#lapbulkelola_formPAUD #lapbulkelola_val_jenjang_paud').val().toUpperCase();
+    if (jenjang.includes("TK")) {
+        $('#lapbulkelola_boxRombelTK, #lapbulkelola_txtTotRombel').show();
+        $('#lapbulkelola_gridRombelTK input[name^="kel_"]').addClass('hitung-paud-rombel');
+    } else {
+        $('#lapbulkelola_boxRombelTK, #lapbulkelola_txtTotRombel').hide();
+        $('#lapbulkelola_gridRombelTK input').val(""); 
+        $('#lapbulkelola_gridRombelTK input[name^="kel_"]').removeClass('hitung-paud-rombel');
+    }
+    lapbulkelola_nextTabPAUD('lapbulkelola_tp2'); 
+}
+
+function lapbulkelola_hitungValidasiPAUD() {
+    var listUsia = ['u01', 'u12', 'u23', 'u34', 'u45', 'u56', 'u6'];
+    var uL = 0, uP = 0;
+    listUsia.forEach(function(kode) {
+        uL += parseInt($(`#lapbulkelola_formPAUD [name="${kode}_l"]`).val()) || 0;
+        uP += parseInt($(`#lapbulkelola_formPAUD [name="${kode}_p"]`).val()) || 0;
+    });
+    var totUsia = uL + uP;
+
+    var kL = 0, kP = 0;
+    kL += parseInt($('#lapbulkelola_formPAUD [name="kel_a_l"]').val()) || 0; kP += parseInt($('#lapbulkelola_formPAUD [name="kel_a_p"]').val()) || 0;
+    kL += parseInt($('#lapbulkelola_formPAUD [name="kel_b_l"]').val()) || 0; kP += parseInt($('#lapbulkelola_formPAUD [name="kel_b_p"]').val()) || 0;
+    var totKel = kL + kP;
+
+    $('#lapbulkelola_totUsia').text(totUsia); $('#lapbulkelola_totUsiaL').text(uL); $('#lapbulkelola_totUsiaP').text(uP);
+    $('#lapbulkelola_txtTotRombel').html(` | Total Kelompok: <span id="lapbulkelola_totRom" class="font-weight-bold text-maroon" style="font-size:16px;">${totKel}</span> <span class="text-muted small">(L:${kL} P:${kP})</span>`);
+
+    var badge = $('#lapbulkelola_statusValPAUD');
+    var isTK = $('#lapbulkelola_boxRombelTK').is(':visible');
+    var isValid = true; 
+    
+    if (isTK && totUsia !== totKel) isValid = false;
+
+    if (isValid) { badge.removeClass('badge-danger badge-warning').addClass('badge-success').html('<i class="fas fa-check-circle mr-1"></i>Sesuai'); } 
+    else { badge.removeClass('badge-success badge-warning').addClass('badge-danger').html('<i class="fas fa-times-circle mr-1"></i>Tidak Sama'); }
+    return isValid;
+}
+
+function lapbulkelola_validateMuridPAUD() {
+    if(lapbulkelola_hitungValidasiPAUD()) { $(`#lapbulkelola_link-lapbulkelola_tp3`).removeClass('disabled-tab'); lapbulkelola_handleTabClickPAUD('lapbulkelola_tp3'); } 
+    else { Sultan.notif.gagal("Data Murid Belum Sesuai/Kosong!"); }
+}
+
+function lapbulkelola_validatePTKPAUD() {
+    var totalKS = 0; $('.val-ks-paud').each(function() { totalKS += Number($(this).val()); });
+    if (totalKS > 1) { $('#lapbulkelola_errKS_PAUD').removeClass('d-none'); return; } else { $('#lapbulkelola_errKS_PAUD').addClass('d-none'); }
+
+    var totalAll = 0; $('.val-ptk-paud').each(function(){ totalAll += Number($(this).val()) });
+    if (totalAll === 0) { $('#lapbulkelola_modalKonfirmasiGuru').modal('show'); return; }
+    
+    lapbulkelola_lanjutKeTabUploadPAUD();
+}
+
+function lapbulkelola_lanjutKeTabUploadPAUD() { $('#lapbulkelola_modalKonfirmasiGuru').modal('hide'); $(`#lapbulkelola_link-lapbulkelola_tp4`).removeClass('disabled-tab'); lapbulkelola_handleTabClickPAUD('lapbulkelola_tp4'); }
+
+function lapbulkelola_submitFormPAUD(e) {
+    e.preventDefault();
+    $('input[type="date"], input[type="number"]').each(function() { if ($(this).val() === "-") { $(this).val(""); } });
+    if (LAPBULKELOLA_IS_EDIT_MODE) { lapbulkelola_submitUpdatePAUD(); return; }
+
+    var f = document.getElementById('lapbulkelola_filePAUD');
+    if (f.files.length === 0) { Sultan.notif.gagal("Anda belum memilih file PDF Laporan!"); return; }
+    // VAKSIN KAPASITAS UPLOAD -> 500 KB
+    if(f.files[0].size > 500 * 1024) { Sultan.notif.gagal("Maksimal ukuran file 500 KB!"); return; }
+    
+    var b = $('#lapbulkelola_btnFinalPAUD'); var t = b.html();
+    b.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Menyimpan...');
+    
+    var r = new FileReader();
+    r.onload = function(ev) {
+        var fd = { data: ev.target.result.split(',')[1], mimeType: f.files[0].type, name: f.files[0].name };
+        var d = {}; $('#lapbulkelola_formPAUD').serializeArray().forEach(function(item){ d[item.name] = item.value; });
+        d.user_login = LAPBULKELOLA_USER_AKTIF;
+        
+        google.script.run.withSuccessHandler(function(res){
+            b.prop('disabled', false).html(t);
+            if(res.success) {
+                $('#lapbulkelola_modalTambahData').modal('hide'); Sultan.notif.sukses(res.message); 
+                LAPBULKELOLA_CACHE_DATA = []; // Force refresh
+                lapbulkelola_prosesCariData(false);
+            } else { Sultan.notif.gagal(res.message); }
+        }).withFailureHandler(function(err){
+             b.prop('disabled', false).html(t); Sultan.notif.gagal(err.message);
+        }).simpanLapbulPAUD(d, fd);
+    };
+    r.readAsDataURL(f.files[0]);
+}
+
+function lapbulkelola_submitUpdatePAUD() {
+    var bln = $('#lapbulkelola_formPAUD select[name="bulan"]').val(); var thn = $('#lapbulkelola_formPAUD select[name="tahun"]').val();
+    if(!bln || !thn) { Sultan.notif.gagal("Periode Laporan masih kosong!"); return; }
+
+    lapbulkelola_hitungValidasiPAUD();
+
+    var f = $('#lapbulkelola_formPAUD input[type="file"]')[0];
+    var hasFile = (f && f.files.length > 0);
+    // VAKSIN KAPASITAS UPLOAD -> 500 KB
+    if (hasFile && f.files[0].size > 500 * 1024) { Sultan.notif.gagal("Maksimal 500 KB."); return; }
+
+    var b = $('#lapbulkelola_formPAUD button[type="submit"]'); var txtAwal = b.html();
+    b.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i>Mengupdate...');
+
+    var runKirim = function(fileData) {
+        var d = {}; $('#lapbulkelola_formPAUD').serializeArray().forEach(i => d[i.name] = i.value);
+        d.bulan = bln; d.tahun = thn; d.total_rombel = parseInt($('#lapbulkelola_formPAUD [name="jumlah_rombel"]').val()) || 0;
+        d.user_login = LAPBULKELOLA_USER_AKTIF; d.EDIT_ROW_ID = $('#lapbulkelola_formPAUD input[name="EDIT_ROW_ID"]').val();
+
+        google.script.run.withSuccessHandler(function(res) {
+            b.prop('disabled', false).html(txtAwal);
+            if (res.success) {
+                $('#lapbulkelola_modalTambahData').modal('hide'); Sultan.notif.sukses(res.message); 
+                if(res.newData) {
+                    var c = LAPBULKELOLA_CACHE_DATA.find(r => r.rowId == d.EDIT_ROW_ID && r.source == 'PAUD');
+                    if(c) { c.tglEdit = res.newData.tglEdit; c.userEdit = res.newData.userEdit; c.statusData = res.newData.statusData; if(res.newData.fileUrl) c.fileUrl = res.newData.fileUrl; }
+                } else { LAPBULKELOLA_CACHE_DATA = []; }
+                lapbulkelola_prosesCariData(false);
+            } else { Sultan.notif.gagal(res.message); }
+        }).withFailureHandler(function(err) {
+            b.prop('disabled', false).html(txtAwal); Sultan.notif.gagal("Koneksi gagal: " + err.message);
+        }).updateLapbulPAUD(d, fileData);
+    };
+
+    if (hasFile) {
+        var r = new FileReader(); r.onload = function(ev) { runKirim({ data: ev.target.result.split(',')[1], mimeType: f.files[0].type, name: f.files[0].name }); }; r.readAsDataURL(f.files[0]);
+    } else { runKirim(null); }
+}
+
+// =================================================================
+// 7. EDIT DATA (POPULATOR)
+// =================================================================
+function lapbulkelola_editLapbul(source, rowId) {
+    Sultan.notif.info("Memuat data " + source + "...");
+    var backendFunction = (source === 'SD') 
+        ? google.script.run.withSuccessHandler(onSuccessLoad).withFailureHandler(onErr).getDetailRowSD(rowId)
+        : google.script.run.withSuccessHandler(onSuccessLoad).withFailureHandler(onErr).getDetailRowPAUD(rowId);
+
+    function onErr(e) { Sultan.notif.gagal("Koneksi gagal: " + e.message); }
+    function onSuccessLoad(data) {
+        if (data.error) { Sultan.notif.gagal(data.error); return; }
+        $('#lapbulkelola_formContentArea').empty(); 
+        LAPBULKELOLA_IS_EDIT_MODE = true; LAPBULKELOLA_EDIT_ROW_ID = rowId; lapbulkelola_URL_FILE_LAMA = data.Dokumen || data.fileUrl || "";
+
+        $('#lapbulkelola_headerModalForm').removeClass('bg-maroon').addClass('bg-warning');
+        $('#lapbulkelola_judulModalForm').css('color', '#343a40').html('<i class="fas fa-pencil-alt mr-2"></i> Edit Laporan Bulan');
+
+        $('#lapbulkelola_btnKembaliPilih').hide();
+        $('#lapbulkelola_modalTambahData').modal('show');
+        $('#lapbulkelola_viewPilihJenjang').removeClass('d-flex').addClass('d-none'); 
+        $('#lapbulkelola_viewFormContainer').removeClass('d-none').addClass('d-flex');
+        
+        lapbulkelola_suntikTemplateKeForm(source);
+        
+        $('#lapbulkelola_inputSearchSekolah, #lapbulkelola_inputSearchSekolahPAUD').prop('readonly', true).addClass('bg-light'); 
+
+        if (source === 'SD') lapbulkelola_initFormSD(); else lapbulkelola_initFormPAUD(); 
+
+        setTimeout(function(){
+            var btnId = (source === 'SD') ? '#lapbulkelola_btnFinalSD' : '#lapbulkelola_btnFinalPAUD';
+            var btn = $(btnId);
+            btn.prop('disabled', false).removeClass('disabled').html('<i class="fas fa-save mr-2"></i>UPDATE DATA');
+            $('#lapbulkelola_labelFormAktif').html('EDIT DATA ' + source + ' <span class="badge badge-warning text-dark ml-2 shadow-sm border border-dark"><i class="fas fa-pencil-alt mr-1"></i> Mode Edit</span>');
+            
+            $('#lapbulkelola_sel_bulan, #lapbulkelola_sel_tahun, #lapbulkelola_sel_bulan_paud, #lapbulkelola_sel_tahun_paud').prop('disabled', true);
+            
+            var formId = (source === 'SD') ? '#lapbulkelola_formSD' : '#lapbulkelola_formPAUD';
+            $(formId).append(`<input type="hidden" name="EDIT_ROW_ID" value="${rowId}">`);
+            $(formId).append(`<input type="hidden" name="file_url_lama" value="${lapbulkelola_URL_FILE_LAMA}">`);
+            $(formId).append(`<input type="hidden" name="bulan" value="${data.Bulan || data.bulan}">`);
+            $(formId).append(`<input type="hidden" name="tahun" value="${data.Tahun || data.tahun}">`);
+
+            var tabId = (source === 'SD') ? '#lapbulkelola_tabSD' : '#lapbulkelola_tabPAUD';
+            $(tabId + ' .nav-link').removeClass('disabled-tab');
+            
+            if (source === 'SD') lapbulkelola_populateFormSD(data); else lapbulkelola_populateFormPAUD(data); 
+            Sultan.notif.tutup();
+        }, 800); 
+    }
+}
+
+function lapbulkelola_populateFormSD(data) {
+    var cariData = function(keywords) {
+        if (!Array.isArray(keywords)) keywords = [keywords];
+        for (var key in data) {
+            var k = String(key).toLowerCase();
+            for (var i = 0; i < keywords.length; i++) {
+                if (k === keywords[i].toLowerCase() || k.includes(keywords[i].toLowerCase())) return data[key]; 
+            }
+        }
+        return "";
+    };
+
+    $.each(data, function(rawKey, value) {
+        var cleanKey = String(rawKey).trim().toLowerCase().replace(/\s+/g, '_');
+        var input = $(`#lapbulkelola_formSD [name="${cleanKey}"], #lapbulkelola_formSD [name="${rawKey}"]`);
+        if (input.length > 0) {
+            var type = input.attr('type');
+            if ((type === 'date' || type === 'number') && (value === "-" || value === "")) { input.val(""); } 
+            else if (type === 'radio') { input.filter(`[value="${value}"]`).prop('checked', true); } 
+            else { input.val(value); }
+        }
+    });
+
+    var npsnTarget = cariData(["npsn"]);
+    $('#lapbulkelola_val_npsn').val(npsnTarget); $('#lapbulkelola_val_nama').val(cariData(["nama sekolah"]));
+    $('#lapbulkelola_inputSearchSekolah').val(npsnTarget + " - " + cariData(["nama sekolah"]));
+    
+    // VAKSIN FALLBACK MASTER DATA: Jika data Edit dari Sheet Transaksi kosong (karena tidak menyimpan kolom legalitas), ambil dari Master
+    var masterData = LAPBULKELOLA_MASTER_SEKOLAH.find(s => String(s.npsn) === String(npsnTarget));
+    
+    if (masterData) {
+        if (!$('#lapbulkelola_in_yayasan').val()) $('#lapbulkelola_in_yayasan').val(masterData.yayasan || "");
+        if (!$('#lapbulkelola_in_no_sk_pendirian').val()) $('#lapbulkelola_in_no_sk_pendirian').val(masterData.no_sk_pendirian || "");
+        if (!$('#lapbulkelola_in_tgl_pendirian').val()) $('#lapbulkelola_in_tgl_pendirian').val(masterData.tgl_pendirian || "");
+        if (!$('#lapbulkelola_in_no_sk_ijin').val()) $('#lapbulkelola_in_no_sk_ijin').val(masterData.no_sk_ijin || "");
+        if (!$('#lapbulkelola_in_tgl_ijin').val()) $('#lapbulkelola_in_tgl_ijin').val(masterData.tgl_ijin || "");
+        if (!$('#lapbulkelola_in_akreditasi').val() || $('#lapbulkelola_in_akreditasi').val() === "-") $('#lapbulkelola_in_akreditasi').val(masterData.akreditasi || "-");
+        if (!$('#lapbulkelola_in_skor').val()) $('#lapbulkelola_in_skor').val(masterData.skor || "");
+        if (!$('#lapbulkelola_in_no_sertifikat').val()) $('#lapbulkelola_in_no_sertifikat').val(masterData.no_sertifikat || "");
+        if (!$('#lapbulkelola_in_tgl_sertifikat').val()) $('#lapbulkelola_in_tgl_sertifikat').val(masterData.tgl_sertifikat || "");
+        if (!$('#lapbulkelola_in_alamat').val()) $('#lapbulkelola_in_alamat').val(masterData.alamat || "");
+        if (!$('#lapbulkelola_in_telepon').val()) $('#lapbulkelola_in_telepon').val(masterData.telepon || "");
+        if (!$('#lapbulkelola_in_email').val()) $('#lapbulkelola_in_email').val(masterData.email || "");
+    } else {
+        // Jika Master tidak ditemukan, baru cari dari data sheet itu sendiri sebagai cadangan terakhir
+        $('#lapbulkelola_in_yayasan').val(cariData(["yayasan"])); $('#lapbulkelola_in_no_sk_pendirian').val(cariData(["sk pendirian", "no. sk pendirian"])); $('#lapbulkelola_in_tgl_pendirian').val(cariData(["tgl pendirian"]));
+        $('#lapbulkelola_in_no_sk_ijin').val(cariData(["sk ijin", "sk izin"])); $('#lapbulkelola_in_tgl_ijin').val(cariData(["tgl ijin", "tgl izin"]));
+        $('#lapbulkelola_in_akreditasi').val(cariData(["akreditasi"])); $('#lapbulkelola_in_skor').val(cariData(["skor", "nilai"]));
+        $('#lapbulkelola_in_no_sertifikat').val(cariData(["no sertifikat"])); $('#lapbulkelola_in_tgl_sertifikat').val(cariData(["tgl sertifikat"]));
+        $('#lapbulkelola_in_alamat').val(cariData(["alamat"])); $('#lapbulkelola_in_telepon').val(cariData(["telepon", "hp"])); $('#lapbulkelola_in_email').val(cariData(["email"])); 
+    }
+
+    for(var i=1; i<=6; i++) {
+        var valRom = cariData(["rombel " + i, "rombel_" + i]);
+        if(valRom !== "") { $(`[name="rombel_${i}"]`).val(valRom).trigger('change'); }
+        var suffixes = ['', 'a', 'b', 'c']; 
+        suffixes.forEach(function(suf) {
+            var valL = cariData([`k${i}${suf} l`, `k${i}${suf}_l`]); if(valL !== "") $(`input[name="k${i}${suf}_l"]`).val(valL);
+            var valP = cariData([`k${i}${suf} p`, `k${i}${suf}_p`]); if(valP !== "") $(`input[name="k${i}${suf}_p"]`).val(valP);
+        });
+        var agamas = ['islam', 'kristen', 'katolik', 'hindu', 'buddha', 'konghucu'];
+        agamas.forEach(function(agm) {
+            var valAgmL = cariData([`k${i} ${agm} l`, `k${i}_${agm}_l`]);
+            if(valAgmL !== "") { $(`select[data-prefix="${agm}"][data-kelas="${i}"]`).val("1").trigger('change'); $(`input[name="k${i}_${agm}_l"]`).val(valAgmL); }
+            var valAgmP = cariData([`k${i} ${agm} p`, `k${i}_${agm}_p`]); if(valAgmP !== "") { $(`input[name="k${i}_${agm}_p"]`).val(valAgmP); }
+        });
+    }
+
+    var mapPTK = [{id:'ks_nonasn',keys:['ks non asn']},{id:'gkris_pns',keys:['gpa kris pns']},{id:'gkris_pppk',keys:['gpa kris pppk']},{id:'gkris_pppk_pw',keys:['gpa kris pppk pw']},{id:'gkris_gty',keys:['gpa kris gty']},{id:'gkris_gtt',keys:['gpa kris gtt']},{id:'gkat_pns',keys:['gpa kat pns']},{id:'gkat_pppk',keys:['gpa kat pppk']},{id:'gkat_pppk_pw',keys:['gpa kat pppk pw']},{id:'gkat_gty',keys:['gpa kat gty']},{id:'gkat_gtt',keys:['gpa kat gtt']},{id:'adm_pns',keys:['adm kan pns']},{id:'adm_pppk',keys:['adm kan pppk']},{id:'adm_pppk_pw',keys:['adm kan pppk pw']},{id:'adm_pty',keys:['adm kan pty']},{id:'adm_ptt',keys:['adm kan ptt']},{id:'lain_pns',keys:['tdklain pns']},{id:'lain_pppk',keys:['tdklain pppk']},{id:'lain_pppk_pw',keys:['tdklain pppk pw']},{id:'lain_pty',keys:['tdklain pty']},{id:'lain_ptt',keys:['tdklain ptt']}];
+    mapPTK.forEach(function(m) { var hasil = cariData(m.keys); if (hasil !== "") $(`#lapbulkelola_formSD input[name="${m.id}"]`).val(hasil); });
+
+    lapbulkelola_URL_FILE_LAMA = cariData(["dokumen", "file"]);
+    if (lapbulkelola_URL_FILE_LAMA && lapbulkelola_URL_FILE_LAMA.length > 5) {
+        $('#lapbulkelola_boxFilePreviewSD, #lapbulkelola_msgEditFileSD').removeClass('d-none');
+    } else {
+        $('#lapbulkelola_boxFilePreviewSD, #lapbulkelola_msgEditFileSD').addClass('d-none');
+    }
+
+    setTimeout(function() { for(var k=1; k<=6; k++) { lapbulkelola_hitungValidasiKelas(k); } $('.val-ks').first().trigger('change'); }, 800);
+}
+
+function lapbulkelola_populateFormPAUD(data) {
+    var cariData = function(keywords) {
+        if (!Array.isArray(keywords)) keywords = [keywords];
+        for (var key in data) {
+            var k = String(key).toLowerCase(); var v = data[key];
+            for (var i = 0; i < keywords.length; i++) {
+                if (k.includes(keywords[i].toLowerCase())) { if (v && typeof v === 'string' && v.includes("T00:00:00")) return v.split("T")[0]; return v; }
+            }
+        }
+        return "";
+    };
+
+    var valBulan = cariData("bulan"); var valTahun = cariData("tahun");
+    var fixElementPeriode = function(namaInput, idYangDiinginkan, nilai) {
+        var el = $('#lapbulkelola_formPAUD select[name="' + namaInput + '"]');
+        if (el.length > 0) {
+            el.attr('id', idYangDiinginkan);
+            if (nilai) {
+                var opsiAda = el.find("option[value='" + nilai + "']").length > 0;
+                if (!opsiAda) { el.find('option').each(function() { if ($(this).text().trim().toLowerCase() === String(nilai).trim().toLowerCase()) { el.val($(this).val()); opsiAda = true; return false; } }); }
+                if (!opsiAda) el.append(new Option(nilai, nilai, true, true)); else if (!el.val()) el.val(nilai);
+                el.trigger('change');
+            }
+        }
+    };
+    fixElementPeriode('tahun', 'lapbulkelola_sel_tahun_paud', valTahun); fixElementPeriode('bulan', 'lapbulkelola_sel_bulan_paud', valBulan);
+
+    var npsnTarget = cariData(["npsn", "nomor pokok"]); var nama = cariData(["nama sekolah", "nama lembaga"]);
+    $('#lapbulkelola_val_npsn_paud').val(npsnTarget); if(!$('#lapbulkelola_val_npsn_paud').val()) $('#lapbulkelola_formPAUD input[name="npsn"]').val(npsnTarget);
+    $('#lapbulkelola_val_nama_paud').val(nama); if(!$('#lapbulkelola_val_nama_paud').val()) $('#lapbulkelola_formPAUD input[name="nama_sekolah"]').val(nama);
+    if(npsnTarget && nama) $('input[id*="Search"]').val(npsnTarget + " - " + nama);
+
+    // VAKSIN FALLBACK MASTER DATA PAUD
+    var masterData = LAPBULKELOLA_MASTER_SEKOLAH.find(s => String(s.npsn) === String(npsnTarget));
+    var fId = '#lapbulkelola_formPAUD';
+    
+    if (masterData) {
+        if (!$(fId + ' [name="yayasan"]').val()) $(fId + ' [name="yayasan"]').val(masterData.yayasan || "");
+        if (!$(fId + ' [name="no_sk_pendirian"]').val()) $(fId + ' [name="no_sk_pendirian"]').val(masterData.no_sk_pendirian || "");
+        if (!$(fId + ' [name="tgl_pendirian"]').val() && !$(fId + ' [name="tanggal_pendirian"]').val()) { $(fId + ' [name="tgl_pendirian"], ' + fId + ' [name="tanggal_pendirian"]').val(masterData.tgl_pendirian || ""); }
+        if (!$(fId + ' [name="no_sk_ijin"]').val()) $(fId + ' [name="no_sk_ijin"]').val(masterData.no_sk_ijin || "");
+        if (!$(fId + ' [name="tgl_ijin"]').val()) $(fId + ' [name="tgl_ijin"]').val(masterData.tgl_ijin || "");
+        if (!$(fId + ' [name="akreditasi"]').val() || $(fId + ' [name="akreditasi"]').val() === "-") $(fId + ' [name="akreditasi"]').val(masterData.akreditasi || "-");
+        if (!$(fId + ' [name="no_sertifikat"]').val()) $(fId + ' [name="no_sertifikat"]').val(masterData.no_sertifikat || "");
+        if (!$(fId + ' [name="alamat"]').val()) $(fId + ' [name="alamat"]').val(masterData.alamat || "");
+        if (!$(fId + ' [name="telepon"]').val()) $(fId + ' [name="telepon"]').val(masterData.telepon || "");
+        if (!$(fId + ' [name="email"]').val()) $(fId + ' [name="email"]').val(masterData.email || "");
+    }
+
+    var valJenjang = String(cariData("jenjang")).toUpperCase().trim();
+    $('#lapbulkelola_val_jenjang_paud').val(valJenjang); $(fId + ' input[name="jenjang"]').val(valJenjang);
+    if (valJenjang.includes("TK")) { $('#lapbulkelola_boxRombelTK, #lapbulkelola_txtTotRombel').show().removeClass('d-none'); $('#lapbulkelola_gridRombelTK input[name^="kel_"]').addClass('hitung-paud-rombel'); } 
+    else { $('#lapbulkelola_boxRombelTK, #lapbulkelola_txtTotRombel').hide().addClass('d-none'); $('#lapbulkelola_gridRombelTK input[name^="kel_"]').removeClass('hitung-paud-rombel'); }
+
+    var fields = [{ name: "status_sekolah", keys: ["status"] }, { name: "yayasan", keys: ["yayasan"] }, { name: "no_sk_pendirian", keys: ["sk pendirian", "no sk pendirian"] }, { name: "no_sk_ijin", keys: ["sk ijin", "sk operasional"] }, { name: "tgl_ijin", keys: ["tgl ijin", "tanggal ijin"] }, { name: "akreditasi", keys: ["akreditasi"] }, { name: "no_sertifikat", keys: ["no sertifikat"] }, { name: "skor", keys: ["skor", "nilai"] }, { name: "alamat", keys: ["alamat"] }, { name: "telepon", keys: ["telepon", "hp"] }, { name: "email", keys: ["email"] }, { name: "jumlah_rombel", keys: ["rombel", "jumlah rombel"] }, { name: "u01_l", keys: ["0-1 l"] }, { name: "u01_p", keys: ["0-1 p"] }, { name: "u12_l", keys: ["1-2 l"] }, { name: "u12_p", keys: ["1-2 p"] }, { name: "u23_l", keys: ["2-3 l"] }, { name: "u23_p", keys: ["2-3 p"] }, { name: "u34_l", keys: ["3-4 l"] }, { name: "u34_p", keys: ["3-4 p"] }, { name: "u45_l", keys: ["4-5 l"] }, { name: "u45_p", keys: ["4-5 p"] }, { name: "u56_l", keys: ["5-6 l"] }, { name: "u56_p", keys: ["5-6 p"] }, { name: "u6_l", keys: ["> 6 l"] },  { name: "u6_p", keys: ["> 6 p"] }, { name: "kel_a_l", keys: ["a l"] }, { name: "kel_a_p", keys: ["a p"] }, { name: "kel_b_l", keys: ["b l"] }, { name: "kel_b_p", keys: ["b p"] }, { name: "ks_gty", keys: ["ks gty"] }, { name: "ks_gtt", keys: ["ks gtt"] }, { name: "ks_pns", keys: ["ks pns"] }, { name: "ks_pppk", keys: ["ks pppk"] }, { name: "gk_gty", keys: ["gk gty"] }, { name: "gk_gtt", keys: ["gk gtt"] }, { name: "gk_pns", keys: ["gk pns"] }, { name: "gk_pppk", keys: ["gk pppk"] }, { name: "gp_gty", keys: ["gp gty"] }, { name: "gp_gtt", keys: ["gp gtt"] }, { name: "gp_pns", keys: ["gp pns"] }, { name: "gp_pppk", keys: ["gp pppk"] }, { name: "td_penjaga", keys: ["penjaga"] }, { name: "td_adm", keys: ["tas", "administrasi"] }, { name: "td_perpus", keys: ["pustakawan"] }, { name: "td_lain", keys: ["tendik lain"] }];
+    fields.forEach(function(f) { var val = cariData(f.keys); if(val !== "") $(fId + ' [name="' + f.name + '"]').val(val); });
+
+    if ($(fId + ' input[name="EDIT_ROW_ID"]').length === 0) { $(fId).append('<input type="hidden" name="EDIT_ROW_ID">'); }
+    var rowId = data.ROW_ID || data.row_id || cariData("row_id"); $(fId + ' input[name="EDIT_ROW_ID"]').val(rowId);
+
+    $('#lapbulkelola_hintEditFilePAUD').remove();
+    var htmlPesan = '<div id="lapbulkelola_hintEditFilePAUD" class="text-info font-italic mb-2 font-weight-bold d-block"><i class="fas fa-info-circle mr-1"></i>Biarkan kosong apabila tidak mengganti file.</div>';
+    $(fId + ' input[type="file"]').parent().before(htmlPesan);
+
+    lapbulkelola_URL_FILE_LAMA = cariData(["dokumen", "file"]);
+    if (lapbulkelola_URL_FILE_LAMA && lapbulkelola_URL_FILE_LAMA.length > 5) { $('#lapbulkelola_boxFilePreviewPAUD').removeClass('d-none'); }
+
+    setTimeout(function() { if(typeof lapbulkelola_hitungValidasiPAUD === 'function') lapbulkelola_hitungValidasiPAUD(); $('.hitung-paud, .val-ptk-paud, .val-ks-paud').trigger('change'); }, 500);
+}
+
+// =================================================================
+// 8. HAPUS & VERIFIKASI
+// =================================================================
+function lapbulkelola_hapusLapbul(source, rowId, namaSekolah) {
+    LAPBULKELOLA_V_TARGET_ID = rowId; LAPBULKELOLA_V_TARGET_SOURCE = source;
+    $('#lapbulkelola_lblHapusSekolah').text(namaSekolah); $('#lapbulkelola_inputKodeHapus').val(""); 
+    $('#lapbulkelola_modalHapus').modal('show');
+    setTimeout(function() { $('#lapbulkelola_inputKodeHapus').focus(); }, 500);
+}
+
+function lapbulkelola_submitHapus() {
+    var inputUser = $('#lapbulkelola_inputKodeHapus').val();
+    var d = new Date(); var kd = d.getFullYear()+""+String(d.getMonth()+1).padStart(2,'0')+""+String(d.getDate()).padStart(2,'0');
+    if (inputUser !== kd) { Sultan.notif.gagal("Kode keamanan salah!"); $('#lapbulkelola_inputKodeHapus').focus(); return; }
+
+    var btn = $('#lapbulkelola_btnEksekusiHapus'); var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menghapus...');
+
+    google.script.run.withSuccessHandler(function(res) {
+        btn.prop('disabled', false).html(txt);
+        if (res.success) {
+            $('#lapbulkelola_modalHapus').modal('hide'); Sultan.notif.sukses(res.message);
+            LAPBULKELOLA_CACHE_DATA = LAPBULKELOLA_CACHE_DATA.filter(r => !(r.rowId == LAPBULKELOLA_V_TARGET_ID && r.source == LAPBULKELOLA_V_TARGET_SOURCE));
+            lapbulkelola_prosesCariData(false); 
+        } else { Sultan.notif.gagal(res.message); $('#lapbulkelola_inputKodeHapus').addClass('is-invalid');}
+    }).withFailureHandler(function(err) {
+        btn.prop('disabled', false).html(txt); Sultan.notif.gagal("Koneksi gagal: " + err.message);
+    }).processDeleteData(LAPBULKELOLA_V_TARGET_SOURCE, LAPBULKELOLA_V_TARGET_ID, inputUser, LAPBULKELOLA_USER_AKTIF);
+}
+
+function lapbulkelola_verifikasiLapbul(source, rowId, namaSekolah, bulan, tahun, fileUrl) {
+    LAPBULKELOLA_V_TARGET_ID = rowId; LAPBULKELOLA_V_TARGET_SOURCE = source;
+    $('#lapbulkelola_vNamaSekolah').text(namaSekolah); $('#lapbulkelola_vBulan').text(bulan); $('#lapbulkelola_vTahun').text(tahun);
+    $('#lapbulkelola_selStatusVerif, #lapbulkelola_txtKetVerif').val("");
+    
+    $('#lapbulkelola_loaderPreview').removeClass('d-none'); $('#lapbulkelola_frameFileVerif, #lapbulkelola_noFileVerif').addClass('d-none');
+
+    if (fileUrl && fileUrl.length > 5 && fileUrl.includes('http')) {
+        var previewLink = fileUrl.replace('/view', '/preview');
+        $('#lapbulkelola_frameFileVerif').attr('src', previewLink);
+        $('#lapbulkelola_frameFileVerif').on('load', function() { $('#lapbulkelola_loaderPreview').addClass('d-none'); $(this).removeClass('d-none'); });
+        setTimeout(function(){ $('#lapbulkelola_loaderPreview').addClass('d-none'); $('#lapbulkelola_frameFileVerif').removeClass('d-none'); }, 2500); // BAB V Fallback
+    } else {
+        $('#lapbulkelola_loaderPreview').addClass('d-none'); $('#lapbulkelola_noFileVerif').removeClass('d-none');
+    }
+    $('#lapbulkelola_modalVerifikasi').modal('show');
+}
+
+function lapbulkelola_submitVerifikasi(e) {
+    e.preventDefault();
+    var status = $('#lapbulkelola_selStatusVerif').val(); var ket = $('#lapbulkelola_txtKetVerif').val();
+    if (!status) { Sultan.notif.gagal("Harap pilih Status Keputusan!"); return; }
+    if ((status === 'Revisi' || status === 'Ditolak') && ket.length < 5) { Sultan.notif.warning("Keterangan wajib diisi minimal 5 karakter."); return; }
+
+    var btn = $('#lapbulkelola_btnSimpanVerif'); var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...');
+
+    google.script.run.withSuccessHandler(function(res) {
+        btn.prop('disabled', false).html(txt);
+        if (res.success) {
+            $('#lapbulkelola_modalVerifikasi').modal('hide'); Sultan.notif.sukses(res.message);
+            if(res.newData) {
+                var c = LAPBULKELOLA_CACHE_DATA.find(r => r.rowId == LAPBULKELOLA_V_TARGET_ID && r.source == LAPBULKELOLA_V_TARGET_SOURCE);
+                if(c) { c.statusData = res.newData.status; c.keterangan = res.newData.ket; c.tglVerif = res.newData.tgl; c.verifikator = res.newData.user; }
+            } else { LAPBULKELOLA_CACHE_DATA = []; }
+            lapbulkelola_prosesCariData(false); 
+        } else { Sultan.notif.gagal(res.message); }
+    }).withFailureHandler(function(err) {
+        btn.prop('disabled', false).html(txt); Sultan.notif.gagal("Koneksi gagal: " + err.message);
+    }).processVerifikasiLapbul(LAPBULKELOLA_V_TARGET_SOURCE, LAPBULKELOLA_V_TARGET_ID, status, ket, LAPBULKELOLA_USER_AKTIF);
+}
+</script>

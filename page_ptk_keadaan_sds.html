@@ -1,0 +1,396 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-chart-pie text-maroon mr-2"></i>Keadaan PTK SD Swasta
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#keadaanptksds_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="keadaanptksds_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Halaman ini bersifat <b>Read-Only (Hanya Tampil)</b>.</li>
+                  <li class="mb-1">Data bersumber dari perhitungan otomatis menu Daftar Nama PTK SDS.</li>
+                  <li class="mb-1">GTY/PTY: Guru/Pegawai Tetap Yayasan.</li>
+                  <li class="mb-1">GTT/PTT: Guru/Pegawai Tidak Tetap.</li>
+                  <li>Baris paling bawah menunjukkan total akumulasi per kolom.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="keadaanptksds_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="SEMUA">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="keadaanptksds_btnSync" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            
+            <div id="keadaanptksds_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold" id="keadaanptksds_loadingText">Mengambil Rekapitulasi Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="keadaanptksds_tableState" style="display:none;">
+              <table id="keadaanptksds_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact table-header-compact text-nowrap mb-0 w-100" style="font-size: 0.85rem; border: none !important;">
+                
+                <thead class="font-weight-bold text-dark bg-light">
+                  <tr>
+                    <th rowspan="2" class="th-main align-middle bg-white text-maroon text-left px-3 py-1 col-sticky-left" style="z-index:50; min-width:250px; border-right: 2px solid #dee2e6; border-bottom: 2px solid #800000;">Unit Kerja</th>
+                    
+                    <th rowspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">Kepala<br>Sekolah</th>
+
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e8f5e9; border-bottom: 1px solid #a5d6a7;">Guru Kelas</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #fff3e0; border-bottom: 1px solid #ffcc80;">Guru PJOK</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #f3e5f5; border-bottom: 1px solid #ce93d8;">Guru PAI</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #fce4ec; border-bottom: 1px solid #f48fb1;">Guru B.Ing</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e0f2f1; border-bottom: 1px solid #80cbc4;">Mapel Lain</th>
+
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e0f7fa; border-bottom: 1px solid #80deea;">Penjaga</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #efebe9; border-bottom: 1px solid #bcaaa4;">TAS</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0;">Perpus</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #f9fbe7; border-bottom: 1px solid #e6ee9c;">Tendik Lain</th>
+                    
+                    <th colspan="3" class="th-main align-middle text-center px-2 py-1" style="background-color: #eceff1; border-bottom: 1px solid #cfd8dc;">Jumlah GTY/PTY</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #dee2e6; border-bottom: 1px solid #adb5bd;">Jml GTT/PTT</th>
+                    
+                    <th rowspan="2" class="th-main align-middle text-center px-2 py-1 text-dark font-weight-bold" style="background-color: #ffecb3; border-bottom: 2px solid #800000; border-left: 2px solid #ffecb3;">TOTAL<br>PTK</th>
+                  </tr>
+
+                  <tr class="small text-center">
+                    <th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e0f7fa; border-bottom: 2px solid #800000;">PTY</th><th class="th-sub px-2 py-1" style="background-color: #e0f7fa; border-bottom: 2px solid #800000;">PTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #efebe9; border-bottom: 2px solid #800000;">PTY</th><th class="th-sub px-2 py-1" style="background-color: #efebe9; border-bottom: 2px solid #800000;">PTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f5f5f5; border-bottom: 2px solid #800000;">PTY</th><th class="th-sub px-2 py-1" style="background-color: #f5f5f5; border-bottom: 2px solid #800000;">PTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f9fbe7; border-bottom: 2px solid #800000;">PTY</th><th class="th-sub px-2 py-1" style="background-color: #f9fbe7; border-bottom: 2px solid #800000;">PTT</th>
+                    
+                    <th class="th-sub px-2 py-1" style="background-color: #eceff1; border-bottom: 2px solid #800000;">KS</th><th class="th-sub px-2 py-1" style="background-color: #eceff1; border-bottom: 2px solid #800000;">Guru</th><th class="th-sub px-2 py-1" style="background-color: #eceff1; border-bottom: 2px solid #800000;">Tendik</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #dee2e6; border-bottom: 2px solid #800000;">Guru</th><th class="th-sub px-2 py-1" style="background-color: #dee2e6; border-bottom: 2px solid #800000;">Tendik</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+
+                <tfoot class="bg-light font-weight-bold" style="border-top: 3px solid #800000;">
+                    <tr>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                        <th></th><th></th><th></th><th></th><th></th><th></th>
+                    </tr>
+                </tfoot>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// =================================================================
+// BAB I: ISOLASI VARIABEL GLOBAL & PENGAMAN SINTAKSIS
+// =================================================================
+var KEADAANPTKSDS_CACHE_DATA = [];
+var KEADAANPTKSDS_TABEL_INSTANCE = null;
+
+var KEADAANPTKSDS_USER_AKTIF = "";
+var KEADAANPTKSDS_IS_ADMIN = false;
+var KEADAANPTKSDS_UNIT_TERKUNCI = ""; 
+var KEADAANPTKSDS_USER_NPSN = "";
+
+$(document).ready(function() {
+    KEADAANPTKSDS_TABEL_INSTANCE = null;
+    $('#keadaanptksds_tableState').hide();
+    $('#keadaanptksds_loadingState').show();
+
+    // Verifikasi Sesi
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        KEADAANPTKSDS_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        KEADAANPTKSDS_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        KEADAANPTKSDS_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { KEADAANPTKSDS_USER_NPSN = ""; KEADAANPTKSDS_IS_ADMIN = false; }
+
+    // VAKSIN 1: ANTI MEMORY LEAK. Bersihkan event sebelum di bind.
+    $(document).off('change', '#keadaanptksds_filterUnit').on('change', '#keadaanptksds_filterUnit', keadaanptksds_terapkanFilterLokal);
+    $(document).off('click', '#keadaanptksds_btnSync').on('click', '#keadaanptksds_btnSync', keadaanptksds_tarikDataServer);
+
+    keadaanptksds_validasiAksesUser(); 
+});
+
+function keadaanptksds_updateTabelKosong(htmlContent) {
+    if(KEADAANPTKSDS_TABEL_INSTANCE) {
+        $('#keadaanptksds_tableState').show();
+        $('#keadaanptksds_loadingState').hide();
+        KEADAANPTKSDS_TABEL_INSTANCE.clear().draw();
+        var emptyRow = $('#keadaanptksds_tabelUtama tbody tr td.dataTables_empty');
+        if (emptyRow.length > 0) { emptyRow.html(htmlContent); }
+    }
+}
+
+// =================================================================
+// 2. GATEKEEPER & FETCH SERVER (BAB VIII)
+// =================================================================
+function keadaanptksds_validasiAksesUser() {
+    $('#keadaanptksds_loadingText').html('Mempersiapkan Akses...');
+
+    if (KEADAANPTKSDS_IS_ADMIN) {
+        $('#keadaanptksds_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#keadaanptksds_btnSync').prop('disabled', false);
+        keadaanptksds_tarikDataServer(); 
+    } else {
+        if (!KEADAANPTKSDS_USER_NPSN) {
+            $('#keadaanptksds_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            keadaanptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-ban fa-2x mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</div>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#keadaanptksds_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    keadaanptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>' + keadaanptksds_escapeHtml(dataUnit.error) + '</div>');
+                    return;
+                }
+
+                KEADAANPTKSDS_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#keadaanptksds_filterUnit').empty().append('<option value="' + keadaanptksds_escapeHtml(KEADAANPTKSDS_UNIT_TERKUNCI) + '">' + keadaanptksds_escapeHtml(KEADAANPTKSDS_UNIT_TERKUNCI) + '</option>').prop('disabled', true);
+                $('#keadaanptksds_btnSync').prop('disabled', false);
+                keadaanptksds_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#keadaanptksds_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                keadaanptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-wifi fa-2x mb-2"></i><br>Koneksi Terputus: ' + keadaanptksds_escapeHtml(err.message) + '</div>');
+            })
+            .getUnitKerjaByNpsnPTK(KEADAANPTKSDS_USER_NPSN);
+    }
+}
+
+function keadaanptksds_tarikDataServer() {
+    KEADAANPTKSDS_CACHE_DATA = [];
+    
+    var btn = $('#keadaanptksds_btnSync');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    if (KEADAANPTKSDS_IS_ADMIN) $('#keadaanptksds_filterUnit').prop('disabled', true);
+    
+    $('#keadaanptksds_tableState').hide();
+    $('#keadaanptksds_loadingText').html('Mengambil Rekapitulasi Server...');
+    $('#keadaanptksds_loadingState').show();
+
+    google.script.run
+        .withSuccessHandler(function(data) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            if (KEADAANPTKSDS_IS_ADMIN) $('#keadaanptksds_filterUnit').prop('disabled', false);
+            
+            KEADAANPTKSDS_CACHE_DATA = data || [];
+            if (KEADAANPTKSDS_IS_ADMIN) keadaanptksds_populateFilterUnit();
+            
+            keadaanptksds_terapkanFilterLokal();
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-danger"></i>');
+            $('#keadaanptksds_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + keadaanptksds_escapeHtml(err.message) + '</span>');
+            Sultan.alert('error', 'Koneksi Terputus', err.message);
+        })
+        .getDataKeadaanGTKSDS(); 
+}
+
+function keadaanptksds_populateFilterUnit() {
+    var uniqueUnit = new Set();
+    KEADAANPTKSDS_CACHE_DATA.forEach(function(row) {
+        var rUnit = String(row[0] || "").trim();
+        if(rUnit) uniqueUnit.add(rUnit);
+    });
+    
+    var currentUnit = $('#keadaanptksds_filterUnit').val();
+    var $selUnit = $('#keadaanptksds_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    
+    Array.from(uniqueUnit).sort().forEach(function(u) {
+        $selUnit.append($('<option>', {value: u, text: u}));
+    });
+    
+    if (currentUnit && uniqueUnit.has(currentUnit)) $selUnit.val(currentUnit);
+}
+
+function keadaanptksds_terapkanFilterLokal() {
+    var tAdminUnit = KEADAANPTKSDS_IS_ADMIN ? ($('#keadaanptksds_filterUnit').val() || "SEMUA").toUpperCase() : "";
+    var tUnitUser  = String(KEADAANPTKSDS_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var filteredData = KEADAANPTKSDS_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase();
+        
+        if (KEADAANPTKSDS_IS_ADMIN) {
+            return (tAdminUnit === "SEMUA" || rUnit === tAdminUnit);
+        } else {
+            return (rUnit === tUnitUser);
+        }
+    });
+
+    keadaanptksds_renderTabel(filteredData);
+}
+
+// =================================================================
+// 3. RENDER ENGINE MATRIKS: EXCEL SOLID COLOR (BAB VII)
+// =================================================================
+function keadaanptksds_getColumnColor(index) {
+    if (index === 2) return "#e3f2fd";  
+    if (index >= 3 && index <= 4) return "#e8f5e9"; 
+    if (index >= 5 && index <= 6) return "#fff3e0"; 
+    if (index >= 7 && index <= 8) return "#f3e5f5"; 
+    if (index >= 9 && index <= 10) return "#fce4ec"; 
+    if (index >= 11 && index <= 12) return "#e0f2f1"; 
+    if (index >= 13 && index <= 14) return "#e0f7fa"; 
+    if (index >= 15 && index <= 16) return "#efebe9"; 
+    if (index >= 17 && index <= 18) return "#f5f5f5"; 
+    if (index >= 19 && index <= 20) return "#f9fbe7"; 
+    if (index >= 21 && index <= 23) return "#eceff1"; 
+    if (index >= 24 && index <= 25) return "#dee2e6"; 
+    if (index === 26) return "#ffecb3"; 
+    return "#ffffff";
+}
+
+function keadaanptksds_escapeHtml(text) {
+    if (!text) return "";
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function keadaanptksds_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+
+        // Kolom 1 (Index 0 di DT): Unit Kerja
+        var uiUnit = '<div class="font-weight-bold text-dark text-left text-wrap" style="min-width: 250px;">' + (keadaanptksds_escapeHtml(row[0]) || '-') + '</div>';
+        arrRow.push(uiUnit);
+
+        // Kolom Data Numerik (Index 1 s/d 25 di DT, dari backend Index 2 s/d 26)
+        for (var c = 2; c <= 26; c++) {
+            var val = parseInt(row[c]) || 0;
+            if (val === 0) {
+                arrRow.push('<span class="text-muted opacity-50">-</span>');
+            } else {
+                arrRow.push('<span class="font-weight-bold text-dark">' + val + '</span>');
+            }
+        }
+        dtArray.push(arrRow);
+    });
+
+    if (!$.fn.DataTable.isDataTable('#keadaanptksds_tabelUtama')) {
+        KEADAANPTKSDS_TABEL_INSTANCE = $('#keadaanptksds_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, 
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            // VAKSIN 2: Resolusi indeks spesifik agar kolom 0 aman dari text-center
+            "columnDefs": [
+                { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-left px-3 py-1" },
+                { "targets": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25], "className": "text-center align-middle p-0" } 
+            ],
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "emptyTable": '<div class="py-4 text-center text-muted"><i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3" style="opacity: 0.6;"></i><br><h6 class="font-weight-bold text-dark mb-1">Belum Ada Data</h6><p class="small mb-0">Tidak ada keadaan PTK untuk filter terpilih.</p></div>' 
+            },
+            "createdRow": function(row, data, dataIndex) {
+                // Loop index array dari DT (Index 1 sampai 25)
+                for (var i = 1; i <= 25; i++) {
+                    var colIndexBackend = i + 1; // 2 s/d 26
+                    var bgColor = keadaanptksds_getColumnColor(colIndexBackend);
+                    var td = $('td', row).eq(i);
+                    
+                    td.css('background-color', bgColor).addClass('py-1');
+                    if (colIndexBackend === 26) {
+                        td.css('border-left', '2px solid #ffecb3');
+                    }
+                }
+            },
+            "footerCallback": function (row, data, start, end, display) {
+                var api = this.api();
+                var totalArr = new Array(25).fill(0); 
+
+                // Parsing angka murni dari string HTML
+                api.rows({ search: 'applied' }).data().each(function(rowData) {
+                    for (var i = 1; i <= 25; i++) {
+                        var val = parseInt(String(rowData[i]).replace(/<[^>]*>?/gm, '').trim(), 10) || 0;
+                        totalArr[i-1] += val;
+                    }
+                });
+
+                // Tuliskan HTML Footer
+                var footHtml = '<td class="bg-light text-maroon text-left font-weight-bold px-3 align-middle col-sticky-left py-1" style="z-index:40; border-right: 2px solid #dee2e6;">TOTAL JUMLAH</td>';
+
+                for (var i = 0; i < 25; i++) {
+                    var colIndex = i + 2; 
+                    var bgColor = keadaanptksds_getColumnColor(colIndex); 
+                    var style = 'background-color: ' + bgColor + ' !important; vertical-align: middle; height: 35px;';
+                    if (colIndex === 26) style += ' border-left: 2px solid #ffecb3 !important;'; 
+                    
+                    footHtml += '<td class="text-center px-2 py-1 font-weight-bold text-maroon" style="' + style + '">' + totalArr[i] + '</td>';
+                }
+
+                // Injeksi mutlak ke row dummy di tfoot
+                $(api.table().footer()).find('tr').html(footHtml);
+            }
+        });
+
+        $('#keadaanptksds_loadingState').hide();
+        $('#keadaanptksds_tableState').show();
+        
+        // VAKSIN 3: Jeda mikro detik agar render DOM selesai sebelum kalkulasi kolom
+        setTimeout(function(){ KEADAANPTKSDS_TABEL_INSTANCE.columns.adjust(); }, 50);
+    } 
+    else {
+        KEADAANPTKSDS_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#keadaanptksds_tableState').is(':hidden')) {
+            $('#keadaanptksds_loadingState').hide();
+            $('#keadaanptksds_tableState').show();
+            setTimeout(function(){ KEADAANPTKSDS_TABEL_INSTANCE.columns.adjust(); }, 50);
+        }
+    }
+}
+</script>

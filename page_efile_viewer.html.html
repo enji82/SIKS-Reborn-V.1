@@ -1,0 +1,425 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-search text-maroon mr-2"></i>Viewer E-File PTK
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content" id="efileviewer_fullscreenArea">
+  <div class="container-fluid">
+    
+    <div class="card-sultan mb-3 shadow-sm" style="border-radius: 8px; overflow: visible;"> 
+        <div class="card-body p-2 bg-dark">
+            <div class="row align-items-center no-gutters">
+                <div class="col-md-2 col-4 text-white text-center font-weight-bold text-uppercase small letter-spacing-1">NIP / Nama</div>
+                <div class="col-md-8 col-8 px-2 position-relative">
+                    
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend"><span class="input-group-text border-0 bg-white"><i class="fas fa-search text-muted"></i></span></div>
+                        <input type="text" id="efileviewer_inputSearch" class="form-control border-0 font-weight-bold" placeholder="Ketik NIP atau Nama PTK untuk mencari..." autocomplete="off">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-secondary font-weight-bold px-3" id="efileviewer_btnResetPtk" style="display:none;"><i class="fas fa-times mr-1"></i> Batal</button>
+                            <button type="button" class="btn btn-light px-3" id="efileviewer_btnRefresh"><i class="fas fa-sync-alt text-dark"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div id="efileviewer_ptk_results" class="list-group position-absolute w-100 shadow-lg mt-1 text-left" style="display:none; z-index:9999; max-height:300px; overflow-y:auto; border-radius:8px;"></div>
+                    
+                </div>
+                <div class="col-md-2 d-none d-md-block text-right pr-2">
+                    <button type="button" class="btn btn-outline-light btn-sm font-weight-bold shadow-sm" id="efileviewer_btnFullscreen"><i class="fas fa-expand mr-1"></i> Full Screen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="efileviewer_identityBar" class="alert alert-info border-info shadow-sm d-none mb-3 py-2">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-user-check fa-2x mr-3"></i>
+            <div>
+                <h6 class="m-0 font-weight-bold text-uppercase" id="efileviewer_lblNama">-</h6>
+                <small class="mb-0 text-dark">NIP: <span class="font-weight-bold" id="efileviewer_lblNip">-</span> | Unit: <span class="font-weight-bold" id="efileviewer_lblUnit">-</span></small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        
+        <div class="col-lg-4 col-md-5 mb-3">
+            <div class="card-sultan h-100 shadow-sm border-0 d-flex flex-column">
+                <div class="card-header font-weight-bold text-dark py-2" style="background-color: #e9ecef; border-bottom: 2px solid #ccc;">
+                    <i class="fas fa-list-ul mr-2 text-secondary"></i>Daftar Berkas Riwayat
+                </div>
+                
+                <div class="card-body p-0 flex-grow-1 position-relative" style="height: 65vh; overflow-y: auto; background-color: #fcfcfc;">
+                    
+                    <div id="efileviewer_treeInitial" class="d-flex h-100 flex-column justify-content-center align-items-center text-muted p-4 text-center position-absolute w-100" style="top:0; left:0;">
+                        <i class="fas fa-folder-open fa-4x mb-3 opacity-25"></i>
+                        <h6 class="font-weight-bold">Gunakan Kotak Pencarian</h6>
+                        <p class="small">Ketik Nama atau NIP di atas untuk memuat riwayat berkas elektronik.</p>
+                    </div>
+
+                    <div id="efileviewer_treeLoading" class="d-none h-100 flex-column justify-content-center align-items-center text-maroon p-4 text-center position-absolute w-100" style="top:0; left:0; background: #fff; z-index: 5;">
+                        <i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i>
+                        <h6 class="font-weight-bold">Membuka Brankas Digital...</h6>
+                    </div>
+
+                    <div id="efileviewer_treeContent" class="w-100 pb-3" style="position: relative; z-index: 2;"></div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-md-7 mb-3">
+            <div class="card-sultan h-100 shadow-sm border-0 position-relative bg-dark d-flex flex-column" style="overflow: hidden;">
+                
+                <div class="bg-black text-white px-3 py-2 d-flex justify-content-between align-items-center" style="background-color: #222;">
+                    <span class="small font-weight-bold text-truncate" id="efileviewer_lblJudulFile"><i class="fas fa-eye mr-2"></i>Pratinjau Dokumen</span>
+                    
+                    <div class="d-flex align-items-center">
+                        <a href="#" id="efileviewer_btnDownloadValid" target="_blank" class="btn btn-xs btn-success font-weight-bold d-none mr-2 shadow-sm rounded-pill px-3">
+                            <i class="fas fa-download mr-1"></i> Unduh
+                        </a>
+                        <a href="#" id="efileviewer_btnUnduhDirect" target="_blank" class="btn btn-xs btn-outline-light font-weight-bold d-none shadow-sm rounded-pill px-3">
+                            <i class="fas fa-external-link-alt mr-1"></i> Buka Beda Tab
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1 position-relative" style="height: 65vh;">
+                    
+                    <div id="efileviewer_iframeLoading" class="d-none h-100 align-items-center justify-content-center text-white-50 position-absolute w-100" style="top:0; left:0; z-index:10; pointer-events:none;">
+                        <div class="text-center"><i class="fas fa-spinner fa-spin fa-4x mb-3"></i><p>Memuat dari Google Drive...</p></div>
+                    </div>
+
+                    <div id="efileviewer_iframeInitial" class="d-flex h-100 flex-column justify-content-center align-items-center text-white-50 p-4 text-center position-absolute w-100" style="top:0; left:0;">
+                        <i class="fas fa-file-invoice fa-4x mb-3 opacity-25"></i>
+                        <h6>Pilih dokumen dari daftar di sebelah kiri untuk melihat pratinjau.</h6>
+                    </div>
+
+                    <iframe id="efileviewer_iframe" class="w-100 h-100 border-0 d-none" src="" style="background-color: #333;"></iframe>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+  </div>
+</section>
+
+<style>
+    .efile-tree-folder { cursor: pointer; user-select: none; transition: background 0.2s; }
+    .efile-tree-folder:hover { background-color: #f1f3f5 !important; }
+    
+    .efile-tree-item { padding: 6px 15px 6px 35px; font-size: 0.85rem; border-bottom: 1px solid #f1f1f1; transition: background 0.2s; }
+    .efile-tree-item-file { color: #17a2b8; cursor: pointer; }
+    .efile-tree-item-file:hover { background-color: #e9ecef; font-weight: bold; }
+    .efile-tree-item-empty { color: #dc3545; background-color: #fffafb; }
+    
+    .efile-tree-content { display: none; background-color: #ffffff; }
+    .efile-icon-rotate { transition: transform 0.3s; }
+    .folder-open .efile-icon-rotate { transform: rotate(90deg); }
+    
+    body.efile-fullscreen-mode { overflow: hidden; }
+    body.efile-fullscreen-mode #efileviewer_fullscreenArea { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; background: #f4f6f9; padding: 15px; overflow-y: auto; }
+</style>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL
+// ======================================================================
+var EFILEVIEWER_USER_AKTIF = "";
+var EFILEVIEWER_IS_ADMIN = false;
+var EFILEVIEWER_NPSN_TERKUNCI = "";
+var EFILEVIEWER_MASTER_PTK = [];
+
+// =================================================================
+// 1. INITIALIZATION & DELEGATION
+// =================================================================
+$(document).ready(function() {
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        EFILEVIEWER_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        var roleStr = String(user.role || "").toLowerCase();
+        EFILEVIEWER_IS_ADMIN = (typeof checkUserRoleIsAdmin === 'function' && checkUserRoleIsAdmin()) || roleStr.includes("admin") || roleStr.includes("verifikator");
+        EFILEVIEWER_NPSN_TERKUNCI = user.npsn || user.unit || user.username || ""; 
+    } catch(e) { EFILEVIEWER_NPSN_TERKUNCI = ""; EFILEVIEWER_IS_ADMIN = false; }
+
+    efileviewer_initMasterData();
+
+    $(document).off('keyup input focus', '#efileviewer_inputSearch').on('keyup input focus', '#efileviewer_inputSearch', efileviewer_searchPtkLocal);
+    $(document).off('click', '.efileviewer-ptk-item').on('click', '.efileviewer-ptk-item', efileviewer_pilihPtk);
+    $(document).off('click', '#efileviewer_btnResetPtk').on('click', '#efileviewer_btnResetPtk', efileviewer_resetPtk);
+
+    $(document).off('click', '#efileviewer_btnRefresh').on('click', '#efileviewer_btnRefresh', function(){ 
+        var c = $('#efileviewer_inputSearch').val();
+        if(c && $('#efileviewer_inputSearch').attr('readonly')) {
+            var id = $('#efileviewer_btnResetPtk').attr('data-id');
+            if(id) efileviewer_loadPtkData(id);
+        }
+    });
+    
+    $(document).off('click', '.efile-tree-folder').on('click', '.efile-tree-folder', function() {
+        $(this).toggleClass('folder-open');
+        $(this).next('.efile-tree-content').slideToggle(200);
+        var icon = $(this).find('.fa-folder, .fa-folder-open');
+        if($(this).hasClass('folder-open')) { icon.removeClass('fa-folder').addClass('fa-folder-open text-warning'); }
+        else { icon.removeClass('fa-folder-open').addClass('fa-folder text-warning'); }
+    });
+
+    $(document).off('click', '.efile-tree-item-file').on('click', '.efile-tree-item-file', function() {
+        $('.efile-tree-item-file').removeClass('bg-info text-white').addClass('text-info');
+        $(this).removeClass('text-info').addClass('bg-info text-white'); 
+        var url = $(this).attr('data-url');
+        var namaFile = $(this).attr('data-nama');
+        efileviewer_loadIframe(url, namaFile);
+    });
+
+    $(document).off('click', '#efileviewer_btnFullscreen').on('click', '#efileviewer_btnFullscreen', function() {
+        $('body').toggleClass('efile-fullscreen-mode');
+        var isFS = $('body').hasClass('efile-fullscreen-mode');
+        if(isFS) { $(this).html('<i class="fas fa-compress mr-1"></i> Tutup Layar'); $('#efileviewer_treeArea, #efileviewer_iframe').closest('.flex-grow-1').css('height', '85vh'); }
+        else { $(this).html('<i class="fas fa-expand mr-1"></i> Full Screen'); $('#efileviewer_treeArea, #efileviewer_iframe').closest('.flex-grow-1').css('height', '65vh'); }
+    });
+});
+
+// =================================================================
+// 2. FETCH DATA MASTER & AUTOCOMPLETE
+// =================================================================
+function efileviewer_initMasterData() {
+    var targetFilter = EFILEVIEWER_IS_ADMIN ? "" : EFILEVIEWER_NPSN_TERKUNCI;
+    $('#efileviewer_inputSearch').prop('placeholder', 'Menyiapkan database pegawai...').prop('disabled', true);
+    
+    google.script.run.withSuccessHandler(function(json) {
+        var res = JSON.parse(json);
+        if(res.success) { EFILEVIEWER_MASTER_PTK = res.ptk || []; }
+        $('#efileviewer_inputSearch').prop('placeholder', 'Ketik NIP atau Nama PTK untuk mencari...').prop('disabled', false);
+    }).getEfileMasterData(targetFilter);
+}
+
+function efileviewer_searchPtkLocal() {
+    if ($('#efileviewer_inputSearch').attr('readonly')) return;
+
+    var k = $(this).val().toLowerCase();
+    var box = $('#efileviewer_ptk_results');
+
+    if(k.length < 3) { box.empty().hide(); return; }
+
+    var hasil = EFILEVIEWER_MASTER_PTK.filter(function(p) {
+        var gabungan = (String(p.nip || "") + " " + String(p.nama)).toLowerCase();
+        return gabungan.includes(k);
+    });
+
+    box.empty();
+    if(hasil.length === 0) {
+        box.append('<div class="p-2 text-center text-danger small font-weight-bold bg-white">Tidak ada kecocokan data.</div>').show();
+        return;
+    }
+
+    var lim = hasil.length > 10 ? 10 : hasil.length;
+    for(var i=0; i<lim; i++) {
+        var p = hasil[i];
+        var viewNip = p.nip && String(p.nip).trim() !== "" ? p.nip : '-';
+        box.append(`
+            <a href="#" class="list-group-item list-group-item-action py-2 px-3 efileviewer-ptk-item" data-id="${p.id_ptk}" data-nama="${efileviewer_escapeHtml(p.nama)}" data-nip="${efileviewer_escapeHtml(viewNip)}">
+                <div class="font-weight-bold text-dark text-uppercase">${efileviewer_escapeHtml(p.nama)}</div>
+                <div class="small text-muted"><i class="fas fa-id-badge mr-1"></i> NIP: ${viewNip} | ${p.status}</div>
+            </a>
+        `);
+    }
+    box.show(); 
+}
+
+function efileviewer_pilihPtk(e) {
+    e.preventDefault();
+    var id = $(this).attr('data-id');
+    var nama = $(this).attr('data-nama');
+    var nip = $(this).attr('data-nip') || '-';
+
+    $('#efileviewer_inputSearch').val(`${nama} [NIP: ${nip}]`)
+        .attr('readonly', 'readonly')
+        .addClass('text-success bg-white');
+        
+    $('#efileviewer_ptk_results').hide();
+    $('#efileviewer_btnResetPtk').show().attr('data-id', id);
+    
+    efileviewer_loadPtkData(id);
+}
+
+function efileviewer_resetPtk() {
+    $('#efileviewer_inputSearch').val('')
+        .removeAttr('readonly')
+        .removeClass('text-success bg-white')
+        .focus();
+        
+    $('#efileviewer_btnResetPtk').hide().removeAttr('data-id');
+    $('#efileviewer_ptk_results').empty().hide();
+    
+    $('#efileviewer_treeContent').empty();
+    $('#efileviewer_identityBar').addClass('d-none');
+    $('#efileviewer_treeInitial').removeClass('d-none').addClass('d-flex'); 
+    $('#efileviewer_iframeInitial').removeClass('d-none').addClass('d-flex');
+    $('#efileviewer_iframe').addClass('d-none').attr('src', '');
+    $('#efileviewer_lblJudulFile').html('<i class="fas fa-eye mr-2"></i>Pratinjau Dokumen');
+    
+    // Matikan tombol saat reset
+    $('#efileviewer_btnUnduhDirect').addClass('d-none');
+    $('#efileviewer_btnDownloadValid').addClass('d-none');
+}
+
+// =================================================================
+// 3. ENGINE TARIK DATA VIEWER
+// =================================================================
+function efileviewer_loadPtkData(id_ptk) {
+    $('#efileviewer_treeInitial').removeClass('d-flex').addClass('d-none');
+    $('#efileviewer_treeContent').empty();
+    $('#efileviewer_treeLoading').removeClass('d-none').addClass('d-flex');
+    $('#efileviewer_identityBar').addClass('d-none');
+    
+    $('#efileviewer_iframeInitial').removeClass('d-none').addClass('d-flex');
+    $('#efileviewer_iframe').addClass('d-none').attr('src', '');
+    $('#efileviewer_lblJudulFile').html('<i class="fas fa-eye mr-2"></i>Pratinjau Dokumen');
+    
+    $('#efileviewer_btnUnduhDirect').addClass('d-none');
+    $('#efileviewer_btnDownloadValid').addClass('d-none');
+
+    var targetNpsn = EFILEVIEWER_IS_ADMIN ? "" : EFILEVIEWER_NPSN_TERKUNCI;
+
+    google.script.run.withSuccessHandler(function(json) {
+        $('#efileviewer_treeLoading').removeClass('d-flex').addClass('d-none');
+        
+        var res = JSON.parse(json);
+        if(!res.success) {
+            $('#efileviewer_treeInitial').removeClass('d-none').addClass('d-flex');
+            Sultan.alert('warning', 'Tidak Ditemukan', res.message);
+            return;
+        }
+
+        var nipText = res.ptk.nip && String(res.ptk.nip).trim() !== "" ? res.ptk.nip : "-";
+
+        $('#efileviewer_lblNama').text(res.ptk.nama);
+        $('#efileviewer_lblNip').text(nipText);
+        $('#efileviewer_lblUnit').text(res.ptk.unit);
+        $('#efileviewer_identityBar').removeClass('d-none');
+
+        efileviewer_buildTree(res.categories, res.files);
+
+    }).withFailureHandler(function(err){
+        $('#efileviewer_treeLoading').removeClass('d-flex').addClass('d-none');
+        $('#efileviewer_treeInitial').removeClass('d-none').addClass('d-flex');
+        Sultan.alert('error', 'Koneksi Terputus', err.message);
+    }).getEfileViewerData(id_ptk, targetNpsn);
+}
+
+// =================================================================
+// 4. TREE BUILDER ALGORITHM (PERBAIKAN NAMA FILE DITAMPILKAN)
+// =================================================================
+function efileviewer_buildTree(categories, files) {
+    var treeHtml = '';
+
+    categories.forEach(function(kat) {
+        var catFiles = files.filter(f => String(f.id_kategori).trim() === String(kat.idKat).trim());
+        var countAda = catFiles.length;
+        var countKosong = countAda > 0 ? 0 : 1; 
+
+        var badgeAdaClass = countAda > 0 ? 'badge-info' : 'badge-secondary';
+        var badgeKsgClass = countKosong > 0 ? 'badge-danger' : 'badge-secondary';
+
+        treeHtml += `
+        <div class="tree-node border-bottom border-light">
+            <div class="efile-tree-folder d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="font-weight-bold text-dark small"><i class="fas fa-folder text-warning mr-2"></i> ${efileviewer_escapeHtml(kat.namaKat)}</span>
+                <div>
+                    <span class="badge ${badgeAdaClass} badge-pill shadow-sm" style="font-size:10px;" title="File Tersedia">${countAda}</span>
+                    <span class="badge ${badgeKsgClass} badge-pill shadow-sm ml-1" style="font-size:10px;" title="File Kosong">${countKosong}</span>
+                    <i class="fas fa-angle-right ml-2 text-muted efile-icon-rotate small"></i>
+                </div>
+            </div>
+            <div class="efile-tree-content">
+        `;
+
+        if(countAda > 0) {
+            catFiles.forEach(function(f) {
+                var ext = String(f.file_name).split('.').pop().toLowerCase();
+                var faIcon = "fa-file-pdf text-danger";
+                if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') { faIcon = "fa-file-image text-success"; }
+
+                // VAKSIN UI: Menampilkan nama file asli hasil Auto-Rename (Tanpa "Dokumen" kaku)
+                var displayNama = efileviewer_escapeHtml(f.file_name);
+
+                treeHtml += `
+                <div class="efile-tree-item efile-tree-item-file font-weight-bold" data-url="${f.url}" data-nama="${displayNama}">
+                    <i class="fas ${faIcon} mr-2"></i> ${displayNama}
+                </div>`;
+            });
+        } else {
+            treeHtml += `
+            <div class="efile-tree-item efile-tree-item-empty font-weight-bold">
+                <i class="fas fa-exclamation-triangle mr-2"></i> [!] Dokumen Kosong
+            </div>`;
+        }
+        
+        treeHtml += `</div></div>`;
+    });
+
+    $('#efileviewer_treeContent').html(treeHtml);
+}
+
+// =================================================================
+// 5. ZERO-BLINK IFRAME INJECTOR DENGAN DOWNLOAD API
+// =================================================================
+function efileviewer_loadIframe(url, namaFile) {
+    if (!url) return;
+    
+    $('#efileviewer_iframeInitial').removeClass('d-flex').addClass('d-none');
+    $('#efileviewer_iframe').addClass('d-none').attr('src', '');
+    $('#efileviewer_iframeLoading').removeClass('d-none').addClass('d-flex');
+    
+    var ext = namaFile.split('.').pop().toLowerCase();
+    var faIcon = "fa-file-pdf text-danger";
+    if (ext === 'jpg' || ext === 'jpeg' || ext === 'png') { faIcon = "fa-file-image text-success"; }
+
+    $('#efileviewer_lblJudulFile').html(`<i class="fas ${faIcon} mr-2"></i>${namaFile}`);
+
+    var previewUrl = url;
+    var directUrl = url;
+    if (url.includes('drive.google.com')) {
+        var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            previewUrl = 'https://drive.google.com/file/d/' + match[1] + '/preview';
+            directUrl = 'https://drive.google.com/uc?export=download&id=' + match[1]; // API Unduh Langsung Google
+        } else {
+            previewUrl = url.replace(/\/view.*/, '/preview');
+        }
+    }
+    
+    // VAKSIN TOMBOL GANDA
+    $('#efileviewer_btnUnduhDirect').attr('href', previewUrl).removeClass('d-none');
+    $('#efileviewer_btnDownloadValid').attr('href', directUrl).removeClass('d-none');
+
+    setTimeout(function() {
+        $('#efileviewer_iframe').attr('src', previewUrl);
+        
+        $('#efileviewer_iframe').off('load').on('load', function() {
+            $('#efileviewer_iframeLoading').removeClass('d-flex').addClass('d-none');
+            $(this).removeClass('d-none');
+        });
+
+        setTimeout(function() {
+            $('#efileviewer_iframeLoading').removeClass('d-flex').addClass('d-none');
+            $('#efileviewer_iframe').removeClass('d-none');
+        }, 3000);
+    }, 150);
+}
+
+function efileviewer_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

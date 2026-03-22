@@ -1,169 +1,588 @@
-<header>
-  <h2>DATA MURID SD MENURUT AGAMA</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterStatus">Status:</label>
-    <select id="filterStatus"></select>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-praying-hands text-maroon mr-2"></i>Jumlah Murid SD Menurut Agama
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  <div id="loadingStatus" class="loading-container">
-      <div class="spinner-container">
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#sdagama_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="sdagama_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Data bersumber dari Laporan Bulan terakhir.</li>
+                  <li class="mb-1">Tabel mencakup 6 Agama: Islam, Kristen, Katolik, Hindu, Buddha, Konghucu.</li>
+                  <li>Gunakan <b>Filter Tampilan</b> untuk berpindah antar Kelas atau melihat Rekap Total.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="sdagama_filterViewKelas" class="form-control form-control-sultan input-auto-width font-weight-bold text-maroon border-maroon" style="min-width: 150px;">
+                    <option value="TOT" selected>Rekapitulasi Total</option>
+                    <option value="K1">Kelas 1</option>
+                    <option value="K2">Kelas 2</option>
+                    <option value="K3">Kelas 3</option>
+                    <option value="K4">Kelas 4</option>
+                    <option value="K5">Kelas 5</option>
+                    <option value="K6">Kelas 6</option>
+                </select>
+
+                <select id="sdagama_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="SEMUA">- Semua Status -</option>
+                </select>
+
+                <div id="sdagama_filterContainer" style="display: none;" class="d-flex align-items-center">
+                    <select id="sdagama_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                        <option value="">- Memvalidasi Akses... -</option>
+                    </select>
+                </div>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="sdagama_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server">
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="sdagama_btnExport" class="btn btn-success text-white font-weight-bold shadow-sm" title="Unduh data dalam format Microsoft Excel">
+                    <i class="fas fa-file-excel mr-1"></i> Unduh Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            
+            <div id="sdagama_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold mt-3" id="sdagama_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sdagama_tableState" style="display: none;">
+                <table id="sdagama_tabelUtama" class="table table-bordered table-hover table-sm table-premium table-sultan-compact text-nowrap mb-0 w-100 text-center" style="font-size: 0.7rem;">
+                    <thead id="sdagama_headData" class="font-weight-bold text-dark bg-light text-nowrap"></thead>
+                    <tbody></tbody>
+                    <tfoot id="sdagama_footData" class="bg-light font-weight-bold text-nowrap" style="border-top: 3px solid #800000;"></tfoot>
+                </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-      <p>Memuat data, mohon tunggu...</p>
   </div>
-  
-  <div id="tableWrapper" style="display:none;">
-    <div class="table-container">
-        <table id="muridSdAgamaTable" class="data-table">
-          <thead></thead>
-          <tbody></tbody>
-          <tfoot></tfoot> 
-        </table>
-    </div>
-    <div class="table-footer-note">
-      Sumber data: laporan bulan terakhir.
-    </div>
-  </div>
-</main>
+</section>
 
-<style>
-  /* Mengatur layout dan scrollbar internal */
-  .main-content {
-    overflow-y: hidden;
-  }
-  main.table-view-container, #tableWrapper {
-    flex-grow: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  #tableWrapper .table-container {
-    overflow-y: auto;
-    flex-grow: 1;
-  }
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - BAB I)
+// ======================================================================
+var SDAGAMA_CACHE_DATA = [];
+var SDAGAMA_TABEL_INSTANCE = null;
 
-  /* =================================================================== */
-  /* ====== PENGATURAN TAMPILAN & FREEZE PANE ====== */
-  /* =================================================================== */
+var SDAGAMA_USER_AKTIF = "";
+var SDAGAMA_IS_ADMIN = false;
+var SDAGAMA_UNIT_TERKUNCI = "";
+var SDAGAMA_NPSN_TERKUNCI = "";
 
-  /* 1. Atur perataan teks dan lebar otomatis */
-  #muridSdAgamaTable th,
-  #muridSdAgamaTable td {
-    text-align: center;
-    vertical-align: middle;
-  }
-  #muridSdAgamaTable td:nth-child(2),
-  #muridSdAgamaTable td:nth-child(4) {
-    text-align: left;
-  }
-  #muridSdAgamaTable th {
-    white-space: normal;
-  }
+// Peta Konfigurasi Kolom Ekstrem
+var SDAGAMA_GROUPS = [
+    { code: 'K1', label: 'KELAS 1', color: '#e3f2fd', startIdx: 6,  endIdx: 23 },
+    { code: 'K2', label: 'KELAS 2', color: '#e8f5e9', startIdx: 24, endIdx: 41 },
+    { code: 'K3', label: 'KELAS 3', color: '#fff3e0', startIdx: 42, endIdx: 59 },
+    { code: 'K4', label: 'KELAS 4', color: '#f3e5f5', startIdx: 60, endIdx: 77 },
+    { code: 'K5', label: 'KELAS 5', color: '#fce4ec', startIdx: 78, endIdx: 95 },
+    { code: 'K6', label: 'KELAS 6', color: '#e0f2f1', startIdx: 96, endIdx: 113 },
+    { code: 'TOT', label: 'JUMLAH TOTAL', color: '#ffecb3', startIdx: 114, endIdx: 131 }
+];
 
-  /* 2. Pengaturan Freeze Pane */
-  #muridSdAgamaable thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  #muridSdAgamaTable tfoot td {
-    position: sticky;
-    bottom: 0;
-    background-color: #101E26; /* Warna solid untuk footer */
-    z-index: 2;
-    border-top: 2px solid rgba(0, 195, 255, 0.5); 
-  }
-  #muridSdAgamaTable thead tr:first-child th { top: 0; }
-  #muridSdAgamaTable thead tr:nth-child(2) th { top: 40px; }
-  #muridSdAgamaTable tfoot td { bottom: 0; }
+var SDAGAMA_LIST_AGAMA = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
 
-  #muridSdAgamaTable tbody td:nth-child(1),
-  #muridSdAgamaTable tbody td:nth-child(2) {
-    position: sticky;
-    background-color: #1c2e3a;
-  }
-  #muridSdAgamaTable thead th:nth-child(1),
-  #muridSdAgamaTable tbody td:nth-child(1),
-  #muridSdAgamaTable tfoot td:nth-child(1) {
-    left: 0;
-  }
-  #muridSdAgamaTable thead th:nth-child(2),
-  #muridSdAgamaTable tbody td:nth-child(2),
-  #muridSdAgamaTable tfoot td:nth-child(2) {
-    left: 50px; /* Lebar kolom No. */
-  }
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE DELEGATION
+// =================================================================
+$(document).ready(function() {
+    SDAGAMA_TABEL_INSTANCE = null;
+    $('#sdagama_tableState').hide();
+    $('#sdagama_loadingState').show();
+    $('#sdagama_filterContainer').hide();
 
-  /* 3. Hirarki z-index */
-  #muridSdAgamaTable tbody td { z-index: 1; }
-  #muridSdAgamaTable thead th { z-index: 2; }
-  #muridSdAgamaTable tfoot td { z-index: 3; }
-  #muridSdAgamaTable thead tr:first-child th:nth-child(1),
-  #muridSdAgamaTable thead tr:first-child th:nth-child(2) { z-index: 4; }
-  #muridSdAgamaTable tfoot td:nth-child(1),
-  #muridSdAgamaTable tfoot td:nth-child(2) { z-index: 5; }
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        SDAGAMA_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        SDAGAMA_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        SDAGAMA_NPSN_TERKUNCI = user.npsn || user.username || ""; 
+    } catch(e) { SDAGAMA_NPSN_TERKUNCI = ""; SDAGAMA_IS_ADMIN = false; }
 
-  /* 4. Efek hover untuk kolom beku */
-  #muridSdAgamaTable tbody tr:hover td:nth-child(1),
-  #muridSdAgamaTable tbody tr:hover td:nth-child(2) {
-    background-color: #2a4152;
-  }
+    sdagama_generateHeaderFooterHTML();
 
-  /* =================================================================== */
-  /* ====== PEWARNAAN FONT & KOLOM (PERBAIKAN +1 KOLOM) ====== */
-  /* =================================================================== */
+    // VAKSIN DELEGASI EVENT JQUERY MUTLAK
+    $(document).off('click', '#sdagama_btnRefresh').on('click', '#sdagama_btnRefresh', sdagama_tarikDataServer);
+    $(document).off('change', '#sdagama_filterStatus').on('change', '#sdagama_filterStatus', sdagama_updateFilterUnit);
+    $(document).off('change', '#sdagama_filterUnit').on('change', '#sdagama_filterUnit', sdagama_terapkanFilterLokal);
+    
+    // API Toggler (Matrix Visibility)
+    $(document).off('change', '#sdagama_filterViewKelas').on('change', '#sdagama_filterViewKelas', sdagama_toggleColumnVisibility);
+    
+    // API Ekspor Excel
+    $(document).off('click', '#sdagama_btnExport').on('click', '#sdagama_btnExport', sdagama_exportExcel);
 
-  /* 5. Beri warna font biru pada kolom "Jumlah" per kelas (ISI TABEL) - DIGESER +1 */
-  #muridSdAgamaTable td:nth-child(13),
-  #muridSdAgamaTable td:nth-child(20),
-  #muridSdAgamaTable td:nth-child(27),
-  #muridSdAgamaTable td:nth-child(34),
-  #muridSdAgamaTable td:nth-child(41),
-  #muridSdAgamaTable td:nth-child(48) {
-    color: var(--color-blue);
-    font-weight: bold;
-  }
+    sdagama_validasiAksesUser();
+});
 
-  /* 6. Beri warna font biru pada SUBHEADER yang sesuai (INI SUDAH BENAR - JANGAN DIUBAH) */
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(7),
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(14), 
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(21), 
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(28), 
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(35), 
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(42)  {
-    color: var(--color-blue);
-    font-weight: bold;
-  }
+// =================================================================
+// 2. GENERATOR HTML HEADER & FOOTER (132 KOLOM)
+// =================================================================
+function sdagama_generateHeaderFooterHTML() {
+    var h1 = '<tr>'; 
+    var h2 = '<tr>'; 
+    var h3 = '<tr class="small text-nowrap">'; 
 
-  /* 7. Beri warna font oranye pada kolom "Jumlah Total" (ISI & SUBHEADER) - DIGESER +1 */
-  #muridSdAgamaTable td:nth-child(55),
-  #muridSdAgamaTable thead tr:nth-child(2) th:nth-child(49) {
-    color: var(--color-orange);
-    font-weight: bold;
-  }
+    // Static Cols (Rowspan 3) -> Index 0 s.d 5
+    var staticCols = ['Unit Kerja', 'NPSN', 'Status', 'Bln', 'Thn', 'Rombel'];
+    staticCols.forEach((c, idx) => {
+        var sticky = (idx === 0) ? 'position:sticky; left:0; z-index:50; min-width:250px; border-right: 2px solid #dee2e6;' : '';
+        h1 += `<th rowspan="3" class="align-middle bg-white text-maroon py-1 px-2" style="${sticky} border-bottom: 2px solid #800000 !important;">${c}</th>`;
+    });
 
-  /* 8. Beri warna latar pada grup kolom di dalam body tabel - DIGESER +1 */
-  #muridSdAgamaTable tbody td:nth-child(n+7):nth-child(-n+13) { background-color: rgba(52, 152, 219, 0.1); }
-  #muridSdAgamaTable tbody td:nth-child(n+14):nth-child(-n+20) { background-color: rgba(46, 204, 113, 0.1); }
-  #muridSdAgamaTable tbody td:nth-child(n+21):nth-child(-n+27) { background-color: rgba(155, 89, 182, 0.1); }
-  #muridSdAgamaTable tbody td:nth-child(n+28):nth-child(-n+34) { background-color: rgba(241, 196, 15, 0.1); }
-  #muridSdAgamaTable tbody td:nth-child(n+35):nth-child(-n+41) { background-color: rgba(230, 126, 34, 0.1); }
-  #muridSdAgamaTable tbody td:nth-child(n+42):nth-child(-n+48) { background-color: rgba(26, 188, 156, 0.1); }
-  #muridSdAgamaTable tbody td:nth-child(n+49):nth-child(-n+55) { background-color: rgba(231, 76, 60, 0.1); }
+    // Data Columns (Index 6 s.d 131)
+    SDAGAMA_GROUPS.forEach((g) => {
+        var borderLeft = (g.code === 'TOT') ? 'border-left: 2px solid #ffecb3 !important;' : '';
+        var tHeadClass = `col-view-${g.code}`; 
 
-  /* 9. Pastikan efek hover tetap berfungsi */
-  #muridSdAgamaTable tbody tr:hover td {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-  }
-  #muridSdAgamaTable tbody tr:hover td:nth-child(1),
-  #muridSdAgamaTable tbody tr:hover td:nth-child(2) {
-    background-color: #2a4152 !important;
-  }
-</style>
+        h1 += `<th colspan="18" class="${tHeadClass} align-middle py-1" style="background-color:${g.color}; border-bottom:1px solid #90caf9; ${borderLeft}">${g.label}</th>`;
+
+        SDAGAMA_LIST_AGAMA.forEach((a, idx) => {
+            var bl = (g.code === 'TOT' && idx === 0) ? 'border-left: 2px solid #ffecb3 !important;' : '';
+            h2 += `<th colspan="3" class="${tHeadClass} align-middle py-1" style="background-color:${g.color}; border-bottom:1px solid #ccc; ${bl}">${a}</th>`;
+            
+            h3 += `<th class="${tHeadClass} py-1" style="background-color:${g.color}; border-bottom:2px solid #800000 !important; ${bl}">L</th>`;
+            h3 += `<th class="${tHeadClass} py-1" style="background-color:${g.color}; border-bottom:2px solid #800000 !important;">P</th>`;
+            h3 += `<th class="${tHeadClass} py-1" style="background-color:${g.color}; border-bottom:2px solid #800000 !important; font-weight:bold;">Jml</th>`;
+        });
+    });
+
+    h1 += '</tr>'; h2 += '</tr>'; h3 += '</tr>';
+    $('#sdagama_headData').html(h1 + h2 + h3);
+
+    // --- FOOTER (132 Kolom) ---
+    var f = '<tr>';
+    f += `<th class="border-right text-right bg-white text-maroon pr-3 align-middle py-2" style="position:sticky; left:0; z-index:40; border-right: 2px solid #dee2e6;">TOTAL KESELURUHAN</th>`;
+    f += `<th class="py-2"></th><th class="py-2"></th><th class="py-2"></th><th class="py-2"></th><th class="text-center text-dark py-2"></th>`;
+    
+    SDAGAMA_GROUPS.forEach((g) => {
+        for(var i=0; i<18; i++) {
+             var isFirstTotal = (g.code === 'TOT' && i === 0);
+             var borderStyle = isFirstTotal ? 'border-left: 2px solid #ffecb3;' : '';
+             f += `<th class="col-view-${g.code} text-center py-2" style="background-color:${g.color}; ${borderStyle}"></th>`;
+        }
+    });
+    f += '</tr>';
+    $('#sdagama_footData').html(f);
+}
+
+// =================================================================
+// 3. GATEKEEPER & FETCH DATA
+// =================================================================
+function sdagama_validasiAksesUser() {
+    if (SDAGAMA_IS_ADMIN) {
+        $('#sdagama_filterContainer').show();
+        $('#sdagama_loadingText').html('Mempersiapkan Akses Admin...');
+        $('#sdagama_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        sdagama_tarikDataServer(); 
+    } else {
+        if (!SDAGAMA_NPSN_TERKUNCI) {
+            $('#sdagama_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#sdagama_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#sdagama_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#sdagama_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${sdagama_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                SDAGAMA_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#sdagama_filterUnit').empty().append($('<option>', {value: SDAGAMA_UNIT_TERKUNCI, text: SDAGAMA_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                sdagama_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#sdagama_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#sdagama_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${sdagama_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNpsnPTK(SDAGAMA_NPSN_TERKUNCI);
+    }
+}
+
+function sdagama_tarikDataServer() {
+    var btn = $('#sdagama_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+
+    if (!$.fn.DataTable.isDataTable('#sdagama_tabelUtama')) {
+        $('#sdagama_tableState').hide();
+        $('#sdagama_loadingText').html('Mengambil Laporan Agama SD Server...');
+        $('#sdagama_loadingState').show();
+    }
+
+    google.script.run.withSuccessHandler(function(dataArray) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        
+        if (!Array.isArray(dataArray)) {
+            $('#sdagama_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+            return;
+        }
+
+        try {
+            SDAGAMA_CACHE_DATA = dataArray;
+
+            if (SDAGAMA_IS_ADMIN) {
+                var uniqueStatus = new Set();
+                SDAGAMA_CACHE_DATA.forEach(function(row) {
+                    var s = String(row[2] || "").trim(); // Index 2 = Status
+                    if(s) uniqueStatus.add(s);
+                });
+                
+                var selStatus = $('#sdagama_filterStatus'); var curS = selStatus.val();
+                selStatus.empty().append('<option value="SEMUA">- Semua Status -</option>');
+                Array.from(uniqueStatus).sort().forEach(function(s) { selStatus.append($('<option>', {value: s, text: s})); });
+                if(curS && uniqueStatus.has(curS)) selStatus.val(curS);
+
+                sdagama_updateFilterUnit();
+            }
+
+            if (!$.fn.DataTable.isDataTable('#sdagama_tabelUtama')) {
+                sdagama_initDataTables();
+            }
+
+            sdagama_terapkanFilterLokal();
+
+            $('#sdagama_loadingState').hide();
+            $('#sdagama_tableState').show();
+            if(SDAGAMA_TABEL_INSTANCE) { setTimeout(function() { SDAGAMA_TABEL_INSTANCE.columns.adjust(); }, 150); }
+
+        } catch (e) {
+            $('#sdagama_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + sdagama_escapeHtml(e.message) + '</span>');
+        }
+
+    }).withFailureHandler(function(e) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#sdagama_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Server Terputus.</span>');
+    }).getDataMuridSDAgama(); 
+}
+
+function sdagama_updateFilterUnit() {
+    if(!SDAGAMA_IS_ADMIN) return;
+
+    var selStatus = $('#sdagama_filterStatus').val();
+    var uniqueUnit = new Set();
+    
+    SDAGAMA_CACHE_DATA.forEach(function(row) {
+        var u = String(row[0] || "").trim(); 
+        var s = String(row[2] || "").trim(); 
+        
+        if (selStatus === "SEMUA" || s === selStatus) {
+            if(u) uniqueUnit.add(u);
+        }
+    });
+
+    var selUnit = $('#sdagama_filterUnit'); var curU = selUnit.val();
+    selUnit.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    Array.from(uniqueUnit).sort().forEach(function(u) { selUnit.append($('<option>', {value: u, text: u})); });
+    
+    if(curU && uniqueUnit.has(curU)) selUnit.val(curU);
+    else selUnit.val('SEMUA');
+
+    sdagama_terapkanFilterLokal();
+}
+
+// =================================================================
+// 4. INISIALISASI DATATABLES (VAKSIN ANTI NaN, BLINK & COLOR MAP)
+// =================================================================
+
+function sdagama_getColGroup(i) {
+    for(var k=0; k<SDAGAMA_GROUPS.length; k++) {
+        if(i >= SDAGAMA_GROUPS[k].startIdx && i <= SDAGAMA_GROUPS[k].endIdx) return SDAGAMA_GROUPS[k];
+    }
+    return null;
+}
+
+function sdagama_initDataTables() {
+    SDAGAMA_TABEL_INSTANCE = $('#sdagama_tabelUtama').DataTable({
+        "destroy": true, 
+        "ordering": false, // VAKSIN MUTLAK ANTI HEADER BENGKAK
+        "pageLength": 15, 
+        "autoWidth": false,
+        "deferRender": true, 
+        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        "columnDefs": [ 
+            { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle border-right text-left font-weight-bold text-dark text-nowrap" }, 
+            { "targets": [1,3,4], "width": "1%", "className": "text-center align-middle text-nowrap" },
+            { "targets": 2, "width": "1%", "className": "text-center align-middle font-weight-bold text-maroon text-nowrap" },
+            { "targets": 5, "width": "1%", "className": "text-center align-middle font-weight-bold text-dark text-nowrap" },
+            // Matriks 126 Kolom Angka (Index 6 s.d 131)
+            { "targets": Array.from({length: 126}, (_, i) => i + 6), "width": "1%", "className": "text-center align-middle text-nowrap" }
+        ],
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada data Agama SD untuk filter yang dipilih." },
+        
+        // VAKSINASI PEWARNAAN DOM MURNI
+        "createdRow": function(row, data, dataIndex) {
+             var tds = row.children;
+             for (var i = 0; i < tds.length; i++) {
+                 var cell = tds[i];
+                 var rawVal = cell.textContent.trim();
+
+                 if (i === 0) {
+                     cell.style.position = 'sticky'; cell.style.left = '0'; cell.style.zIndex = '2'; cell.style.backgroundColor = '#ffffff';
+                 } 
+                 else if (i >= 6) { 
+                     var group = sdagama_getColGroup(i);
+                     if(group) {
+                         cell.style.backgroundColor = group.color;
+                         if (group.code === 'TOT' && i === 114) cell.style.borderLeft = '2px solid #ffecb3';
+                     }
+
+                     // Penebalan dan Pemburaman Data
+                     if (rawVal === "0" || rawVal === "-" || rawVal === "") {
+                         cell.innerHTML = '<span class="text-muted opacity-50">-</span>';
+                     } else {
+                         cell.classList.add('font-weight-bold', 'text-dark');
+                         // Kolom Jml (kelipatan ke-3 di dalam grup) -> Jml ada di offset +2, +5, +8 dari startIdx
+                         var offset = i - (group ? group.startIdx : 6);
+                         if (offset % 3 === 2) {
+                             cell.classList.replace('text-dark', 'text-maroon'); 
+                         }
+                     }
+                 }
+             }
+        },
+
+        // VAKSIN MUTLAK FOOTER: Anti-NaN dengan Regex Stripper Lapis Baja
+        "footerCallback": function(row, data, start, end, display) {
+            var api = this.api();
+            if (api.data().length === 0) return;
+
+            var extractNumber = function (str) { 
+                if (typeof str === 'number') return str;
+                if (!str) return 0;
+                var cleanStr = String(str).replace(/(<([^>]+)>)/gi, ""); 
+                var num = parseInt(cleanStr.replace(/[^0-9]/g, ''), 10); 
+                return isNaN(num) ? 0 : num; 
+            };
+            
+            // Loop Rombel (5) dan 126 Kolom Angka (6 s.d 131)
+            for (var i = 5; i <= 131; i++) {
+                var total = api.column(i, {page: 'current'}).data().reduce(function(a, b) {
+                    return extractNumber(a) + extractNumber(b);
+                }, 0);
+
+                var cell = $(api.column(i).footer());
+                cell.html(total === 0 ? '-' : total.toLocaleString('id-ID'));
+                
+                var cellDom = cell[0];
+                if(cellDom && i >= 6) {
+                    var group = sdagama_getColGroup(i);
+                    if(group) {
+                        cellDom.style.backgroundColor = group.color;
+                        if (group.code === 'TOT' && i === 114) cellDom.style.borderLeft = '2px solid #ffecb3';
+                        
+                        var offset = i - group.startIdx;
+                        if (offset % 3 === 2) cellDom.classList.add('text-maroon');
+                        else cellDom.classList.add('text-dark');
+                    }
+                }
+            }
+        }
+    });
+
+    // Panggil Visibility setelah tabel 100% jadi
+    sdagama_toggleColumnVisibility();
+}
+
+// =================================================================
+// 5. VISIBILITY TOGGLER (DATATABLES API) - ZERO BLINK
+// =================================================================
+function sdagama_toggleColumnVisibility() {
+    if (!SDAGAMA_TABEL_INSTANCE) return;
+    
+    var mode = $('#sdagama_filterViewKelas').val(); // K1, K2 ... TOT
+    
+    // Matikan auto-redraw untuk mematikan blink
+    var dt = SDAGAMA_TABEL_INSTANCE;
+
+    // 1. Hide All Matrix Columns (Index 6 to 131)
+    dt.columns(Array.from({length: 126}, (_, i) => i + 6)).visible(false, false);
+
+    // 2. Show Only Selected Matrix Columns
+    var targetGroup = SDAGAMA_GROUPS.find(g => g.code === mode);
+    if(targetGroup) {
+        var showIndexes = [];
+        for(var c = targetGroup.startIdx; c <= targetGroup.endIdx; c++) {
+            showIndexes.push(c);
+        }
+        dt.columns(showIndexes).visible(true, false);
+    }
+
+    // 3. Sembunyikan/Tampilkan thead buatan manual (karena colspan row HTML sulit diatur DT column().visible())
+    $('th[class*="col-view-"]').hide(); // Sembunyikan semua label Kelas/Agama
+    $('.col-view-' + mode).show(); // Munculkan label Kelas/Agama yg terpilih
+
+    // 4. Draw ulang sekali saja
+    dt.columns.adjust().draw(false);
+}
+
+// =================================================================
+// 6. FILTER LOKAL & INJEKSI DATA
+// =================================================================
+function sdagama_terapkanFilterLokal() {
+    if (!SDAGAMA_TABEL_INSTANCE) return;
+
+    var fStatus = $('#sdagama_filterStatus').val() || "SEMUA";
+    var fUnit = SDAGAMA_IS_ADMIN ? String($('#sdagama_filterUnit').val() || "SEMUA").trim().toUpperCase() : String(SDAGAMA_UNIT_TERKUNCI).trim().toUpperCase();
+    
+    var hasil = SDAGAMA_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase(); 
+        var rStatus = String(row[2] || "").trim();
+
+        if (SDAGAMA_IS_ADMIN) {
+            if (fUnit !== "SEMUA" && fUnit !== "" && rUnit !== fUnit) return false;
+        } else {
+            if (rUnit !== fUnit) return false;
+        }
+
+        if (fStatus !== "SEMUA" && fStatus !== "" && rStatus !== fStatus) return false;
+
+        return true;
+    });
+    
+    sdagama_renderTabel(hasil);
+}
+
+function sdagama_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+        
+        arrRow.push(sdagama_escapeHtml(row[0] || "-")); 
+        arrRow.push(sdagama_escapeHtml(row[1] || "-"));
+        arrRow.push(sdagama_escapeHtml(row[2] || "-"));
+        arrRow.push(sdagama_escapeHtml(row[3] || "-"));
+        arrRow.push(sdagama_escapeHtml(row[4] || "-"));
+        
+        var rombelVal = (row[5] === undefined || row[5] === null || String(row[5]).trim() === "" || String(row[5]).trim() === "-") ? "0" : String(row[5]).trim();
+        arrRow.push(sdagama_escapeHtml(rombelVal));
+
+        // Index Data: G(6) s.d EB(131)
+        for (var c = 6; c <= 131; c++) {
+            var val = (row[c] === undefined || row[c] === null || String(row[c]).trim() === "" || String(row[c]).trim() === "-") ? "0" : String(row[c]).trim();
+            arrRow.push(sdagama_escapeHtml(val));
+        }
+
+        dtArray.push(arrRow);
+    });
+
+    SDAGAMA_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+}
+
+// =================================================================
+// 7. API EKSPOR EXCEL (NATIVE HTML TO XLS) - VAKSIN VIEW
+// =================================================================
+function sdagama_exportExcel() {
+    if (!SDAGAMA_TABEL_INSTANCE) {
+        Sultan.alert('warning', 'Belum Ada Data', 'Silakan tunggu data dimuat terlebih dahulu.');
+        return;
+    }
+
+    var btn = $('#sdagama_btnExport');
+    var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Mengekspor...');
+
+    setTimeout(function() {
+        var info = SDAGAMA_TABEL_INSTANCE.page.info();
+        var currLen = info.length;
+        var currPage = info.page;
+        
+        // Render semua halaman
+        SDAGAMA_TABEL_INSTANCE.page.len(-1).draw('page');
+
+        // Kloning DOM yang sedang TAMPIL saja
+        var tableClone = document.getElementById('sdagama_tabelUtama').cloneNode(true);
+        
+        // Kembalikan paging
+        SDAGAMA_TABEL_INSTANCE.page.len(currLen).page(currPage).draw('page');
+
+        // Hapus elemen yang tersembunyi (display:none) di dalam hasil kloning
+        $(tableClone).find('[style*="display: none"]').remove();
+
+        $(tableClone).find('th, td').css({
+            'border': '1px solid #000000',
+            'border-collapse': 'collapse',
+            'font-family': 'Arial, sans-serif'
+        });
+        
+        $(tableClone).find('.opacity-50').css('color', '#cccccc'); 
+
+        var htmlData = tableClone.outerHTML;
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>' + htmlData + '</body></html>';
+        
+        var blob = new Blob([template], { type: 'application/vnd.ms-excel' });
+        var url = URL.createObjectURL(blob);
+        
+        var a = document.createElement('a');
+        a.href = url;
+        var viewCode = $('#sdagama_filterViewKelas').val();
+        a.download = 'Rekap_Jumlah_Murid_SD_Agama_' + viewCode + '.xls';
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btn.prop('disabled', false).html(txt);
+        Sultan.notif.sukses('Data berhasil diunduh ke Excel.');
+    }, 200); 
+}
+
+// =================================================================
+// 8. HELPER UTILITIES: PEMBERSIH XSS
+// =================================================================
+function sdagama_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

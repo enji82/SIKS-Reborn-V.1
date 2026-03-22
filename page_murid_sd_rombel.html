@@ -1,175 +1,544 @@
-<header>
-  <h2>DATA MURID SD MENURUT ROMBEL</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterStatus">Status:</label>
-    <select id="filterStatus"></select>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-layer-group text-maroon mr-2"></i>Jumlah Murid SD Menurut Rombel
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  <div id="loadingStatus" class="loading-container">
-      <div class="spinner-container">
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" 
+                 data-toggle="collapse" data-target="#sdrombel_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="sdrombel_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Data bersumber dari laporan bulan yang terakhir diunggah.</li>
+                  <li class="mb-1">Gunakan filter <b>Status</b> untuk menyaring sekolah Negeri atau Swasta.</li>
+                  <li>Tabel ini merinci jumlah murid berdasarkan pembagian Rombel (A, B, C).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="sdrombel_filterStatus" class="form-control form-control-sultan input-auto-width min-w-150 border-maroon">
+                    <option value="SEMUA">- Semua Status -</option>
+                </select>
+
+                <div id="sdrombel_filterContainer" style="display: none;" class="d-flex align-items-center">
+                    <select id="sdrombel_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                        <option value="">- Memvalidasi Akses... -</option>
+                    </select>
+                </div>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="sdrombel_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server">
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="sdrombel_btnExport" class="btn btn-success text-white font-weight-bold shadow-sm" title="Unduh data dalam format Microsoft Excel">
+                    <i class="fas fa-file-excel mr-1"></i> Unduh Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            
+            <div id="sdrombel_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold mt-3" id="sdrombel_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sdrombel_tableState" style="display: none;">
+              <table id="sdrombel_tabelUtama" class="table table-bordered table-hover table-sm table-premium table-sultan-compact text-nowrap mb-0 w-100 text-center" style="font-size: 0.85rem;">
+                
+                <thead class="font-weight-bold text-dark bg-light text-nowrap">
+                  <tr>
+                    <th rowspan="3" class="align-middle bg-white text-maroon text-left pl-3 py-1" style="position:sticky; left:0; z-index:50; min-width:250px; border-right: 2px solid #dee2e6; border-bottom: 2px solid #800000 !important;">Unit Kerja</th>
+                    
+                    <th rowspan="3" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">NPSN</th>
+                    <th rowspan="3" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Status</th>
+                    <th rowspan="3" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Bln</th>
+                    <th rowspan="3" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Thn</th>
+                    <th rowspan="3" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Rombel</th>
+
+                    <th colspan="10" class="align-middle py-1" style="background-color: #e3f2fd; border-bottom: 1px solid #90caf9;">KELAS 1</th>
+                    <th colspan="10" class="align-middle py-1" style="background-color: #e8f5e9; border-bottom: 1px solid #a5d6a7;">KELAS 2</th>
+                    <th colspan="10" class="align-middle py-1" style="background-color: #fff3e0; border-bottom: 1px solid #ffcc80;">KELAS 3</th>
+                    <th colspan="10" class="align-middle py-1" style="background-color: #f3e5f5; border-bottom: 1px solid #ce93d8;">KELAS 4</th>
+                    <th colspan="10" class="align-middle py-1" style="background-color: #fce4ec; border-bottom: 1px solid #f48fb1;">KELAS 5</th>
+                    <th colspan="10" class="align-middle py-1" style="background-color: #e0f2f1; border-bottom: 1px solid #80cbc4;">KELAS 6</th>
+                    
+                    <th rowspan="3" class="align-middle py-1" style="background-color: #ffecb3; border-bottom: 2px solid #800000 !important; border-left: 2px solid #ffecb3;">TOTAL<br>SEMUA</th>
+                  </tr>
+
+                  <tr class="small text-nowrap">
+                    <th colspan="3" class="py-1" style="background-color: #e3f2fd;">Rombel A</th><th colspan="3" class="py-1" style="background-color: #e3f2fd;">Rombel B</th><th colspan="3" class="py-1" style="background-color: #e3f2fd;">Rombel C</th><th rowspan="2" class="py-1" style="background-color: #bbdefb; border-bottom: 2px solid #800000 !important;">Total</th>
+                    <th colspan="3" class="py-1" style="background-color: #e8f5e9;">Rombel A</th><th colspan="3" class="py-1" style="background-color: #e8f5e9;">Rombel B</th><th colspan="3" class="py-1" style="background-color: #e8f5e9;">Rombel C</th><th rowspan="2" class="py-1" style="background-color: #c8e6c9; border-bottom: 2px solid #800000 !important;">Total</th>
+                    <th colspan="3" class="py-1" style="background-color: #fff3e0;">Rombel A</th><th colspan="3" class="py-1" style="background-color: #fff3e0;">Rombel B</th><th colspan="3" class="py-1" style="background-color: #fff3e0;">Rombel C</th><th rowspan="2" class="py-1" style="background-color: #ffe0b2; border-bottom: 2px solid #800000 !important;">Total</th>
+                    <th colspan="3" class="py-1" style="background-color: #f3e5f5;">Rombel A</th><th colspan="3" class="py-1" style="background-color: #f3e5f5;">Rombel B</th><th colspan="3" class="py-1" style="background-color: #f3e5f5;">Rombel C</th><th rowspan="2" class="py-1" style="background-color: #e1bee7; border-bottom: 2px solid #800000 !important;">Total</th>
+                    <th colspan="3" class="py-1" style="background-color: #fce4ec;">Rombel A</th><th colspan="3" class="py-1" style="background-color: #fce4ec;">Rombel B</th><th colspan="3" class="py-1" style="background-color: #fce4ec;">Rombel C</th><th rowspan="2" class="py-1" style="background-color: #f8bbd0; border-bottom: 2px solid #800000 !important;">Total</th>
+                    <th colspan="3" class="py-1" style="background-color: #e0f2f1;">Rombel A</th><th colspan="3" class="py-1" style="background-color: #e0f2f1;">Rombel B</th><th colspan="3" class="py-1" style="background-color: #e0f2f1;">Rombel C</th><th rowspan="2" class="py-1" style="background-color: #b2dfdb; border-bottom: 2px solid #800000 !important;">Total</th>
+                  </tr>
+
+                  <tr class="small text-nowrap">
+                    <th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e3f2fd; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e8f5e9; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#fff3e0; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#f3e5f5; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#fce4ec; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">Jml</th>
+                    <th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">L</th><th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">P</th><th class="py-1" style="background-color:#e0f2f1; border-bottom:2px solid #800000 !important;">Jml</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+                
+                <tfoot class="bg-light font-weight-bold text-nowrap" style="border-top: 3px solid #800000;">
+                    <tr>
+                        <th class="border-right text-right bg-white text-maroon pr-3 align-middle py-2" style="position:sticky; left:0; z-index:40; border-right: 2px solid #dee2e6;">TOTAL KESELURUHAN</th>
+                        <th class="py-2"></th><th class="py-2"></th><th class="py-2"></th><th class="py-2"></th>
+                        <th class="text-center text-dark py-2"></th>
+                        
+                        <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        
+                        <th class="text-center py-2"></th>
+                    </tr>
+                </tfoot>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-      <p>Memuat data, mohon tunggu...</p>
   </div>
-  
-  <div id="tableWrapper" style="display:none;">
-    <div class="table-container">
-        <table id="muridSdRombelTable" class="data-table">
-          <thead></thead>
-          <tbody></tbody>
-          <tfoot></tfoot> 
-        </table>
-    </div>
-    <div class="table-footer-note">
-      Sumber data: laporan bulan terakhir.
-    </div>
-  </div>
-</main>
+</section>
 
-<style>
-  /* Mengatur layout dan scrollbar internal */
-  .main-content {
-    overflow-y: hidden;
-  }
-  main.table-view-container, #tableWrapper {
-    flex-grow: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  #tableWrapper .table-container {
-    overflow-y: auto;
-    flex-grow: 1;
-  }
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - BAB I)
+// ======================================================================
+var SDROMBEL_CACHE_DATA = [];
+var SDROMBEL_TABEL_INSTANCE = null;
 
-  /* =================================================================== */
-  /* ====== PENGATURAN TAMPILAN & FREEZE PANE (FINAL) ====== */
-  /* =================================================================== */
+var SDROMBEL_USER_AKTIF = "";
+var SDROMBEL_IS_ADMIN = false;
+var SDROMBEL_UNIT_TERKUNCI = "";
+var SDROMBEL_NPSN_TERKUNCI = "";
 
-  /* 1. Atur perataan teks dan lebar otomatis */
-  #muridSdRombelTable th,
-  #muridSdRombelTable td {
-    text-align: center;
-    vertical-align: middle;
-  }
-  #muridSdRombelTable td:nth-child(2),
-  #muridSdRombelTable td:nth-child(4) {
-    text-align: left;
-  }
-  #muridSdRombelTable th {
-    white-space: normal;
-  }
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE DELEGATION
+// =================================================================
+$(document).ready(function() {
+    SDROMBEL_TABEL_INSTANCE = null;
+    $('#sdrombel_tableState').hide();
+    $('#sdrombel_loadingState').show();
+    $('#sdrombel_filterContainer').hide();
 
-  /* 2. Pengaturan Freeze Pane (Header, Footer, Kolom 1 & 2) */
-  #muridSdRombelTable thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  #muridSdRombelTable tfoot td {
-    position: sticky;
-    bottom: 0;
-    background-color: #101E26; /* Warna solid untuk footer */
-    z-index: 2;
-    border-top: 2px solid rgba(0, 195, 255, 0.5); 
-  }
-  #muridSdRombelTable thead tr:first-child th { top: 0; }
-  #muridSdRombelTable thead tr:nth-child(2) th { top: 40px; }
-  #muridSdRombelTable tfoot td { bottom: 0; }
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        SDROMBEL_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        SDROMBEL_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        SDROMBEL_NPSN_TERKUNCI = user.npsn || user.username || ""; 
+    } catch(e) { SDROMBEL_NPSN_TERKUNCI = ""; SDROMBEL_IS_ADMIN = false; }
 
-  #muridSdRombelTable tbody td:nth-child(1),
-  #muridSdRombelTable tbody td:nth-child(2) {
-    position: sticky;
-    background-color: #1c2e3a;
-  }
-  #muridSdRombelTable thead th:nth-child(1),
-  #muridSdRombelTable tbody td:nth-child(1),
-  #muridSdRombelTable tfoot td:nth-child(1) {
-    left: 0;
-  }
-  #muridSdRombelTable thead th:nth-child(2),
-  #muridSdRombelTable tbody td:nth-child(2),
-  #muridSdRombelTable tfoot td:nth-child(2) {
-    left: 50px; /* Lebar kolom No. */
-  }
+    // VAKSIN DELEGASI EVENT JQUERY MUTLAK
+    $(document).off('click', '#sdrombel_btnRefresh').on('click', '#sdrombel_btnRefresh', sdrombel_tarikDataServer);
+    $(document).off('change', '#sdrombel_filterStatus').on('change', '#sdrombel_filterStatus', sdrombel_updateFilterUnit);
+    $(document).off('change', '#sdrombel_filterUnit').on('change', '#sdrombel_filterUnit', sdrombel_terapkanFilterLokal);
+    
+    // VAKSIN EKSPOR EXCEL
+    $(document).off('click', '#sdrombel_btnExport').on('click', '#sdrombel_btnExport', sdrombel_exportExcel);
 
-  /* 3. Hirarki z-index yang Benar */
-  #muridSdRombelTable tbody td { z-index: 1; }
-  #muridSdRombelTable thead th { z-index: 2; }
-  #muridSdRombelTable tfoot td { 
-    z-index: 3; 
-  }
-  #muridSdRombelTable thead tr:first-child th:nth-child(1),
-  #muridSdRombelTable thead tr:first-child th:nth-child(2) {
-    z-index: 4;
-  }
-  #muridSdRombelTable tfoot td:nth-child(1),
-  #muridSdRombelTable tfoot td:nth-child(2) {
-    z-index: 5;
-  }
+    sdrombel_validasiAksesUser();
+});
 
-  /* 4. Efek hover untuk kolom beku */
-  #muridSdRombelTable tbody tr:hover td:nth-child(1),
-  #muridSdRombelTable tbody tr:hover td:nth-child(2) {
-    background-color: #2a4152;
-  }
-  
-  /* =================================================================== */
-  /* ====== PEWARNAAN ISI KOLOM & FONT BOLD (PERBAIKAN FINAL) ====== */
-  /* =================================================================== */
+// =================================================================
+// 2. GATEKEEPER & FETCH DATA
+// =================================================================
+function sdrombel_validasiAksesUser() {
+    if (SDROMBEL_IS_ADMIN) {
+        $('#sdrombel_filterContainer').show();
+        $('#sdrombel_loadingText').html('Mempersiapkan Akses Admin...');
+        $('#sdrombel_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        sdrombel_tarikDataServer(); 
+    } else {
+        if (!SDROMBEL_NPSN_TERKUNCI) {
+            $('#sdrombel_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#sdrombel_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
 
-  /* 5. Beri warna pada kolom "Jml. Murid" (ISI TABEL) - INI SUDAH BENAR */
-  #muridSdRombelTable td:nth-child(12),
-  #muridSdRombelTable td:nth-child(18),
-  #muridSdRombelTable td:nth-child(24),
-  #muridSdRombelTable td:nth-child(30),
-  #muridSdRombelTable td:nth-child(36),
-  #muridSdRombelTable td:nth-child(42) {
-    color: var(--color-blue);
-    font-weight: bold;
-  }
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#sdrombel_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#sdrombel_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${sdrombel_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
 
-  /* 6. Beri warna pada SUBHEADER yang sesuai - DIGESER -1 (PERBAIKAN) */
-  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(6),
-  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(12),
-  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(18),
-  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(24),
-  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(30),
-  #muridSdRombelTable thead tr:nth-child(2) th:nth-child(36) {
-    color: var(--color-blue);
-    font-weight: bold;
-  }
+                SDROMBEL_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#sdrombel_filterUnit').empty().append($('<option>', {value: SDROMBEL_UNIT_TERKUNCI, text: SDROMBEL_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                sdrombel_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#sdrombel_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#sdrombel_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${sdrombel_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNpsnPTK(SDROMBEL_NPSN_TERKUNCI);
+    }
+}
 
-  /* 7. Buat teks di kolom terakhir menjadi tebal dan berwarna lain - INI SUDAH BENAR */
-  #muridSdRombelTable thead tr:first-child th:last-child,
-  #muridSdRombelTable td:last-child {
-    font-weight: bold;
-    color: var(--color-orange);
-  }
+function sdrombel_tarikDataServer() {
+    var btn = $('#sdrombel_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
 
-  /* 8. Beri warna pada grup kolom Kelas di dalam body tabel - INI SUDAH BENAR */
-  #muridSdRombelTable tbody td:nth-child(n+7):nth-child(-n+12) { background-color: rgba(52, 152, 219, 0.1); }
-  #muridSdRombelTable tbody td:nth-child(n+13):nth-child(-n+18) { background-color: rgba(46, 204, 113, 0.1); }
-  #muridSdRombelTable tbody td:nth-child(n+19):nth-child(-n+24) { background-color: rgba(155, 89, 182, 0.1); }
-  #muridSdRombelTable tbody td:nth-child(n+25):nth-child(-n+30) { background-color: rgba(241, 196, 15, 0.1); }
-  #muridSdRombelTable tbody td:nth-child(n+31):nth-child(-n+36) { background-color: rgba(230, 126, 34, 0.1); }
-  #muridSdRombelTable tbody td:nth-child(n+37):nth-child(-n+42) { background-color: rgba(26, 188, 156, 0.1); }
-  #muridSdRombelTable tbody td:nth-child(43) { background-color: rgba(231, 76, 60, 0.1); }
+    if (!$.fn.DataTable.isDataTable('#sdrombel_tabelUtama')) {
+        $('#sdrombel_tableState').hide();
+        $('#sdrombel_loadingText').html('Mengambil Laporan Rombel SD Server...');
+        $('#sdrombel_loadingState').show();
+    }
 
-  /* 9. Pastikan efek hover tetap berfungsi di atas warna latar */
-  #muridSdRombelTable tbody tr:hover td {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-  }
-  #muridSdRombelTable tbody tr:hover td:nth-child(1),
-  #muridSdRombelTable tbody tr:hover td:nth-child(2) {
-    background-color: #2a4152 !important;
-  }
-</style>
+    google.script.run.withSuccessHandler(function(dataArray) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        
+        if (!Array.isArray(dataArray)) {
+            $('#sdrombel_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+            return;
+        }
+
+        try {
+            SDROMBEL_CACHE_DATA = dataArray;
+
+            if (SDROMBEL_IS_ADMIN) {
+                var uniqueStatus = new Set();
+                SDROMBEL_CACHE_DATA.forEach(function(row) {
+                    var s = String(row[2] || "").trim(); // Index 2 = Status
+                    if(s) uniqueStatus.add(s);
+                });
+                
+                var selStatus = $('#sdrombel_filterStatus'); var curS = selStatus.val();
+                selStatus.empty().append('<option value="SEMUA">- Semua Status -</option>');
+                Array.from(uniqueStatus).sort().forEach(function(s) { selStatus.append($('<option>', {value: s, text: s})); });
+                if(curS && uniqueStatus.has(curS)) selStatus.val(curS);
+
+                sdrombel_updateFilterUnit();
+            }
+
+            if (!$.fn.DataTable.isDataTable('#sdrombel_tabelUtama')) {
+                sdrombel_initDataTables();
+            }
+
+            sdrombel_terapkanFilterLokal();
+
+            $('#sdrombel_loadingState').hide();
+            $('#sdrombel_tableState').show();
+            if(SDROMBEL_TABEL_INSTANCE) { setTimeout(function() { SDROMBEL_TABEL_INSTANCE.columns.adjust(); }, 150); }
+
+        } catch (e) {
+            $('#sdrombel_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + sdrombel_escapeHtml(e.message) + '</span>');
+        }
+
+    }).withFailureHandler(function(e) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#sdrombel_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Server Terputus.</span>');
+    }).getDataMuridSDRombel(); 
+}
+
+function sdrombel_updateFilterUnit() {
+    if(!SDROMBEL_IS_ADMIN) return;
+
+    var selStatus = $('#sdrombel_filterStatus').val();
+    var uniqueUnit = new Set();
+    
+    SDROMBEL_CACHE_DATA.forEach(function(row) {
+        var u = String(row[0] || "").trim(); 
+        var s = String(row[2] || "").trim(); 
+        
+        if (selStatus === "SEMUA" || s === selStatus) {
+            if(u) uniqueUnit.add(u);
+        }
+    });
+
+    var selUnit = $('#sdrombel_filterUnit'); var curU = selUnit.val();
+    selUnit.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    Array.from(uniqueUnit).sort().forEach(function(u) { selUnit.append($('<option>', {value: u, text: u})); });
+    
+    if(curU && uniqueUnit.has(curU)) selUnit.val(curU);
+    else selUnit.val('SEMUA');
+
+    sdrombel_terapkanFilterLokal();
+}
+
+// =================================================================
+// 3. INISIALISASI DATATABLES (VAKSIN ANTI NaN, BLINK & COLOR MAP)
+// =================================================================
+function sdrombel_getColColor(i) {
+    if (i >= 6 && i <= 15) return "#e3f2fd"; // Kls 1
+    if (i >= 16 && i <= 25) return "#e8f5e9"; // Kls 2
+    if (i >= 26 && i <= 35) return "#fff3e0"; // Kls 3
+    if (i >= 36 && i <= 45) return "#f3e5f5"; // Kls 4
+    if (i >= 46 && i <= 55) return "#fce4ec"; // Kls 5
+    if (i >= 56 && i <= 65) return "#e0f2f1"; // Kls 6
+    if (i === 66) return "#ffecb3"; // Total Semua
+    return "#ffffff";
+}
+
+function sdrombel_initDataTables() {
+    SDROMBEL_TABEL_INSTANCE = $('#sdrombel_tabelUtama').DataTable({
+        "destroy": true, 
+        "ordering": false, // VAKSIN MUTLAK ANTI HEADER BENGKAK
+        "pageLength": 15, 
+        "autoWidth": false,
+        "deferRender": true, 
+        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        "columnDefs": [ 
+            { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle border-right text-left font-weight-bold text-dark text-nowrap" }, 
+            { "targets": [1,3,4], "width": "1%", "className": "text-center align-middle text-nowrap" },
+            { "targets": 2, "width": "1%", "className": "text-center align-middle font-weight-bold text-maroon text-nowrap" },
+            { "targets": 5, "width": "1%", "className": "text-center align-middle font-weight-bold text-dark text-nowrap" },
+            // Matriks 61 Kolom (Index 6 s.d 66)
+            { "targets": Array.from({length: 61}, (_, i) => i + 6), "width": "1%", "className": "text-center align-middle text-nowrap" }
+        ],
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada data Murid SD Rombel untuk filter yang dipilih." },
+        
+        // VAKSINASI PEWARNAAN DOM MURNI
+        "createdRow": function(row, data, dataIndex) {
+             var tds = row.children;
+             for (var i = 0; i < tds.length; i++) {
+                 var cell = tds[i];
+                 var rawVal = cell.textContent.trim();
+
+                 if (i === 0) {
+                     cell.style.position = 'sticky'; cell.style.left = '0'; cell.style.zIndex = '2'; cell.style.backgroundColor = '#ffffff';
+                 } 
+                 else if (i >= 6) { 
+                     var bgColor = sdrombel_getColColor(i);
+                     
+                     // Penggelapan Warna Sub-Total
+                     if ([15, 25, 35, 45, 55, 65].includes(i)) {
+                         if(i===15) bgColor="#bbdefb"; if(i===25) bgColor="#c8e6c9"; if(i===35) bgColor="#ffe0b2";
+                         if(i===45) bgColor="#e1bee7"; if(i===55) bgColor="#f8bbd0"; if(i===65) bgColor="#b2dfdb";
+                     }
+                     cell.style.backgroundColor = bgColor;
+                     if (i === 66) cell.style.borderLeft = '2px solid #ffecb3';
+
+                     // Penebalan dan Pemburaman Data
+                     if (rawVal === "0" || rawVal === "-" || rawVal === "") {
+                         cell.innerHTML = '<span class="text-muted opacity-50">-</span>';
+                     } else {
+                         cell.classList.add('font-weight-bold', 'text-dark');
+                         // Jika merupakan kolom Total atau Sub-Total
+                         if (i === 66 || [15, 25, 35, 45, 55, 65].includes(i)) {
+                             cell.classList.replace('text-dark', 'text-maroon'); 
+                         }
+                     }
+                 }
+             }
+        },
+
+        // VAKSIN MUTLAK FOOTER: Anti-NaN dengan Regex Stripper Lapis Baja
+        "footerCallback": function(row, data, start, end, display) {
+            var api = this.api();
+            if (api.data().length === 0) return;
+
+            var extractNumber = function (str) { 
+                if (typeof str === 'number') return str;
+                if (!str) return 0;
+                var cleanStr = String(str).replace(/(<([^>]+)>)/gi, ""); 
+                var num = parseInt(cleanStr.replace(/[^0-9]/g, ''), 10); 
+                return isNaN(num) ? 0 : num; 
+            };
+            
+            // Loop kolom Rombel (5) dan Matriks Angka (6 s.d 66)
+            for (var i = 5; i <= 66; i++) {
+                var total = api.column(i, {page: 'current'}).data().reduce(function(a, b) {
+                    return extractNumber(a) + extractNumber(b);
+                }, 0);
+
+                var cell = $(api.column(i).footer());
+                cell.html(total === 0 ? '-' : total.toLocaleString('id-ID'));
+                
+                var cellDom = cell[0];
+                if(cellDom && i >= 6) {
+                    var bgColor = sdrombel_getColColor(i);
+                    if ([15, 25, 35, 45, 55, 65].includes(i)) {
+                        if(i===15) bgColor="#bbdefb"; if(i===25) bgColor="#c8e6c9"; if(i===35) bgColor="#ffe0b2";
+                        if(i===45) bgColor="#e1bee7"; if(i===55) bgColor="#f8bbd0"; if(i===65) bgColor="#b2dfdb";
+                    }
+
+                    cellDom.style.backgroundColor = bgColor;
+                    if (i === 66) cellDom.style.borderLeft = '2px solid #ffecb3'; 
+                    
+                    if (i === 66 || [15, 25, 35, 45, 55, 65].includes(i)) {
+                        cellDom.classList.add('text-maroon');
+                    } else {
+                        cellDom.classList.add('text-dark');
+                    }
+                }
+            }
+        }
+    });
+}
+
+// =================================================================
+// 4. FILTER LOKAL & INJEKSI DATA (ZERO BLINK MUTLAK)
+// =================================================================
+function sdrombel_terapkanFilterLokal() {
+    if (!SDROMBEL_TABEL_INSTANCE) return;
+
+    var fStatus = $('#sdrombel_filterStatus').val() || "SEMUA";
+    var fUnit = SDROMBEL_IS_ADMIN ? String($('#sdrombel_filterUnit').val() || "SEMUA").trim().toUpperCase() : String(SDROMBEL_UNIT_TERKUNCI).trim().toUpperCase();
+    
+    var hasil = SDROMBEL_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase(); 
+        var rStatus = String(row[2] || "").trim();
+
+        if (SDROMBEL_IS_ADMIN) {
+            if (fUnit !== "SEMUA" && fUnit !== "" && rUnit !== fUnit) return false;
+        } else {
+            if (rUnit !== fUnit) return false;
+        }
+
+        if (fStatus !== "SEMUA" && fStatus !== "" && rStatus !== fStatus) return false;
+
+        return true;
+    });
+    
+    sdrombel_renderTabel(hasil);
+}
+
+function sdrombel_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+        
+        arrRow.push(sdrombel_escapeHtml(row[0] || "-")); 
+        arrRow.push(sdrombel_escapeHtml(row[1] || "-"));
+        arrRow.push(sdrombel_escapeHtml(row[2] || "-"));
+        arrRow.push(sdrombel_escapeHtml(row[3] || "-"));
+        arrRow.push(sdrombel_escapeHtml(row[4] || "-"));
+        
+        var rombelVal = (row[5] === undefined || row[5] === null || String(row[5]).trim() === "" || String(row[5]).trim() === "-") ? "0" : String(row[5]).trim();
+        arrRow.push(sdrombel_escapeHtml(rombelVal));
+
+        // Index Data: G(6) s.d BO(66)
+        for (var c = 6; c <= 66; c++) {
+            var val = (row[c] === undefined || row[c] === null || String(row[c]).trim() === "" || String(row[c]).trim() === "-") ? "0" : String(row[c]).trim();
+            arrRow.push(sdrombel_escapeHtml(val));
+        }
+
+        dtArray.push(arrRow);
+    });
+
+    SDROMBEL_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+}
+
+// =================================================================
+// 5. API EKSPOR EXCEL (NATIVE HTML TO XLS)
+// =================================================================
+function sdrombel_exportExcel() {
+    if (!SDROMBEL_TABEL_INSTANCE) {
+        Sultan.alert('warning', 'Belum Ada Data', 'Silakan tunggu data dimuat terlebih dahulu.');
+        return;
+    }
+
+    var btn = $('#sdrombel_btnExport');
+    var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Mengekspor...');
+
+    setTimeout(function() {
+        var info = SDROMBEL_TABEL_INSTANCE.page.info();
+        var currLen = info.length;
+        var currPage = info.page;
+        SDROMBEL_TABEL_INSTANCE.page.len(-1).draw('page');
+
+        var tableClone = document.getElementById('sdrombel_tabelUtama').cloneNode(true);
+        
+        SDROMBEL_TABEL_INSTANCE.page.len(currLen).page(currPage).draw('page');
+
+        $(tableClone).find('th, td').css({
+            'border': '1px solid #000000',
+            'border-collapse': 'collapse',
+            'font-family': 'Arial, sans-serif'
+        });
+        
+        $(tableClone).find('.opacity-50').css('color', '#cccccc'); 
+
+        var htmlData = tableClone.outerHTML;
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>' + htmlData + '</body></html>';
+        
+        var blob = new Blob([template], { type: 'application/vnd.ms-excel' });
+        var url = URL.createObjectURL(blob);
+        
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'Rekap_Jumlah_Murid_SD_Rombel.xls';
+        document.body.appendChild(a);
+        a.click();
+        
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btn.prop('disabled', false).html(txt);
+        Sultan.notif.sukses('Data berhasil diunduh ke Excel.');
+    }, 200); 
+}
+
+// =================================================================
+// 6. HELPER UTILITIES: PEMBERSIH XSS
+// =================================================================
+function sdrombel_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

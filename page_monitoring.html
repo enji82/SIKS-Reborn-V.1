@@ -1,0 +1,432 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2 align-items-center">
+      <div class="col-sm-8">
+        <h5 class="m-0 text-maroon font-weight-bold"><i class="fas fa-chart-line mr-2"></i>Monitoring Aktivitas Aplikasi</h5>
+      </div>
+      <div class="col-sm-4 text-right">
+        <button type="button" id="monitoring_btnRefresh" class="btn btn-sm btn-white border shadow-sm text-secondary font-weight-bold px-3 rounded-pill" title="Segarkan Dasbor">
+            <i class="fas fa-sync-alt text-maroon mr-1"></i> Refresh
+        </button>
+      </div>
+      <div class="col-sm-12"><hr class="style-sultan-solid mt-2"></div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    
+    <div class="row">
+      <div class="col-md-4">
+        <div class="info-box shadow-sm monitoring-hover-zoom border-0" style="border-radius: 10px;">
+          <span class="info-box-icon bg-maroon" style="border-radius: 10px 0 0 10px;"><i class="fas fa-users"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text font-weight-bold text-muted text-uppercase" style="letter-spacing: 0.5px; font-size: 12px;">Total Kunjungan</span>
+            <span class="info-box-number text-maroon" id="monitoring_valTotal" style="font-size: 24px;">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box shadow-sm monitoring-hover-zoom border-0" style="border-radius: 10px;">
+          <span class="info-box-icon bg-success" style="border-radius: 10px 0 0 10px;"><i class="fas fa-briefcase"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text font-weight-bold text-muted text-uppercase" style="letter-spacing: 0.5px; font-size: 12px;">Hari Efektif</span>
+            <span class="info-box-number text-success" id="monitoring_valKerja" style="font-size: 24px;">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box shadow-sm monitoring-hover-zoom border-0" style="border-radius: 10px;">
+          <span class="info-box-icon bg-warning" style="border-radius: 10px 0 0 10px;"><i class="fas fa-umbrella-beach text-dark"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text font-weight-bold text-muted text-uppercase" style="letter-spacing: 0.5px; font-size: 12px;">Hari Libur</span>
+            <span class="info-box-number text-dark" id="monitoring_valLibur" style="font-size: 24px;">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-12">
+        <div class="card card-sultan shadow-sm border-0">
+          <div class="card-header bg-white border-bottom py-3">
+            <h6 class="card-title m-0 font-weight-bold text-dark"><i class="fas fa-chart-area mr-2 text-maroon"></i>Tren Kunjungan Harian</h6>
+          </div>
+          <div class="card-body p-3">
+            <div class="chart-container" style="position: relative; height:300px; width:100%">
+                <canvas id="monitoring_chartDaily"></canvas>
+                <div id="monitoring_loaderChart1" class="monitoring-overlay-loader"><i class="fas fa-spinner fa-spin fa-3x text-maroon"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <div class="col-md-6 mb-3">
+        <div class="card card-sultan shadow-sm h-100 border-0">
+          <div class="card-header bg-white border-bottom py-3">
+              <h6 class="card-title m-0 font-weight-bold text-info"><i class="fas fa-calendar-week mr-2"></i>Statistik Mingguan</h6>
+          </div>
+          <div class="card-body p-3">
+            <div class="chart-container" style="position: relative; height:250px;">
+                <canvas id="monitoring_chartWeekly"></canvas>
+                <div id="monitoring_loaderChart2" class="monitoring-overlay-loader"><i class="fas fa-spinner fa-spin fa-2x text-info"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <div class="card card-sultan shadow-sm h-100 border-0">
+          <div class="card-header bg-white border-bottom py-3">
+              <h6 class="card-title m-0 font-weight-bold text-success"><i class="fas fa-calendar-alt mr-2"></i>Statistik Bulanan</h6>
+          </div>
+          <div class="card-body p-3">
+            <div class="chart-container" style="position: relative; height:250px;">
+                <canvas id="monitoring_chartMonthly"></canvas>
+                <div id="monitoring_loaderChart3" class="monitoring-overlay-loader"><i class="fas fa-spinner fa-spin fa-2x text-success"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-2 mb-4">
+      <div class="col-md-6 mb-3">
+        <div class="card card-sultan shadow-sm h-100 border-0 d-flex flex-column">
+          <div class="card-header bg-maroon text-white py-3">
+            <h6 class="card-title m-0 font-weight-bold"><i class="fas fa-medal mr-2 text-warning"></i>Top 10 User Paling Aktif</h6>
+          </div>
+          
+          <div class="p-2 bg-light border-bottom">
+              <div class="input-group input-group-sm">
+                  <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span></div>
+                  <input type="text" id="monitoring_searchTop" class="form-control border-left-0" placeholder="Cari nama user rajin..." autocomplete="off">
+              </div>
+          </div>
+
+          <div class="card-body p-0 table-responsive flex-grow-1" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+              <thead class="bg-light">
+                  <tr>
+                      <th class="text-center" style="width: 10%">Rank</th>
+                      <th>Nama Pengguna</th>
+                      <th class="text-center" style="width: 20%">Hit Login</th>
+                  </tr>
+              </thead>
+              <tbody id="monitoring_tableTopUsers">
+                  <tr><td colspan="3" class="text-center p-5 text-muted"><i class="fas fa-circle-notch fa-spin fa-2x mb-2"></i><br>Menganalisa Log Aktivitas...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <div class="card card-sultan shadow-sm h-100 border-0 d-flex flex-column">
+          <div class="card-header bg-secondary text-white py-3">
+            <h6 class="card-title m-0 font-weight-bold"><i class="fas fa-user-clock mr-2"></i>User Belum Pernah Login</h6>
+          </div>
+
+          <div class="p-2 bg-light border-bottom">
+              <div class="input-group input-group-sm">
+                  <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span></div>
+                  <input type="text" id="monitoring_searchPassive" class="form-control border-left-0" placeholder="Ketik nama untuk mencari..." autocomplete="off">
+              </div>
+          </div>
+
+          <div class="card-body p-0 table-responsive flex-grow-1" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+              <thead class="bg-light text-muted">
+                  <tr>
+                      <th class="text-center" style="width: 10%">No</th>
+                      <th>Nama Pengguna</th>
+                      <th class="text-center" style="width: 20%">Status</th>
+                  </tr>
+              </thead>
+              <tbody id="monitoring_tablePassiveUsers">
+                  <tr><td colspan="3" class="text-center p-5 text-muted"><i class="fas fa-circle-notch fa-spin fa-2x mb-2"></i><br>Membandingkan Database...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+    .monitoring-hover-zoom { transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s; }
+    .monitoring-hover-zoom:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+    .monitoring-overlay-loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); display:flex; justify-content:center; align-items:center; z-index:10; border-radius: 4px; backdrop-filter: blur(2px); }
+</style>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - BAB I & X)
+// ======================================================================
+var MONITORING_PENDING_REQ = 0; 
+var MONITORING_CHART_DAILY = null; 
+var MONITORING_CHART_WEEKLY = null;
+var MONITORING_CHART_MONTHLY = null;
+
+// =================================================================
+// 1. INITIALIZATION & DELEGATION
+// =================================================================
+$(document).ready(function(){
+    $(document).off('click', '#monitoring_btnRefresh').on('click', '#monitoring_btnRefresh', monitoring_refreshData);
+    
+    $(document).off('keyup', '#monitoring_searchTop').on('keyup', '#monitoring_searchTop', function(){
+        var v = $(this).val().toLowerCase();
+        $('.monitoring-item-top').filter(function(){ $(this).toggle($(this).text().toLowerCase().indexOf(v) > -1); });
+    });
+    
+    $(document).off('keyup', '#monitoring_searchPassive').on('keyup', '#monitoring_searchPassive', function(){
+        var v = $(this).val().toLowerCase();
+        $('.monitoring-item-passive').filter(function(){ $(this).toggle($(this).text().toLowerCase().indexOf(v) > -1); });
+    });
+
+    if (typeof Chart === 'undefined') {
+        $.getScript("https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js").done(function() {
+            monitoring_startEngine();
+        }).fail(function() {
+            Sultan.alert('error', 'Library Gagal', 'Tidak dapat memuat Chart.js dari CDN. Periksa koneksi internet.');
+        });
+    } else {
+        monitoring_startEngine();
+    }
+});
+
+// =================================================================
+// 2. ENGINE PENGENDALI (RACE CONDITION PROTECTOR)
+// =================================================================
+function monitoring_refreshData() {
+    if (MONITORING_PENDING_REQ > 0) {
+        Sultan.notif.info('Sistem sedang memproses data, harap tunggu...');
+        return;
+    }
+    
+    $('#monitoring_btnRefresh').prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon mr-1"></i> Loading...');
+    $('#monitoring_loaderChart1, #monitoring_loaderChart2, #monitoring_loaderChart3').fadeIn('fast');
+    
+    $('#monitoring_searchTop, #monitoring_searchPassive').val('');
+    
+    monitoring_startEngine();
+}
+
+function monitoring_startEngine() {
+    MONITORING_PENDING_REQ = 2; 
+    
+    monitoring_loadChartsAndStats(); 
+    monitoring_loadUserAnalysis();   
+}
+
+function monitoring_checkDone() {
+    MONITORING_PENDING_REQ--;
+    if (MONITORING_PENDING_REQ <= 0) {
+        MONITORING_PENDING_REQ = 0;
+        $('#monitoring_btnRefresh').prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon mr-1"></i> Refresh');
+    }
+}
+
+// =================================================================
+// 3. JALUR 1: STATS & GRAFIK (CHART.JS HANDLING)
+// =================================================================
+function monitoring_loadChartsAndStats() {
+    google.script.run.withSuccessHandler(function(json){
+        var data;
+        try { data = JSON.parse(json); } catch(e) { monitoring_checkDone(); return; }
+        
+        monitoring_animateValue('monitoring_valTotal', data.total);
+        monitoring_animateValue('monitoring_valKerja', data.kerja);
+        monitoring_animateValue('monitoring_valLibur', data.libur);
+
+        var dKeys = Object.keys(data.daily || {}).sort();
+        var dVals = dKeys.map(k => data.daily[k]);
+        var dLabels = dKeys.map(k => { var p = k.split('-'); return p[2]+'/'+p[1]; });
+        
+        monitoring_renderChart('monitoring_chartDaily', 'line', dLabels, dVals, 'rgba(128, 0, 0, 0.15)', '#800000', 'Kunjungan Harian');
+        $('#monitoring_loaderChart1').fadeOut('fast');
+
+        var wKeys = Object.keys(data.weekly || {}).sort();
+        var wVals = wKeys.map(k => data.weekly[k]);
+        monitoring_renderChart('monitoring_chartWeekly', 'bar', wKeys, wVals, 'rgba(23, 162, 184, 0.7)', '#17a2b8', 'Kunjungan Mingguan');
+        $('#monitoring_loaderChart2').fadeOut('fast');
+
+        var monthOrder = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        var mKeys = Object.keys(data.monthly || {}).sort((a,b) => {
+             var ma = a.split(' ')[0]; var mb = b.split(' ')[0];
+             return monthOrder.indexOf(ma) - monthOrder.indexOf(mb);
+        });
+        var mVals = mKeys.map(k => data.monthly[k]);
+        
+        monitoring_renderChart('monitoring_chartMonthly', 'bar', mKeys, mVals, 'rgba(40, 167, 69, 0.7)', '#28a745', 'Kunjungan Bulanan');
+        $('#monitoring_loaderChart3').fadeOut('fast');
+
+        monitoring_checkDone();
+    }).withFailureHandler(function(err){
+        monitoring_checkDone();
+        Sultan.alert('error', 'Gagal Memuat Grafik', err.message);
+    }).getMonitoring_Charts();
+}
+
+// =================================================================
+// 4. JALUR 2: ANALISIS TABEL (SULTAN TABLES)
+// =================================================================
+function monitoring_loadUserAnalysis() {
+    var elTop = $('#monitoring_tableTopUsers');
+    var elPas = $('#monitoring_tablePassiveUsers');
+    
+    elTop.html('<tr><td colspan="3" class="text-center p-5 text-muted"><i class="fas fa-circle-notch fa-spin fa-2x mb-2"></i><br>Menganalisa Log Aktivitas...</td></tr>');
+    elPas.html('<tr><td colspan="3" class="text-center p-5 text-muted"><i class="fas fa-circle-notch fa-spin fa-2x mb-2"></i><br>Membandingkan Database...</td></tr>');
+
+    google.script.run.withSuccessHandler(function(json){
+        var data;
+        try { data = JSON.parse(json); } catch(e) { monitoring_checkDone(); return; }
+        
+        elTop.empty();
+        if (data.topUsers && data.topUsers.length > 0) {
+            data.topUsers.forEach((u, i) => {
+                var medal = '';
+                if(i===0) medal = '<i class="fas fa-medal text-warning fa-lg mr-2"></i>'; 
+                else if(i===1) medal = '<i class="fas fa-medal text-secondary fa-lg mr-2"></i>'; 
+                else if(i===2) medal = '<i class="fas fa-medal text-danger fa-lg mr-2"></i>';
+                
+                elTop.append(`
+                    <tr class="monitoring-item-top">
+                        <td class="text-center align-middle font-weight-bold text-muted">${i+1}</td>
+                        <td class="font-weight-bold text-dark align-middle text-uppercase">${medal}${monitoring_escapeHtml(u.name)}</td>
+                        <td class="text-center align-middle"><span class="badge badge-sultan badge-sultan-light-success px-3 py-1" style="font-size:12px;"><i class="fas fa-fire mr-1"></i>${u.count} x</span></td>
+                    </tr>
+                `);
+            });
+        } else {
+            elTop.html('<tr><td colspan="3" class="text-center p-4 text-muted"><i class="fas fa-folder-open fa-2x mb-2 opacity-50"></i><br>Belum ada rekaman aktivitas aplikasi.</td></tr>');
+        }
+
+        elPas.empty();
+        if (data.passiveUsers && data.passiveUsers.length > 0) {
+            data.passiveUsers.forEach((name, i) => {
+                elPas.append(`
+                    <tr class="monitoring-item-passive">
+                        <td class="text-center align-middle text-muted">${i+1}</td>
+                        <td class="text-dark align-middle font-weight-bold text-uppercase">${monitoring_escapeHtml(name)}</td>
+                        <td class="text-center align-middle"><span class="badge badge-sultan badge-sultan-light-danger"><i class="fas fa-times-circle mr-1"></i>Belum Login</span></td>
+                    </tr>
+                `);
+            });
+        } else {
+            elPas.html('<tr><td colspan="3" class="text-center p-5 text-success"><i class="fas fa-check-circle fa-3x mb-3 opacity-75"></i><br><h6 class="font-weight-bold mb-0">Luar Biasa!</h6><span class="small">Semua User telah melakukan login.</span></td></tr>');
+        }
+
+        monitoring_checkDone();
+    }).withFailureHandler(function(err){
+        monitoring_checkDone();
+        $('#monitoring_tableTopUsers').html(`<tr><td colspan="3" class="text-center p-3 text-danger"><i class="fas fa-exclamation-triangle"></i> Gagal memuat: ${err.message}</td></tr>`);
+    }).getMonitoring_Users();
+}
+
+// =================================================================
+// 5. HELPER UTILITIES & VAKSIN CHART.JS
+// =================================================================
+function monitoring_renderChart(canvasId, type, labels, dataVal, bgColor, borderColor, labelName) {
+    var sum = 0;
+    if (dataVal && dataVal.length > 0) {
+        sum = dataVal.reduce(function(a, b) { return a + (parseInt(b)||0); }, 0);
+    }
+    
+    if (sum === 0 || !dataVal || dataVal.length === 0) {
+        labels = ['Belum ada data'];
+        dataVal = [0.1]; 
+        bgColor = '#e9ecef';
+        borderColor = '#ced4da';
+        labelName = 'Kosong';
+    }
+
+    var ctx = document.getElementById(canvasId).getContext('2d');
+    
+    if(canvasId === 'monitoring_chartDaily' && MONITORING_CHART_DAILY) MONITORING_CHART_DAILY.destroy();
+    if(canvasId === 'monitoring_chartWeekly' && MONITORING_CHART_WEEKLY) MONITORING_CHART_WEEKLY.destroy();
+    if(canvasId === 'monitoring_chartMonthly' && MONITORING_CHART_MONTHLY) MONITORING_CHART_MONTHLY.destroy();
+
+    var chartInstance = new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: labelName,
+                data: dataVal,
+                backgroundColor: bgColor,
+                borderColor: borderColor,
+                borderWidth: 2,
+                fill: (type === 'line'), 
+                tension: 0.3, 
+                pointRadius: 4,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: borderColor,
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: { display: false }, 
+                tooltip: { 
+                    mode: 'index', intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            if (labelName === 'Kosong') return 'Tidak ada data';
+                            return context.dataset.label + ': ' + Math.round(context.raw) + ' Hit';
+                        }
+                    }
+                }
+            },
+            scales: {
+                // VAKSIN CHART.JS: Cabut stepSize: 1 mutlak, biarkan Chart.js melakukan auto-scaling cerdas
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { 
+                        precision: 0 // Hanya menjamin angka bulat (tanpa desimal)
+                    },
+                    grid: { borderDash: [2, 4], color: '#e9ecef' }
+                },
+                x: { grid: { display: false } }
+            },
+            animation: { duration: 1500, easing: 'easeOutQuart' },
+            interaction: { mode: 'nearest', axis: 'x', intersect: false }
+        }
+    });
+
+    if(canvasId === 'monitoring_chartDaily') MONITORING_CHART_DAILY = chartInstance;
+    if(canvasId === 'monitoring_chartWeekly') MONITORING_CHART_WEEKLY = chartInstance;
+    if(canvasId === 'monitoring_chartMonthly') MONITORING_CHART_MONTHLY = chartInstance;
+}
+
+function monitoring_animateValue(id, endValue) {
+    var obj = document.getElementById(id);
+    if(!obj) return;
+    var start = 0; var end = parseInt(endValue);
+    if (isNaN(end) || end === 0) { obj.innerHTML = "0"; return; }
+    
+    var duration = 1500; 
+    var range = end - start; 
+    var current = start; 
+    var stepTime = Math.abs(Math.floor(duration / range));
+    if(stepTime < 15) stepTime = 15; 
+    var stepVal = Math.ceil(range / (duration / stepTime));
+    
+    var timer = setInterval(function() {
+        current += stepVal; 
+        if (current >= end) { current = end; clearInterval(timer); }
+        obj.innerHTML = current.toLocaleString('id-ID');
+    }, stepTime);
+}
+
+function monitoring_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

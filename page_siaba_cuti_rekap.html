@@ -1,0 +1,389 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-list-alt text-maroon mr-2"></i>Rekap Jumlah Cuti
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#rekapcuti_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="rekapcuti_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-2 pl-3 text-justify">
+                  <li>Halaman ini menampilkan rekapitulasi jumlah cuti yang sudah diambil.</li>
+                  <li>Pilih <b>Tahun</b> lalu klik tombol Ikon <b><i class="fas fa-sync-alt"></i></b> untuk memuat ulang data dari server.</li>
+                  <li><b>Ajuan</b> merupakan frekuensi pengajuan dan <b>Hari</b> merupakan total jumlah hari yang diambil.</li>
+                  <li>Singkatan: <b>CT</b> (Tahunan), <b>CS</b> (Sakit), <b>CAP</b> (Alasan Penting), <b>CM</b> (Melahirkan), <b>CB</b> (Besar), <b>CLTN</b> (Di Luar Tanggungan Negara).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="rekapcuti_filterTahun" class="form-control form-control-sultan input-auto-width min-w-100">
+                    <option value="">- Memuat Tahun... -</option>
+                </select>
+
+                <div id="rekapcuti_filterContainer" style="display: none;" class="d-flex align-items-center">
+                    <select id="rekapcuti_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                        <option value="">- Memvalidasi Akses... -</option>
+                    </select>
+                </div>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="rekapcuti_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server">
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="rekapcuti_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="rekapcuti_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="rekapcuti_tableState" style="display: none;">
+                  <table id="rekapcuti_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact table-header-compact mb-0 w-100 text-nowrap">
+                    <thead class="bg-light">
+                        <tr>
+                            <th rowspan="2" class="th-main col-sticky-left border-right align-middle text-left bg-white" style="min-width: 250px; z-index: 5;">Nama ASN</th>
+                            <th colspan="2" class="th-main text-center bg-col-highlight-1">CT</th>
+                            <th colspan="2" class="th-main text-center">CS</th>
+                            <th colspan="2" class="th-main text-center bg-col-highlight-1">CAP</th>
+                            <th colspan="2" class="th-main text-center">CM</th>
+                            <th colspan="2" class="th-main text-center bg-col-highlight-1">CB</th>
+                            <th colspan="2" class="th-main text-center border-right-0">CLTN</th>
+                        </tr>
+                        <tr>
+                            <th class="th-sub text-center bg-col-highlight-1">Ajuan</th><th class="th-sub text-center border-right bg-col-highlight-1">Hari</th>
+                            <th class="th-sub text-center">Ajuan</th><th class="th-sub text-center border-right">Hari</th>
+                            <th class="th-sub text-center bg-col-highlight-1">Ajuan</th><th class="th-sub text-center border-right bg-col-highlight-1">Hari</th>
+                            <th class="th-sub text-center">Ajuan</th><th class="th-sub text-center border-right">Hari</th>
+                            <th class="th-sub text-center bg-col-highlight-1">Ajuan</th><th class="th-sub text-center border-right bg-col-highlight-1">Hari</th>
+                            <th class="th-sub text-center">Ajuan</th><th class="th-sub text-center border-right-0">Hari</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - READ ONLY)
+// BAB I: Aturan Namespace (Prefix: rekapcuti_)
+// ======================================================================
+var REKAPCUTI_CACHE_DATA = [];
+var REKAPCUTI_CACHE_YEAR_LOADED = ""; 
+var REKAPCUTI_TABEL_INSTANCE = null;
+
+var REKAPCUTI_USER_AKTIF = "";
+var REKAPCUTI_IS_ADMIN = false;
+var REKAPCUTI_UNIT_TERKUNCI = ""; 
+var REKAPCUTI_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE (Hukum Ke-1)
+// =================================================================
+$(document).ready(function() {
+    REKAPCUTI_TABEL_INSTANCE = null;
+    $('#rekapcuti_tableState').hide();
+    $('#rekapcuti_loadingState').show();
+    $('#rekapcuti_filterContainer').hide();
+
+    // Cek Sesi Login & Role
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        REKAPCUTI_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        REKAPCUTI_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        REKAPCUTI_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { REKAPCUTI_USER_NPSN = ""; REKAPCUTI_IS_ADMIN = false; }
+
+    // VAKSINASI EVENT DELEGATION
+    $(document).off('click', '#rekapcuti_btnRefresh').on('click', '#rekapcuti_btnRefresh', rekapcuti_tarikDataServer); 
+    $(document).off('change', '#rekapcuti_filterTahun').on('change', '#rekapcuti_filterTahun', rekapcuti_prosesCariData); 
+    $(document).off('change', '#rekapcuti_filterUnit').on('change', '#rekapcuti_filterUnit', rekapcuti_terapkanFilterLokal);
+
+    // Load Opsi Tahun Terlebih Dahulu
+    rekapcuti_initYears(); 
+});
+
+// =================================================================
+// 2. CHAINED INITIALIZATION: YEARS -> GATEKEEPER -> FETCH
+// =================================================================
+function rekapcuti_initYears() {
+    $('#rekapcuti_loadingText').html('Memuat Konfigurasi Tahun...');
+    
+    google.script.run.withSuccessHandler(function(years) {
+        var select = $('#rekapcuti_filterTahun');
+        select.empty().append('<option value="">- Pilih Tahun -</option>');
+        
+        if (!years || years.length === 0) {
+            $('#rekapcuti_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Konfigurasi tahun belum tersedia di server.</span>');
+            return;
+        }
+
+        var currentYear = new Date().getFullYear().toString();
+        var found = false;
+
+        years.forEach(function(y) {
+            var isSelected = (y.tahun == currentYear) ? 'selected' : '';
+            if(isSelected) found = true;
+            select.append(`<option value="${rekapcuti_escapeHtml(y.id)}" ${isSelected}>${rekapcuti_escapeHtml(y.tahun)}</option>`);
+        });
+        
+        if (!found && years.length > 0) select.val(years[0].id);
+
+        rekapcuti_validasiAksesUser();
+    }).getRekapYears();
+}
+
+function rekapcuti_validasiAksesUser() {
+    $('#rekapcuti_loadingText').html('Mempersiapkan Akses...');
+
+    if (REKAPCUTI_IS_ADMIN) {
+        $('#rekapcuti_filterContainer').show();
+        $('#rekapcuti_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        rekapcuti_tarikDataServer(); 
+    } else {
+        if (!REKAPCUTI_USER_NPSN) {
+            $('#rekapcuti_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#rekapcuti_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${rekapcuti_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                REKAPCUTI_UNIT_TERKUNCI = dataUnit.unitKerja;
+                rekapcuti_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#rekapcuti_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${rekapcuti_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNPSN(REKAPCUTI_USER_NPSN);
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA & FILTER MANUAL TRIGGER
+// =================================================================
+function rekapcuti_prosesCariData() {
+    var selectedId = $('#rekapcuti_filterTahun').val();
+    if (!selectedId) { Sultan.notif.info('Pilih Tahun terlebih dahulu.'); return; }
+
+    if (selectedId === REKAPCUTI_CACHE_YEAR_LOADED && REKAPCUTI_CACHE_DATA.length > 0) {
+        rekapcuti_terapkanFilterLokal(); 
+    } else {
+        rekapcuti_tarikDataServer();
+    }
+}
+
+function rekapcuti_tarikDataServer() {
+    var sheetId = $('#rekapcuti_filterTahun').val();
+    if(!sheetId) return;
+
+    var btn = $('#rekapcuti_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#rekapcuti_tabelUtama')) {
+        $('#rekapcuti_tableState').hide();
+        $('#rekapcuti_loadingText').html('Mengambil data rekap dari server...');
+        $('#rekapcuti_loadingState').show();
+    }
+
+    google.script.run.withSuccessHandler(function(jsonStr) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        
+        var res;
+        try {
+            res = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonString;
+        } catch(e) {
+            $('#rekapcuti_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+            return;
+        }
+
+        if (res && res.error) { 
+            $('#rekapcuti_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + rekapcuti_escapeHtml(res.error) + '</span>'); 
+            return; 
+        }
+
+        try {
+            REKAPCUTI_CACHE_DATA = res.data || [];
+            REKAPCUTI_CACHE_YEAR_LOADED = sheetId; 
+
+            if (REKAPCUTI_IS_ADMIN) rekapcuti_populateFilterUnit();
+            
+            rekapcuti_terapkanFilterLokal();
+
+        } catch(e) { 
+            $('#rekapcuti_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + rekapcuti_escapeHtml(e.message) + '</span>'); 
+        }
+
+    }).withFailureHandler(function(e) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#rekapcuti_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus.</span>');
+    }).getRekapData(sheetId);
+}
+
+function rekapcuti_populateFilterUnit() {
+    var unique = new Set();
+    REKAPCUTI_CACHE_DATA.forEach(function(row) {
+        var unit = String(row[0] || "").trim();
+        if (unit) unique.add(unit);
+    });
+    
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#rekapcuti_filterUnit');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${rekapcuti_escapeHtml(u)}">${rekapcuti_escapeHtml(u)}</option>`); });
+    
+    select.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    if(currentVal && unique.has(currentVal)) { select.val(currentVal); }
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK & DOM COLORING (ANTI SCROLLX BUG)
+// =================================================================
+function rekapcuti_terapkanFilterLokal() {
+    var tAdminUnit = REKAPCUTI_IS_ADMIN ? $('#rekapcuti_filterUnit').val().toUpperCase() : "";
+    var tUnitUser  = String(REKAPCUTI_UNIT_TERKUNCI).trim().toUpperCase();
+    
+    var hasil = REKAPCUTI_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase(); 
+        if (REKAPCUTI_IS_ADMIN) { return (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit); }
+        else { return (rUnit === tUnitUser); }
+    });
+    
+    rekapcuti_renderTabel(hasil);
+}
+
+function rekapcuti_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+
+        // Kolom 1 (Index 0): GABUNGAN NAMA & NIP (Hukum BAB IX)
+        var txtUnitHtml = REKAPCUTI_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${rekapcuti_escapeHtml(row[0] || "-")}</div>` : '';
+        var uiNama = `<div class="font-weight-bold text-dark text-wrap">${rekapcuti_escapeHtml(row[1] || "-")}</div>
+                      <div class="small text-muted text-wrap">${rekapcuti_escapeHtml(row[2] || "")}</div>${txtUnitHtml}`;
+        arrRow.push(uiNama);
+
+        // Kolom 2 - 13: DATA ANGKA (Excel Index 3 sampai 14)
+        for (var c = 3; c <= 14; c++) {
+            var val = (row[c] === undefined || row[c] === null) ? "" : String(row[c]);
+            arrRow.push(rekapcuti_escapeHtml(val));
+        }
+        dtArray.push(arrRow);
+    });
+
+    if (!$.fn.DataTable.isDataTable('#rekapcuti_tabelUtama')) {
+        REKAPCUTI_TABEL_INSTANCE = $('#rekapcuti_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, 
+            // VAKSIN FATAL: scrollX dan scrollCollapse DIHAPUS MUTLAK
+            // Pengaturan scroll akan ditangani sepenuhnya oleh class .table-responsive pada atribut 'dom'
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "columnDefs": [
+                // VAKSIN BAB IX: Class .col-sticky-left disuntikkan murni melalui columnDefs
+                { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-left" },
+                { "targets": [1,2,3,4,5,6,7,8,9,10,11,12], "className": "text-center align-middle" }
+            ],
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "emptyTable": '<div class="py-4 text-center text-muted"><i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3" style="opacity: 0.6;"></i><br><h6 class="font-weight-bold text-dark mb-1">Belum Ada Data</h6><p class="small mb-0">Tidak ada rekap cuti untuk filter terpilih.</p></div>' 
+            },
+            // Pewarnaan Native DOM (Performa Turbo Seamless)
+            "createdRow": function(row, data, dataIndex) {
+                 var tds = row.children;
+                 for (var i = 0; i < tds.length; i++) {
+                     var cell = tds[i];
+                     var rawVal = cell.textContent.trim();
+
+                     if (i > 0) {
+                         // Warna Background Zebra menyesuaikan Header
+                         if (i === 1 || i === 2 || i === 5 || i === 6 || i === 9 || i === 10) {
+                             cell.classList.add('bg-col-highlight-1');
+                         }
+                         
+                         // Format Angka: Buramkan 0/-, Bold angka lain
+                         if (rawVal === "0" || rawVal === "0.00" || rawVal === "-" || rawVal === "") {
+                             cell.innerHTML = '<span class="text-muted opacity-50">-</span>';
+                         } else {
+                             // Index Genap = Hari (Merah), Index Ganjil = Ajuan (Gelap)
+                             if (i % 2 === 0) { cell.innerHTML = `<span class="font-weight-bold text-danger">${rawVal}</span>`; } 
+                             else { cell.innerHTML = `<span class="font-weight-bold text-dark">${rawVal}</span>`; }
+                         }
+                     }
+                 }
+            }
+        });
+
+        $('#rekapcuti_loadingState').hide();
+        $('#rekapcuti_tableState').show();
+        setTimeout(function(){ REKAPCUTI_TABEL_INSTANCE.columns.adjust(); }, 150);
+    } 
+    else {
+        REKAPCUTI_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        if ($('#rekapcuti_tableState').is(':hidden')) {
+            $('#rekapcuti_loadingState').hide();
+            $('#rekapcuti_tableState').show();
+            setTimeout(function(){ REKAPCUTI_TABEL_INSTANCE.columns.adjust(); }, 150);
+        }
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: PEMBERSIH XSS
+// =================================================================
+function rekapcuti_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

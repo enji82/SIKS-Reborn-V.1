@@ -1,6 +1,8 @@
 <nav class="mt-3">
-  <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="true">
-    
+  <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent"
+      data-widget="treeview" role="menu" data-accordion="true">
+
+    <!-- BERANDA -->
     <li class="nav-item">
       <a href="#" class="nav-link" data-page="home">
         <i class="nav-icon fas fa-home text-maroon"></i>
@@ -8,28 +10,29 @@
       </a>
     </li>
 
+    <!-- SK PEMBAGIAN TUGAS -->
     <li class="nav-item">
       <a href="#" class="nav-link">
         <i class="nav-icon fas fa-file-signature text-maroon"></i>
         <p>SK Pembagian Tugas <i class="right fas fa-angle-left"></i></p>
       </a>
       <ul class="nav nav-treeview">
+
         <li class="nav-item"><a href="#" class="nav-link" data-page="sk_dashboard"><i class="far fa-circle nav-icon"></i><p>Dashboard SK</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link" data-page="sk_unggah"><i class="far fa-circle nav-icon"></i><p>Unggah SK</p></a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-page="sk_data"><i class="far fa-circle nav-icon"></i><p>Data SK</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link" data-page="sk_kirim"><i class="far fa-circle nav-icon"></i><p>Status Pengiriman</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link" data-page="sk_arsip"><i class="far fa-circle nav-icon"></i><p>Arsip SK (Drive)</p></a></li>
-        <li class="nav-item id-admin-only"><a href="#" class="nav-link" data-page="sk_trash"><i class="far fa-circle nav-icon"></i><p>Trash SK</p></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-page="sk_status"><i class="far fa-circle nav-icon"></i><p>Status Pengiriman</p></a></li>
+
       </ul>
     </li>
 
+    <!-- LAPORAN BULAN -->
     <li class="nav-item">
       <a href="#" class="nav-link">
         <i class="nav-icon fas fa-file-invoice text-maroon"></i>
         <p>Laporan Bulan <i class="right fas fa-angle-left"></i></p>
       </a>
       <ul class="nav nav-treeview">
-        <li class="nav-item"><a href="#" class="nav-link" data-page="lapbul_landing"><i class="far fa-circle nav-icon"></i><p>Unggah File</p></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-page="lapbul_unggah"><i class="far fa-circle nav-icon"></i><p>Unggah File</p></a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-page="lapbul_riwayat"><i class="far fa-circle nav-icon"></i><p>Riwayat Pengiriman</p></a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-page="lapbul_status"><i class="far fa-circle nav-icon"></i><p>Status Laporan</p></a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-page="lapbul_kelola"><i class="far fa-circle nav-icon"></i><p>Kelola Data</p></a></li>
@@ -109,54 +112,139 @@
     <li class="nav-item">
       <a href="#" class="nav-link">
         <i class="nav-icon fas fa-fingerprint text-maroon"></i>
-        <p>SIABA <i class="right fas fa-angle-left"></i></p>
+        <p>
+          SIABA
+          <i class="right fas fa-angle-left"></i>
+        </p>
       </a>
       <ul class="nav nav-treeview">
-        <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_panduan"><i class="far fa-circle nav-icon"></i><p>Panduan</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_daftar_presensi"><i class="far fa-circle nav-icon"></i><p>Daftar Presensi</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_tidak_presensi"><i class="far fa-circle nav-icon"></i><p>Tidak Presensi</p></a></li>
-        <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_apel_upacara"><i class="far fa-circle nav-icon"></i><p>Apel & Upacara</p></a></li>
+        
         <li class="nav-item">
-          <a href="#" class="nav-link"><i class="far fa-question-circle nav-icon"></i><p>Lupa Presensi <i class="right fas fa-angle-left"></i></p></a>
+          <a href="#" class="nav-link" data-page="siaba_dashboard">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Dashboard Siaba</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="far fa-circle nav-icon"></i>
+            <p>
+              Presensi
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_lupa_unduh"><i class="far fa-circle nav-icon"></i><p>Unduh Format</p></a></li>
-            <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_lupa_unggah"><i class="far fa-circle nav-icon"></i><p>Unggah Surat</p></a></li>
-            <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_lupa_cek"><i class="far fa-circle nav-icon"></i><p>Cek Status</p></a></li>
-            <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_lupa_rekap"><i class="far fa-circle nav-icon"></i><p>Rekap Bulanan</p></a></li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_presensi_harian">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Harian</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_presensi_apel">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Apel dan Upacara</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_presensi_tidak">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Tidak Presensi</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_presensi_terlambat">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Terlambat</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_presensi_pulang">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Pulang Awal</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_presensi_unduh">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Unduh Rekap Bulanan</p>
+              </a>
+            </li>
           </ul>
         </li>
+
         <li class="nav-item">
-          <a href="#" class="nav-link"><i class="far fa-times-circle nav-icon"></i><p>Salah Klik <i class="right fas fa-angle-left"></i></p></a>
+          <a href="#" class="nav-link" data-page="siaba_presensi_lupa">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Lupa Presensi</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-page="siaba_presensi_salah">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Salah Presensi</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link" data-page="siaba_perjalanan_dinas">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Perjalanan Dinas</p>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="far fa-circle nav-icon"></i>
+            <p>
+              Cuti
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
           <ul class="nav nav-treeview">
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_salah_form"><i class="far fa-circle nav-icon"></i><p>Formulir</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_salah_cek"><i class="far fa-circle nav-icon"></i><p>Cek Perbaikan</p></a></li>
+
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_cuti_data">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Pengajuan</p>
+              </a>
+            </li>
+                        <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_cuti_sisa">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Sisa Cuti Tahunan</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_cuti_rekap">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Rekap Cuti</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_cuti_unggah">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Unggah Surat Cuti</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-page="siaba_cuti_informasi">
+                <i class="far fa-dot-circle nav-icon"></i>
+                <p>Informasi</p>
+              </a>
+            </li>
           </ul>
         </li>
+
         <li class="nav-item">
-          <a href="#" class="nav-link"><i class="fas fa-plane nav-icon"></i><p>Perj. Dinas <i class="right fas fa-angle-left"></i></p></a>
-          <ul class="nav nav-treeview">
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_dinas_unduh"><i class="far fa-circle nav-icon"></i><p>Unduh SPT</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_dinas_unggah"><i class="far fa-circle nav-icon"></i><p>Unggah SPT</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_dinas_cek"><i class="far fa-circle nav-icon"></i><p>Cek Status</p></a></li>
-          </ul>
+          <a href="#" class="nav-link" data-page="siaba_format_panduan">
+            <i class="far fa-circle nav-icon"></i>
+            <p>Format dan Panduan</p>
+          </a>
         </li>
-        <li class="nav-item">
-           <a href="#" class="nav-link"><i class="fas fa-bed nav-icon"></i><p>Cuti Pegawai <i class="right fas fa-angle-left"></i></p></a>
-           <ul class="nav nav-treeview">
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_cuti_sisa"><i class="far fa-circle nav-icon"></i><p>Sisa Cuti</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_cuti_unduh"><i class="far fa-circle nav-icon"></i><p>Unduh Surat</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_cuti_unggah"><i class="far fa-circle nav-icon"></i><p>Unggah Surat</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_cuti_cek"><i class="far fa-circle nav-icon"></i><p>Cek Status</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_cuti_data"><i class="far fa-circle nav-icon"></i><p>Data Cuti (Admin)</p></a></li>
-           </ul>
-        </li>
-        <li class="nav-item">
-           <a href="#" class="nav-link"><i class="fas fa-clipboard-list nav-icon"></i><p>Rekapitulasi <i class="right fas fa-angle-left"></i></p></a>
-           <ul class="nav nav-treeview">
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_rekap_terlambat"><i class="far fa-circle nav-icon"></i><p>Datang Terlambat</p></a></li>
-             <li class="nav-item"><a href="#" class="nav-link" data-page="siaba_rekap_pulang_awal"><i class="far fa-circle nav-icon"></i><p>Pulang Awal</p></a></li>
-           </ul>
-        </li>
+
       </ul>
     </li>
 

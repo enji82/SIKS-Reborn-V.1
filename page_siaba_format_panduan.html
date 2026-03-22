@@ -1,0 +1,103 @@
+<style>
+    /* Tombol Sultan */
+    .btn-unduh-preview {
+        background-color: #001f3f; 
+        color: #d4af37 !important; 
+        border: 1px solid #001f3f;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        border-radius: 50px; 
+        text-transform: uppercase;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease-in-out;
+    }
+    .btn-unduh-preview:hover {
+        background-color: #d4af37;
+        color: #001f3f !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(212, 175, 55, 0.4);
+    }
+    /* Efek Hover untuk Card Format */
+    .card-format-sultan {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-format-sultan:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+    }
+</style>
+
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-book text-maroon mr-2"></i>Format dan Panduan
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    
+    <div class="row justify-content-center mb-3">
+        <div class="col-12 col-lg-10">
+            <div class="card-sultan shadow-sm card-format-sultan">
+                <div class="card-body p-4 border-left-warning d-flex align-items-center justify-content-between flex-wrap" style="gap: 15px;">
+                    <div>
+                        <h5 class="font-weight-bold text-dark mb-1">
+                            <i class="fas fa-file-word text-primary mr-2"></i>Surat Pernyataan Tidak Presensi Elektronik
+                        </h5>
+                        <p class="text-muted mb-0">
+                            Format dokumen Word (.docx) untuk ASN yang lupa melakukan presensi pada aplikasi Siaba.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="https://docs.google.com/document/d/107zChK8J3oznI3KVZTXTmsh-cxpVCcEr/export?format=docx" class="btn-unduh-preview" style="padding: 8px 20px; font-size: 13px;">
+                            <i class="fas fa-cloud-download-alt mr-2"></i> Unduh Format
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mb-4">
+      <div class="col-12 col-lg-10">
+        
+        <div class="card-sultan shadow-sm">
+            <div class="card-header bg-maroon text-white py-2">
+                <h6 class="card-title m-0 font-weight-bold">
+                    <i class="fas fa-book-reader mr-2"></i>Panduan Penggunaan Aplikasi
+                </h6>
+            </div>
+            <div class="card-body p-0 border-bottom border-left border-right rounded-bottom" style="background-color: #f4f6f9;">
+                
+                <div style="position: relative; width: 100%; padding-bottom: 75%; overflow: hidden;"> 
+                    
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3 opacity-50"></i>
+                        <span class="text-muted font-weight-bold">Memuat dokumen panduan...</span>
+                    </div>
+
+                    <iframe 
+                        src="https://drive.google.com/file/d/1_hDGrcQAbxeE2O82oNZ3VFtFhjWlGV3_/preview" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 2;" 
+                        allow="autoplay">
+                    </iframe>
+                    
+                </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>

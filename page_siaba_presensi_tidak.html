@@ -1,0 +1,392 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-user-times text-maroon mr-2"></i>Rekap Tidak Presensi
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#tp_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="tp_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-2 pl-3 text-justify">
+                  <li>Halaman ini menampilkan rekaman ASN yang tidak melakukan presensi (Alpha/Lupa).</li>
+                  <li>Data yang ditampilkan diperbarui secara berkala (tidak realtime).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                <select id="tp_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80" disabled></select>
+                <select id="tp_filterBulan" class="form-control form-control-sultan input-auto-width" disabled></select>
+                
+                <select id="tp_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="tp_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+                <button type="button" class="btn btn-primary font-weight-bold shadow-sm d-none">Spacer</button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="tp_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="tp_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="tp_tableState" style="display: none;">
+                  <table id="tp_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="col-sticky-left border-right text-left px-3 align-middle bg-white" style="z-index: 5;">Nama ASN</th>
+                            <th class="text-center align-middle text-dark px-2">Jumlah Tidak Presensi</th>
+                            <th class="text-center align-middle text-dark px-2">Tidak Datang</th>
+                            <th class="text-center align-middle text-dark px-2">Tidak Pulang</th>
+                            <th class="text-center align-middle text-dark px-2" style="min-width: 150px;">Tanggal Tidak Presensi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - READ ONLY)
+// BAB I: Prefix Mutlak tp_
+// ======================================================================
+var TP_CACHE_DATA = []; 
+var TP_CACHE_THN = "";
+var TP_CACHE_BLN = "";
+var TP_TABEL_INSTANCE = null;
+
+var TP_USER_AKTIF = "";
+var TP_IS_ADMIN = false;
+var TP_UNIT_TERKUNCI = ""; 
+var TP_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE
+// =================================================================
+$(document).ready(function() {
+    TP_TABEL_INSTANCE = null;
+    $('#tp_tableState').hide();
+    $('#tp_loadingState').show();
+
+    // Cek Sesi Login
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        TP_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        TP_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        TP_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { TP_USER_NPSN = ""; TP_IS_ADMIN = false; }
+    
+    // VAKSINASI EVENT SPA DELEGATION (Pemusnahan onClick Inline)
+    $(document).off('change', '#tp_filterTahun, #tp_filterBulan').on('change', '#tp_filterTahun, #tp_filterBulan', tp_prosesCariData);
+    $(document).off('change', '#tp_filterUnit').on('change', '#tp_filterUnit', tp_terapkanFilterLokal);
+    $(document).off('click', '#tp_btnRefresh').on('click', '#tp_btnRefresh', tp_tarikDataServer);
+
+    tp_initFilters();
+});
+
+// =================================================================
+// 2. CHAINED INITIALIZATION: FILTERS -> GATEKEEPER -> FETCH
+// =================================================================
+function tp_initFilters() {
+    $('#tp_loadingText').html('Memuat Konfigurasi Waktu...');
+
+    google.script.run.withSuccessHandler(function(res) {
+        var data = JSON.parse(res);
+        
+        var elThn = $('#tp_filterTahun').empty().append('<option value="">- Tahun -</option>');
+        if(data.years) data.years.forEach(y => elThn.append(`<option value="${tp_escapeHtml(y)}">${tp_escapeHtml(y)}</option>`));
+        
+        var elBln = $('#tp_filterBulan').empty().append('<option value="">- Bulan -</option>');
+        if(data.months) data.months.forEach(m => elBln.append(`<option value="${tp_escapeHtml(m)}">${tp_escapeHtml(m)}</option>`));
+
+        var now = new Date();
+        var curYear = now.getFullYear().toString();
+        var mNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+        var curMonth = mNames[now.getMonth()];
+
+        if ($("#tp_filterTahun option[value='"+curYear+"']").length > 0) $('#tp_filterTahun').val(curYear);
+        if ($("#tp_filterBulan option[value='"+curMonth+"']").length > 0) $('#tp_filterBulan').val(curMonth);
+
+        $('#tp_filterTahun, #tp_filterBulan, #tp_btnRefresh').prop('disabled', false);
+
+        tp_validasiAksesUser(); 
+
+    }).getSiabaTidakFilters();
+}
+
+function tp_validasiAksesUser() {
+    $('#tp_loadingText').html('Mempersiapkan Akses...');
+
+    if (TP_IS_ADMIN) {
+        $('#tp_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        tp_tarikDataServer(); 
+    } else {
+        if (!TP_USER_NPSN) {
+            $('#tp_filterUnit').empty().append('<option value="">AKSES DITOLAK (NPSN KOSONG)</option>');
+            $('#tp_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#tp_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#tp_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${tp_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                TP_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#tp_filterUnit').empty().append($('<option>', {value: TP_UNIT_TERKUNCI, text: TP_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                tp_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#tp_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#tp_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Database Induk Terputus: ${tp_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNPSN(TP_USER_NPSN); 
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA & FILTER MANUAL TRIGGER (BAB VII - Turbo Seamless)
+// =================================================================
+function tp_prosesCariData() {
+    var th = $('#tp_filterTahun').val(); 
+    var bl = $('#tp_filterBulan').val();
+    if (!th || !bl) { Sultan.notif.info('Pilih Tahun dan Bulan.'); return; }
+    
+    if (th === TP_CACHE_THN && bl === TP_CACHE_BLN && TP_CACHE_DATA.length > 0) { 
+        tp_terapkanFilterLokal(); 
+    } else { 
+        tp_tarikDataServer(); 
+    }
+}
+
+function tp_tarikDataServer() {
+    var th = $('#tp_filterTahun').val(); 
+    var bl = $('#tp_filterBulan').val();
+    if(!th || !bl) return;
+
+    var btn = $('#tp_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#tp_tabelUtama')) {
+        $('#tp_tableState').hide();
+        $('#tp_loadingText').html('Mengambil data alpha & lupa absen...');
+        $('#tp_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            
+            var data;
+            try {
+                data = typeof res === 'string' ? JSON.parse(res) : res;
+            } catch(e) {
+                $('#tp_tableState').hide();
+                $('#tp_loadingState').show();
+                $('#tp_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+                return;
+            }
+            
+            if (data && data.error) {
+                $('#tp_tableState').hide();
+                $('#tp_loadingState').show();
+                $('#tp_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${tp_escapeHtml(data.error)}</span>`);
+                return;
+            }
+            
+            try {
+                TP_CACHE_DATA = data.rows || []; 
+                TP_CACHE_THN = th;
+                TP_CACHE_BLN = bl;
+
+                if(TP_IS_ADMIN) tp_populateDropdownUnit();
+
+                tp_terapkanFilterLokal();
+                
+            } catch(e) { 
+                $('#tp_tableState').hide();
+                $('#tp_loadingState').show();
+                $('#tp_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + tp_escapeHtml(e.message) + '</span>'); 
+            }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-search text-maroon"></i>');
+            $('#tp_tableState').hide();
+            $('#tp_loadingState').show();
+            $('#tp_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${tp_escapeHtml(err.message)}</span>`);
+        })
+        .getSiabaTidakData(th, bl, "SEMUA"); 
+}
+
+function tp_populateDropdownUnit() {
+    var unique = new Set();
+    TP_CACHE_DATA.forEach(function(row) {
+        var lastIdx = row.length - 1;
+        var unit = String(row[lastIdx]).trim();
+        if (unit) unique.add(unit);
+    });
+    
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#tp_filterUnit');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${tp_escapeHtml(u)}">${tp_escapeHtml(u)}</option>`); });
+    
+    select.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    if(currentVal && unique.has(currentVal)) { select.val(currentVal); }
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK (Hukum Ke-4) & VAKSIN ANTI-CRASH
+// =================================================================
+function tp_terapkanFilterLokal() {
+    var tAdminUnit = TP_IS_ADMIN ? String($('#tp_filterUnit').val() || "").toUpperCase() : "";
+    var tUnitUser  = String(TP_UNIT_TERKUNCI || "").trim().toUpperCase();
+    
+    var hasil = TP_CACHE_DATA.filter(function(row) {
+        var lastIdx = row.length - 1;
+        var rUnit = String(row[lastIdx] || "").trim().toUpperCase(); 
+        
+        if (TP_IS_ADMIN) {
+            return (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit);
+        } else {
+            return (rUnit === tUnitUser);
+        }
+    });
+
+    tp_renderTabel(hasil);
+}
+
+function tp_renderTabel(dataRows) {
+    var dtArray = []; 
+    
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+        
+        // Kolom 1 (Index 0): Gabungan Nama & NIP (Anti-XSS & BAB IX)
+        var safeNama = tp_escapeHtml(row[0]);
+        var safeNip  = tp_escapeHtml(row[1]);
+        var safeUnit = tp_escapeHtml(row[row.length - 1] || '-');
+        
+        var txtUnitHtml = TP_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${safeUnit}</div>` : '';
+        arrRow.push(`<div class="font-weight-bold text-dark text-nowrap text-left">${safeNama}</div><div class="small text-muted text-left text-nowrap">${safeNip}</div>${txtUnitHtml}`);
+        
+        // Kolom 2: Jumlah LA
+        arrRow.push(row[2] == 0 || row[2] === "" ? "-" : `<span class="badge badge-danger px-2 py-1">${tp_escapeHtml(row[2])}</span>`);
+        
+        // Kolom 3: LAD (Telah divaksin menjadi text-danger)
+        arrRow.push(row[3] == 0 || row[3] === "" ? "-" : `<span class="font-weight-bold text-danger">${tp_escapeHtml(row[3])}</span>`);
+        
+        // Kolom 4: LAP (Telah divaksin menjadi text-danger)
+        arrRow.push(row[4] == 0 || row[4] === "" ? "-" : `<span class="font-weight-bold text-danger">${tp_escapeHtml(row[4])}</span>`);
+        
+        // Kolom 5: Tanggal LA
+        arrRow.push(row[5] === "" || row[5] === "-" ? "-" : `<span class="text-dark" style="white-space:normal;">${tp_escapeHtml(row[5])}</span>`);
+
+        dtArray.push(arrRow);
+    });
+
+    // JIKA DATATABLES BELUM PERNAH DIBUAT (BAB VII)
+    if (!$.fn.DataTable.isDataTable('#tp_tabelUtama')) {
+        TP_TABEL_INSTANCE = $('#tp_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, // Performa Turbo
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "search": "", "searchPlaceholder": "Cari Nama...",
+                "emptyTable": '<div class="py-5 text-center text-muted"><div class="mb-3"><i class="fas fa-clipboard-list fa-3x text-gray-300" style="opacity: 0.6;"></i></div><h6 class="font-weight-bold text-dark mb-1">Tidak Ada Data</h6><p class="small mb-0">Tidak ditemukan rekap data alpha/lupa untuk unit ini.</p></div>' 
+            },
+            "columnDefs": [
+                { "targets": 0, "width": "auto", "className": "col-sticky-left border-right text-left px-3 align-middle bg-white" },
+                { "targets": [1,2,3,4], "className": "text-center align-middle px-2 py-2" }
+            ],
+            // Pasang z-index untuk col-sticky
+            "createdRow": function(row, data, dataIndex) {
+                 var cell = row.childNodes[0];
+                 cell.style.position = 'sticky';
+                 cell.style.left = '0';
+                 cell.style.zIndex = '2';
+                 cell.style.backgroundColor = '#ffffff';
+            }
+        });
+
+        // BUKA RUANG B SEKALI SAJA INSTAN (Tanpa fadeIn)
+        $('#tp_loadingState').hide();
+        $('#tp_tableState').show();
+        TP_TABEL_INSTANCE.columns.adjust();
+    } 
+    // JIKA TABEL SUDAH ADA (Refresh / Filter)
+    else {
+        TP_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#tp_tableState').is(':hidden')) {
+            $('#tp_loadingState').hide();
+            $('#tp_tableState').show();
+            TP_TABEL_INSTANCE.columns.adjust();
+        }
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: PEMBERSIH XSS (Hukum Ke-5)
+// =================================================================
+function tp_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

@@ -1,100 +1,487 @@
-<div class="container-fluid">
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Dashboard Data PTK</h1>
-  </div>
-
-  <div class="row">
-    
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-primary shadow h-100 py-2" style="border-left: 5px solid #0d6efd;">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total PTK</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="dash-total-ptk">Loading...</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-users fa-2x text-gray-300" style="opacity:0.3"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-success shadow h-100 py-2" style="border-left: 5px solid #198754;">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Status PNS</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="dash-total-pns">Loading...</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-user-tie fa-2x text-gray-300" style="opacity:0.3"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-info shadow h-100 py-2" style="border-left: 5px solid #0dcaf0;">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Status PPPK</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="dash-total-pppk">Loading...</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-id-card fa-2x text-gray-300" style="opacity:0.3"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-warning shadow h-100 py-2" style="border-left: 5px solid #ffc107;">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Honorer/GTT</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="dash-total-honor">Loading...</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-chalkboard-teacher fa-2x text-gray-300" style="opacity:0.3"></i>
-            </div>
-          </div>
-        </div>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-tachometer-alt text-maroon mr-2"></i>Dashboard Data PTK
+        </h5>
+        <hr class="style-sultan-solid">
       </div>
     </div>
   </div>
-
-  <div class="row mt-4">
-    <div class="col-lg-6 mb-4">
-      <div class="card shadow mb-4">
-        <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Sebaran Guru per Jenjang</h6>
-        </div>
-        <div class="card-body">
-          <p class="text-center p-5 text-muted bg-light">Area Grafik</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
+<section class="content">
+  <div class="container-fluid">
+    
+    <div id="wrapperSDN" class="card-sultan mb-4" style="display:none;">
+        <div class="card-header bg-white border-bottom-0">
+            <h3 class="card-title font-weight-bold text-maroon"><i class="fas fa-school mr-2"></i>REKAPITULASI SD NEGERI</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row">
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-maroon">
+                        <div class="inner">
+                            <h3 id="sdn_jml_sekolah"><i class="fas fa-spinner fa-spin"></i></h3>
+                            <p>Jumlah Sekolah</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-building"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3 id="sdn_jml_pns"><i class="fas fa-spinner fa-spin"></i></h3>
+                            <p>Total PNS</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-id-card"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3 id="sdn_jml_pppk"><i class="fas fa-spinner fa-spin"></i></h3>
+                            <p>Total PPPK</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-user-tie"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3 id="sdn_jml_pppk_pw"><i class="fas fa-spinner fa-spin"></i></h3>
+                            <p>PPPK Paruh Waktu</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-user-clock"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3 id="sdn_jml_nonasn"><i class="fas fa-spinner fa-spin"></i></h3>
+                            <p>Non ASN (GTT/PTT)</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-users"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3 id="sdn_total_ptk"><i class="fas fa-spinner fa-spin"></i></h3>
+                            <p>Total PTK</p>
+                        </div>
+                        <div class="icon"><i class="fas fa-chart-line"></i></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider-text text-muted my-3 small font-weight-bold">RINCIAN JABATAN & STATUS</div>
+
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-primary"><i class="fas fa-user-graduate text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Kepala Sekolah</span>
+                            <span class="info-box-number text-lg" id="sdn_det_ks">0</span>
+                            <div class="progress"><div class="progress-bar bg-primary w-100"></div></div>
+                            <span class="progress-description small text-muted">
+                                PNS: <b id="sdn_det_ks_pns" class="text-primary">0</b> | PPPK: <b id="sdn_det_ks_pppk" class="text-warning">0</b>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-success"><i class="fas fa-chalkboard-teacher text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Guru PNS</span>
+                            <span class="info-box-number text-lg" id="sdn_det_g_pns">0</span>
+                            <div class="progress"><div class="progress-bar bg-success w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-warning"><i class="fas fa-chalkboard-teacher text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Guru PPPK</span>
+                            <span class="info-box-number text-lg" id="sdn_det_g_pppk">0</span>
+                            <div class="progress"><div class="progress-bar bg-warning w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-info"><i class="fas fa-chalkboard-teacher text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Guru PPPK PW</span>
+                            <span class="info-box-number text-lg" id="sdn_det_g_pppk_pw">0</span>
+                            <div class="progress"><div class="progress-bar bg-info w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-secondary"><i class="fas fa-chalkboard-teacher text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Guru GTT</span>
+                            <span class="info-box-number text-lg" id="sdn_det_g_gtt">0</span>
+                            <div class="progress"><div class="progress-bar bg-secondary w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-warning"><i class="fas fa-user-cog text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Tendik PPPK</span>
+                            <span class="info-box-number text-lg" id="sdn_det_t_pppk">0</span>
+                            <div class="progress"><div class="progress-bar bg-warning w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-info"><i class="fas fa-user-cog text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Tendik PPPK PW</span>
+                            <span class="info-box-number text-lg" id="sdn_det_t_pppk_pw">0</span>
+                            <div class="progress"><div class="progress-bar bg-info w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-6">
+                    <div class="info-box bg-light border">
+                        <span class="info-box-icon bg-gray"><i class="fas fa-user-cog text-white"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text font-weight-bold">Tendik PTT</span>
+                            <span class="info-box-number text-lg" id="sdn_det_t_ptt">0</span>
+                            <div class="progress"><div class="progress-bar bg-gray w-100"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="wrapperSDS" class="card-sultan mb-4" style="display:none;">
+        <div class="card-header bg-white border-bottom-0">
+            <h3 class="card-title font-weight-bold text-maroon"><i class="fas fa-school mr-2"></i>REKAPITULASI SD SWASTA</h3>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="row">
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-maroon">
+                        <div class="inner"><h3 id="sds_jml_sekolah"><i class="fas fa-spinner fa-spin"></i></h3><p>Jumlah Sekolah</p></div>
+                        <div class="icon"><i class="fas fa-building"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner"><h3 id="sds_jml_pns"><i class="fas fa-spinner fa-spin"></i></h3><p>Jumlah PNS/PPPK</p></div>
+                        <div class="icon"><i class="fas fa-user-shield"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner"><h3 id="sds_jml_gty"><i class="fas fa-spinner fa-spin"></i></h3><p>Jumlah GTY</p></div>
+                        <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner"><h3 id="sds_jml_pty"><i class="fas fa-spinner fa-spin"></i></h3><p>Jumlah PTY</p></div>
+                        <div class="icon"><i class="fas fa-user-cog"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner"><h3 id="sds_jml_gtt"><i class="fas fa-spinner fa-spin"></i></h3><p>Jumlah GTT</p></div>
+                        <div class="icon"><i class="fas fa-user"></i></div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="small-box bg-gray">
+                        <div class="inner"><h3 id="sds_jml_ptt"><i class="fas fa-spinner fa-spin"></i></h3><p>Jumlah PTT</p></div>
+                        <div class="icon"><i class="fas fa-users"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="wrapperPAUD" class="card-sultan" style="display:none;">
+        <div class="card-header bg-white p-2">
+            <ul class="nav nav-pills">
+                <li class="nav-item"><a class="nav-link active font-weight-bold" href="#tab_tk" data-toggle="tab">TK (Taman Kanak-Kanak)</a></li>
+                <li class="nav-item"><a class="nav-link font-weight-bold" href="#tab_kb" data-toggle="tab">KB (Kelompok Bermain)</a></li>
+                <li class="nav-item"><a class="nav-link font-weight-bold" href="#tab_sps" data-toggle="tab">SPS/TPA</a></li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab_tk">
+                    <h5 class="font-weight-bold text-maroon mb-3">Rekapitulasi Jenjang TK</h5>
+                    <div class="row" id="row_tk">
+                        <div class="col-12 text-center p-3 text-muted"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat data...</div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="tab_kb">
+                    <h5 class="font-weight-bold text-maroon mb-3">Rekapitulasi Jenjang KB</h5>
+                    <div class="row" id="row_kb">
+                        <div class="col-12 text-center p-3 text-muted"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat data...</div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="tab_sps">
+                    <h5 class="font-weight-bold text-maroon mb-3">Rekapitulasi Jenjang SPS/TPA</h5>
+                    <div class="row" id="row_sps">
+                        <div class="col-12 text-center p-3 text-muted"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  </div>
+</section>
+
 <script>
-  // Script kecil untuk memanggil data real dari server
-  $(document).ready(function() {
-      google.script.run
-        .withSuccessHandler(function(data) {
-            $('#dash-total-ptk').text(data.total);
-            $('#dash-total-pns').text(data.pns);
-            $('#dash-total-pppk').text(data.pppk);
-            $('#dash-total-honor').text(data.honor);
-        })
-        .getStatistikPTK(); // Fungsi ini harus dibuat di Code.gs
-  });
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL DASHBOARD
+// ======================================================================
+var DASH_IS_ADMIN = false;
+var DASH_USER_NPSN = "";
+
+$(document).ready(function() {
+    try {
+        var user = getSesiUser() || {};
+        DASH_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        DASH_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { DASH_USER_NPSN = ""; DASH_IS_ADMIN = false; }
+
+    dashValidasiGatekeeper();
+});
+
+// GATEKEEPER V5: Admin load semua, User Sekolah load miliknya saja
+function dashValidasiGatekeeper() {
+    if (DASH_IS_ADMIN) {
+        // ADMIN: Tampilkan semua Wrapper, eksekusi semua API paralel
+        $('#wrapperSDN, #wrapperSDS, #wrapperPAUD').fadeIn();
+        google.script.run.withSuccessHandler(res => calculateSDN(res, true)).getDataKeadaanGTK();
+        google.script.run.withSuccessHandler(res => calculateSDS(res, true)).getDataKeadaanGTKSDS();
+        google.script.run.withSuccessHandler(res => calculatePAUD(res, true)).getDataKeadaanGTKPAUD();
+    } else {
+        // USER SEKOLAH: Cari dia masuk ke golongan mana (SDN, SDS, atau PAUD)
+        if (!DASH_USER_NPSN) {
+            Sultan.alert('error', 'Akses Ditolak', 'NPSN tidak ditemukan pada sesi login Anda.');
+            return;
+        }
+
+        // Cek SDN
+        google.script.run.withSuccessHandler(function(res) {
+            var myData = res.filter(r => String(r[1] || "").trim().toUpperCase() === String(DASH_USER_NPSN).trim().toUpperCase());
+            if (myData.length > 0) {
+                $('#wrapperSDN').fadeIn();
+                calculateSDN(myData, false); // false = bukan admin, tidak perlu hitung jumlah sekolah
+            } else {
+                // Jika bukan SDN, cek SDS
+                google.script.run.withSuccessHandler(function(resSDS) {
+                    var myDataSDS = resSDS.filter(r => String(r[1] || "").trim().toUpperCase() === String(DASH_USER_NPSN).trim().toUpperCase());
+                    if (myDataSDS.length > 0) {
+                        $('#wrapperSDS').fadeIn();
+                        calculateSDS(myDataSDS, false);
+                    } else {
+                        // Jika bukan SDS, cek PAUD
+                        google.script.run.withSuccessHandler(function(resPAUD) {
+                            var myDataPAUD = resPAUD.filter(r => String(r[1] || "").trim().toUpperCase() === String(DASH_USER_NPSN).trim().toUpperCase());
+                            if (myDataPAUD.length > 0) {
+                                $('#wrapperPAUD').fadeIn();
+                                calculatePAUD(myDataPAUD, false);
+                            } else {
+                                Sultan.alert('error', 'Data Kosong', 'Data statistik sekolah Anda tidak ditemukan di server.');
+                            }
+                        }).getDataKeadaanGTKPAUD();
+                    }
+                }).getDataKeadaanGTKSDS();
+            }
+        }).getDataKeadaanGTK();
+    }
+}
+
+// ======================================================================
+// LOGIKA HITUNG SD NEGERI
+// ======================================================================
+function calculateSDN(data, isAdmin) {
+    if (!data || data.length === 0) { setZero("sdn"); return; }
+    
+    var stats = {
+        jml_sekolah: isAdmin ? data.length : 1,
+        ks: 0, ks_pns: 0, ks_pppk: 0, 
+        g_pns: 0, g_pppk: 0, g_pppk_pw: 0, g_gtt: 0,
+        t_pppk: 0, t_pppk_pw: 0, t_ptt: 0
+    };
+
+    data.forEach(function(row) {
+        var ks_pns  = parseInt(row[45]) || 0;
+        var ks_pppk = parseInt(row[48]) || 0;
+        
+        stats.ks_pns += ks_pns;
+        stats.ks_pppk += ks_pppk;
+        stats.ks += (ks_pns + ks_pppk);
+
+        stats.g_pns     += parseInt(row[46]) || 0;
+        stats.g_pppk    += parseInt(row[49]) || 0;
+        stats.g_pppk_pw += parseInt(row[51]) || 0;
+        stats.g_gtt     += parseInt(row[53]) || 0;
+        
+        stats.t_pppk    += parseInt(row[50]) || 0;
+        stats.t_pppk_pw += parseInt(row[52]) || 0;
+        stats.t_ptt     += parseInt(row[54]) || 0;
+    });
+
+    var total_pns     = data.reduce((sum, r) => sum + (parseInt(r[45])||0) + (parseInt(r[46])||0) + (parseInt(r[47])||0), 0);
+    var total_pppk    = stats.g_pppk + stats.t_pppk + (parseInt(data.reduce((a,b)=>a+(parseInt(b[48])||0),0))); 
+    var total_pw      = stats.g_pppk_pw + stats.t_pppk_pw;
+    var total_nonasn  = stats.g_gtt + stats.t_ptt;
+    var total_all     = total_pns + total_pppk + total_pw + total_nonasn;
+
+    animateValue("sdn_jml_sekolah", stats.jml_sekolah);
+    animateValue("sdn_jml_pns", total_pns);
+    animateValue("sdn_jml_pppk", total_pppk);
+    animateValue("sdn_jml_pppk_pw", total_pw);
+    animateValue("sdn_jml_nonasn", total_nonasn);
+    animateValue("sdn_total_ptk", total_all);
+
+    animateValue("sdn_det_ks", stats.ks);
+    animateValue("sdn_det_ks_pns", stats.ks_pns);     
+    animateValue("sdn_det_ks_pppk", stats.ks_pppk);   
+    
+    animateValue("sdn_det_g_pns", stats.g_pns);
+    animateValue("sdn_det_g_pppk", stats.g_pppk);
+    animateValue("sdn_det_g_pppk_pw", stats.g_pppk_pw);
+    animateValue("sdn_det_g_gtt", stats.g_gtt);
+    animateValue("sdn_det_t_pppk", stats.t_pppk);
+    animateValue("sdn_det_t_pppk_pw", stats.t_pppk_pw);
+    animateValue("sdn_det_t_ptt", stats.t_ptt);
+}
+
+// ======================================================================
+// LOGIKA HITUNG SD SWASTA
+// ======================================================================
+function calculateSDS(data, isAdmin) {
+    if (!data || data.length === 0) { setZero("sds"); return; }
+
+    var s = { school: isAdmin ? data.length : 1, pns: 0, gty: 0, pty: 0, gtt: 0, ptt: 0 };
+
+    data.forEach(function(row) {
+        var ks_gty   = parseInt(row[21]) || 0;
+        var guru_gty = parseInt(row[22]) || 0;
+        var tendik_pty = parseInt(row[23]) || 0;
+        var guru_gtt = parseInt(row[24]) || 0;
+        var tendik_ptt = parseInt(row[25]) || 0;
+
+        s.gty += (ks_gty + guru_gty);
+        s.pty += tendik_pty;
+        s.gtt += guru_gtt;
+        s.ptt += tendik_ptt;
+        s.pns += 0; 
+    });
+
+    animateValue("sds_jml_sekolah", s.school);
+    animateValue("sds_jml_pns", s.pns);
+    animateValue("sds_jml_gty", s.gty);
+    animateValue("sds_jml_pty", s.pty);
+    animateValue("sds_jml_gtt", s.gtt);
+    animateValue("sds_jml_ptt", s.ptt);
+}
+
+// ======================================================================
+// LOGIKA HITUNG PAUD
+// ======================================================================
+function calculatePAUD(data, isAdmin) {
+    var stats = {
+        tk: { id:'tk', name:'TK', jml:0, pns:0, gty:0, pty:0, gtt:0, ptt:0 },
+        kb: { id:'kb', name:'KB', jml:0, pns:0, gty:0, pty:0, gtt:0, ptt:0 },
+        sps: { id:'sps', name:'SPS', jml:0, pns:0, gty:0, pty:0, gtt:0, ptt:0 }
+    };
+
+    if (data && data.length > 0) {
+        data.forEach(function(row) {
+            var jenjang = String(row[2] || "").toUpperCase().trim();
+            var target = null;
+
+            if (jenjang.includes("TK")) target = stats.tk;
+            else if (jenjang.includes("KB")) target = stats.kb;
+            else if (jenjang.includes("SPS") || jenjang.includes("TPA")) target = stats.sps;
+
+            if (target) {
+                target.jml++;
+                target.gty += parseInt(row[22]) || 0;
+                target.pns += parseInt(row[23]) || 0;
+                target.gtt += parseInt(row[24]) || 0;
+                target.pty += parseInt(row[25]) || 0;
+                target.ptt += parseInt(row[26]) || 0;
+            }
+        });
+    }
+
+    // Jika bukan Admin, set "Jumlah Lembaga" fix jadi 1
+    if (!isAdmin) {
+        if(stats.tk.jml > 0) stats.tk.jml = 1;
+        if(stats.kb.jml > 0) stats.kb.jml = 1;
+        if(stats.sps.jml > 0) stats.sps.jml = 1;
+    }
+
+    function renderPAUDBox(containerId, obj) {
+        if(obj.jml === 0 && !isAdmin) {
+            $('#' + containerId).html('<div class="col-12 text-center text-muted py-4">Data tidak relevan dengan jenjang sekolah Anda.</div>');
+            return;
+        }
+
+        var html = `
+            <div class="col-lg-2 col-6"><div class="small-box bg-maroon"><div class="inner"><h3>${obj.jml}</h3><p>Jumlah Lembaga</p></div><div class="icon"><i class="fas fa-building"></i></div></div></div>
+            <div class="col-lg-2 col-6"><div class="small-box bg-primary"><div class="inner"><h3>${obj.pns}</h3><p>Jumlah PNS</p></div><div class="icon"><i class="fas fa-id-card"></i></div></div></div>
+            <div class="col-lg-2 col-6"><div class="small-box bg-success"><div class="inner"><h3>${obj.gty}</h3><p>Jumlah GTY</p></div><div class="icon"><i class="fas fa-chalkboard-teacher"></i></div></div></div>
+            <div class="col-lg-2 col-6"><div class="small-box bg-info"><div class="inner"><h3>${obj.pty}</h3><p>Jumlah PTY</p></div><div class="icon"><i class="fas fa-user-cog"></i></div></div></div>
+            <div class="col-lg-2 col-6"><div class="small-box bg-secondary"><div class="inner"><h3>${obj.gtt}</h3><p>Jumlah GTT</p></div><div class="icon"><i class="fas fa-users"></i></div></div></div>
+            <div class="col-lg-2 col-6"><div class="small-box bg-gray"><div class="inner"><h3>${obj.ptt}</h3><p>Jumlah PTT</p></div><div class="icon"><i class="fas fa-user-clock"></i></div></div></div>
+        `;
+        $('#' + containerId).html(html);
+    }
+
+    renderPAUDBox('row_tk', stats.tk);
+    renderPAUDBox('row_kb', stats.kb);
+    renderPAUDBox('row_sps', stats.sps);
+}
+
+// Helper: Animasi Angka
+function animateValue(id, value) {
+    var $el = $('#' + id);
+    if ($el.length === 0) return;
+    $({ Counter: 0 }).animate({ Counter: value }, {
+        duration: 1000,
+        easing: 'swing',
+        step: function() { $el.text(Math.ceil(this.Counter)); },
+        complete: function() { $el.text(value); }
+    });
+}
+
+function setZero(prefix) {
+    $('[id^="'+prefix+'"]').text("0");
+}
 </script>

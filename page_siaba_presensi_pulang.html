@@ -1,0 +1,453 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-hourglass-end text-maroon mr-2"></i>Rekap Pulang Awal
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#pla_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="pla_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-2 pl-3 text-justify">
+                    <li>Data diurutkan berdasarkan <b>Total Menit Pulang Awal</b> terbanyak.</li>
+                    <li>Angka yang ditampilkan adalah jumlah menit dan detik kekurangan jam kerja (pulang sebelum waktunya).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                <select id="pla_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80" disabled></select>
+                
+                <select id="pla_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="pla_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+                
+                <div class="ml-auto d-none d-md-block"></div>
+                <button type="button" class="btn btn-primary font-weight-bold shadow-sm d-none">Spacer</button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="pla_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="pla_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="pla_tableState" style="display: none;">
+                  <table id="pla_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact table-header-compact mb-0 w-100 text-nowrap">
+                    <thead class="bg-light">
+                        <tr id="pla_rowHeaderTop">
+                            <th class="col-sticky-left border-right text-left px-3 align-middle bg-white" style="position: sticky; left: 0; z-index: 5;">Nama ASN</th>
+                            <th class="text-center align-middle px-2">Memuat...</th>
+                        </tr>
+                        <tr id="pla_rowHeaderSub"></tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - DYNAMIC READ ONLY)
+// BAB I: Prefix Mutlak pla_
+// ======================================================================
+var PLA_CACHE_DATA = []; 
+var PLA_HEADER_TOP = [];
+var PLA_HEADER_SUB = [];
+var PLA_CACHE_THN = "";
+var PLA_TABEL_INSTANCE = null;
+
+var PLA_USER_AKTIF = "";
+var PLA_IS_ADMIN = false;
+var PLA_UNIT_TERKUNCI = ""; 
+var PLA_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE (Hukum Ke-1)
+// =================================================================
+$(document).ready(function() {
+    PLA_TABEL_INSTANCE = null;
+    $('#pla_tableState').hide();
+    $('#pla_loadingState').show();
+
+    // Cek Sesi Login
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        PLA_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        PLA_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        PLA_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { PLA_USER_NPSN = ""; PLA_IS_ADMIN = false; }
+    
+    // VAKSINASI EVENT SPA DELEGATION (Pemusnahan onClick Inline)
+    // 1. Pemicu Dropdown -> Menggunakan Cache (Zero Blink)
+    $(document).off('change', '#pla_filterTahun').on('change', '#pla_filterTahun', pla_prosesCariData);
+    $(document).off('change', '#pla_filterUnit').on('change', '#pla_filterUnit', pla_terapkanFilterLokal);
+    
+    // 2. Pemicu Tombol Refresh -> Paksa ambil dari Server (Bypass Cache)
+    $(document).off('click', '#pla_btnRefresh').on('click', '#pla_btnRefresh', pla_tarikDataServer);
+
+    pla_initFilters();
+});
+
+// =================================================================
+// 2. CHAINED INITIALIZATION: FILTERS -> GATEKEEPER -> FETCH
+// =================================================================
+function pla_initFilters() {
+    $('#pla_loadingText').html('Memuat Konfigurasi Tahun...');
+
+    google.script.run.withSuccessHandler(function(res) {
+        var data = JSON.parse(res);
+        
+        var elThn = $('#pla_filterTahun').empty().append('<option value="">- Tahun -</option>');
+        if (data.years && data.years.length > 0) {
+            data.years.forEach(y => elThn.append(`<option value="${pla_escapeHtml(y)}">${pla_escapeHtml(y)}</option>`));
+        }
+        
+        var curYear = new Date().getFullYear().toString();
+        if ($("#pla_filterTahun option[value='"+curYear+"']").length > 0) {
+            $('#pla_filterTahun').val(curYear);
+        }
+        
+        $('#pla_filterTahun, #pla_btnRefresh').prop('disabled', false);
+
+        pla_validasiAksesUser(); 
+
+    }).getSiabaPulangFilters();
+}
+
+function pla_validasiAksesUser() {
+    $('#pla_loadingText').html('Mempersiapkan Akses...');
+
+    if (PLA_IS_ADMIN) {
+        $('#pla_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        pla_tarikDataServer(); 
+    } else {
+        if (!PLA_USER_NPSN) {
+            $('#pla_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#pla_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#pla_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#pla_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${pla_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                PLA_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#pla_filterUnit').empty().append($('<option>', {value: PLA_UNIT_TERKUNCI, text: PLA_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                pla_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#pla_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#pla_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Database Induk Terputus: ${pla_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNPSN(PLA_USER_NPSN); 
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA DARI SERVER (BAB VIII)
+// =================================================================
+function pla_prosesCariData() {
+    var th = $('#pla_filterTahun').val();
+    if (!th) { Sultan.notif.info('Pilih Tahun terlebih dahulu.'); return; }
+    
+    // Filter Lokal (Zero Blink)
+    if (th === PLA_CACHE_THN && PLA_CACHE_DATA.length > 0) { 
+        pla_terapkanFilterLokal(); 
+    } else { 
+        pla_tarikDataServer(); 
+    }
+}
+
+function pla_tarikDataServer() {
+    var th = $('#pla_filterTahun').val();
+    if(!th) return;
+
+    var btn = $('#pla_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    if(PLA_IS_ADMIN) $('#pla_filterUnit').prop('disabled', true);
+    
+    // MUNCULKAN RUANG A JIKA TABEL BELUM PERNAH DIBUAT ATAU REFRESH PAKSA
+    if (!$.fn.DataTable.isDataTable('#pla_tabelUtama')) {
+        $('#pla_tableState').hide();
+        $('#pla_loadingText').html('Mengambil data presensi pulang awal...');
+        $('#pla_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            if(PLA_IS_ADMIN) $('#pla_filterUnit').prop('disabled', false);
+            
+            var data;
+            try {
+                data = typeof res === 'string' ? JSON.parse(res) : res;
+            } catch(e) {
+                console.error("JSON Error:", e);
+                $('#pla_tableState').hide();
+                $('#pla_loadingState').show();
+                $('#pla_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+                return;
+            }
+            
+            if (data && data.error) {
+                $('#pla_tableState').hide();
+                $('#pla_loadingState').show();
+                $('#pla_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${pla_escapeHtml(data.error)}</span>`);
+                return;
+            }
+            
+            try {
+                PLA_HEADER_TOP = data.headerTop || [];
+                PLA_HEADER_SUB = data.headerSub || [];
+                PLA_CACHE_DATA = data.rows || []; 
+                PLA_CACHE_THN = th; 
+                
+                if(PLA_IS_ADMIN) pla_populateDropdownUnit();
+
+                // Render Tabel otomatis menghandle Dynamic Header & Injeksi
+                pla_terapkanFilterLokal(); 
+
+            } catch(e) { 
+                console.error("Table Error:", e);
+                $('#pla_tableState').hide();
+                $('#pla_loadingState').show();
+                $('#pla_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + pla_escapeHtml(e.message) + '</span>'); 
+            }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-search text-maroon"></i>');
+            if(PLA_IS_ADMIN) $('#pla_filterUnit').prop('disabled', false);
+            $('#pla_tableState').hide();
+            $('#pla_loadingState').show();
+            $('#pla_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${pla_escapeHtml(err.message)}</span>`);
+        })
+        .getSiabaPulangData(th, "SEMUA"); 
+}
+
+function pla_populateDropdownUnit() {
+    var unique = new Set();
+    PLA_CACHE_DATA.forEach(function(row) {
+        var lastIdx = row.length - 1;
+        var unit = String(row[lastIdx]).trim();
+        if (unit) unique.add(unit);
+    });
+    
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#pla_filterUnit');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${pla_escapeHtml(u)}">${pla_escapeHtml(u)}</option>`); });
+    
+    select.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    if(currentVal && unique.has(currentVal)) { select.val(currentVal); }
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK & DYNAMIC HEADER (BAB VII)
+// =================================================================
+function pla_terapkanFilterLokal() {
+    var tAdminUnit = PLA_IS_ADMIN ? String($('#pla_filterUnit').val() || "").toUpperCase() : "";
+    var tUnitUser  = String(PLA_UNIT_TERKUNCI || "").trim().toUpperCase();
+    
+    var hasil = PLA_CACHE_DATA.filter(function(row) {
+        var lastIdx = row.length - 1; 
+        var rUnit = String(row[lastIdx] || "").trim().toUpperCase(); 
+        
+        if (PLA_IS_ADMIN) {
+            return (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit);
+        } else {
+            return (rUnit === tUnitUser);
+        }
+    });
+    
+    pla_renderTabel(hasil);
+}
+
+function pla_renderTabel(rows) {
+    var isFirstLoad = !$.fn.DataTable.isDataTable('#pla_tabelUtama');
+
+    // --- A. BANGUN HEADER DINAMIS (Dijalankan hanya saat inisialisasi) ---
+    if (isFirstLoad) {
+        var headerTop = PLA_HEADER_TOP; 
+        var headerSub = PLA_HEADER_SUB; 
+        
+        // VAKSIN LEBAR: Tag <th> tanpa paksaan min-width
+        var htmlTop = `<th rowspan="2" class="col-sticky-left border-right text-left px-3 align-middle bg-white" style="position: sticky; left: 0; z-index: 5;">Nama ASN</th>`;
+        var htmlSub = '';
+
+        for (let i = 2; i < headerTop.length; i++) {
+            let titleTop = pla_escapeHtml(headerTop[i]);
+            let titleSub = pla_escapeHtml(headerSub[i]);
+
+            if (titleTop !== "" && i < headerTop.length - 1) {
+                htmlTop += `<th colspan="2" class="text-center align-middle border-bottom bg-light text-dark px-2">${titleTop}</th>`;
+                htmlSub += `<th class="text-center align-middle bg-light text-muted px-2">${titleSub}</th>`;
+            } else if (titleTop === "" && i > 0) {
+                htmlSub += `<th class="text-center align-middle bg-light text-muted px-2">${titleSub}</th>`;
+            } else {
+                htmlTop += `<th rowspan="2" class="text-center align-middle bg-light text-dark px-3 border-left">${titleTop}</th>`;
+            }
+        }
+        $('#pla_rowHeaderTop').html(htmlTop);
+        $('#pla_rowHeaderSub').html(htmlSub);
+    }
+
+    // --- B. BANGUN ARRAY DATA ---
+    var dtArray = [];
+    if (rows && rows.length > 0) {
+        rows.forEach(function(row) {
+            var arrRow = [];
+            
+            // Kolom 1 (Index 0): Gabungan Nama & NIP (Vaksin text-nowrap mutlak)
+            var safeNama = pla_escapeHtml(row[0]);
+            var safeNip  = pla_escapeHtml(row[1]);
+            var safeUnit = pla_escapeHtml(row[row.length - 1] || '-');
+            
+            var txtUnitHtml = PLA_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${safeUnit}</div>` : '';
+            arrRow.push(`<div class="font-weight-bold text-dark text-nowrap text-left">${safeNama}</div><div class="small text-muted text-nowrap text-left">${safeNip}</div>${txtUnitHtml}`);
+            
+            // Kolom Angka (Index 2 sampai batas sebelum kolom unit)
+            for (var colIdx = 2; colIdx < row.length - 1; colIdx++) {
+                var val = row[colIdx];
+                arrRow.push(val == 0 || val == "0" || val === "" ? "-" : pla_escapeHtml(val));
+            }
+            dtArray.push(arrRow);
+        });
+    }
+
+    // --- C. INISIALISASI & INJEKSI DATA (BAB VII) ---
+    if (isFirstLoad) {
+        // Kalkulasi matematis jumlah kolom aktif untuk columnDefs (Anti _all)
+        var totalCols = (dtArray.length > 0) ? dtArray[0].length : (PLA_HEADER_TOP.length - 1);
+        var targetDynamicArray = Array.from({length: Math.max(0, totalCols - 1)}, function(_, i) { return i + 1; });
+
+        PLA_TABEL_INSTANCE = $('#pla_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, 
+            "ordering": false,
+            "pageLength": 10,
+            "autoWidth": false,
+            "deferRender": true, // Performa Turbo
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "search": "", "searchPlaceholder": "Cari Nama/NIP...",
+                "emptyTable": '<div class="py-5 text-center text-muted"><div class="mb-3"><i class="fas fa-clipboard-list fa-3x text-gray-300" style="opacity: 0.6;"></i></div><h6 class="font-weight-bold text-dark mb-1">Belum Ada Presensi</h6><p class="small mb-0">Tidak ada data pulang awal untuk filter terpilih.</p></div>' 
+            },
+            "columnDefs": [
+                // VAKSIN LEBAR: target 0 pakai width: auto
+                { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle font-weight-bold border-right text-dark text-left" },
+                // VAKSIN BAB VII: Array indeks otomatis dari 1 sampai akhir
+                { "targets": targetDynamicArray, "className": "text-center align-middle" }
+            ],
+            // VAKSIN PERFORMA TURBO: Menggunakan Native DOM murni (membuang jQuery $(this).addClass)
+            "createdRow": function(row, data, dataIndex) {
+                 var tds = row.children;
+                 var lastIdx = tds.length - 1; 
+                 var secondLastIdx = tds.length - 2;
+
+                 for (var visIdx = 0; visIdx < tds.length; visIdx++) {
+                     var cell = tds[visIdx];
+                     var rawVal = cell.textContent.trim();
+
+                     if (visIdx === 0) {
+                         cell.style.position = 'sticky';
+                         cell.style.left = '0';
+                         cell.style.zIndex = '2';
+                         cell.style.backgroundColor = '#ffffff';
+                     } else {
+                         // Native class manipulation
+                         if (rawVal === "-") {
+                             cell.classList.add('text-muted', 'opacity-50');
+                         } else {
+                             // Total di pojok kanan diberikan warna merah bold
+                             if (visIdx === lastIdx || visIdx === secondLastIdx) {
+                                 cell.classList.add('text-danger', 'font-weight-bold');
+                             } else {
+                                 cell.classList.add('text-dark'); 
+                             }
+                         }
+                     }
+                 }
+            }
+        });
+
+        // BUKA RUANG B SEKALI SAJA (Instan, No fadeIn)
+        $('#pla_loadingState').hide();
+        $('#pla_tableState').show();
+        
+        // VAKSIN MICRO BLINK (Beri waktu browser menyelesaikan lukisan sebelum mengatur ulang kolom)
+        setTimeout(function(){ PLA_TABEL_INSTANCE.columns.adjust(); }, 100);
+        
+    } else {
+        // Zero Blink Injeksi Array Baru
+        PLA_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#pla_tableState').is(':hidden')) {
+            $('#pla_loadingState').hide();
+            $('#pla_tableState').show();
+        }
+
+        setTimeout(function(){ PLA_TABEL_INSTANCE.columns.adjust(); }, 50);
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: PEMBERSIH XSS (Hukum Ke-5)
+// =================================================================
+function pla_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

@@ -1,0 +1,922 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-question-circle text-maroon mr-2"></i>Data Lupa Presensi
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#lupa_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="lupa_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Fasilitas bagi ASN yang lupa melakukan presensi harian pada aplikasi Siaba.</li>
+                  <li>Batas toleransi lupa presensi maksimal 5x per bulan.</li>
+                  <li>Scan surat pernyataan lupa absen yang sudah ditandatangani Asli (PDF, Maks 200 KB).</li>
+                  <li>Klik tombol <strong>+ Tambah</strong> untuk mengajukan permohonan.</li>
+                  <li>Periksa kembali data yang Anda input, gunakan tombol <strong>Edit</strong> untuk memperbaiki data.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="lupa_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <select id="lupa_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80"></select>
+                
+                <select id="lupa_filterBulan" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Bulan -</option>
+                    <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Maret">Maret</option>
+                    <option value="April">April</option><option value="Mei">Mei</option><option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option><option value="Agustus">Agustus</option><option value="September">September</option>
+                    <option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                </select>
+
+                <select id="lupa_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Status -</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Revisi">Revisi</option>
+                    <option value="Ditolak">Ditolak</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="lupa_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="lupa_btnTambah" class="btn btn-maroon text-white font-weight-bold shadow-sm" disabled>
+                    <i class="fas fa-plus mr-1"></i> Tambah
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+          <div class="card-body p-3">
+            
+            <div id="lupa_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold mt-3" id="lupa_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lupa_tableState" style="display: none;">
+                <table id="lupa_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact w-100">
+                   <thead class="bg-light">
+                      <tr>
+                         <th class="col-sticky-left border-right text-center align-middle" style="z-index: 5;">Aksi</th>
+                         <th class="text-left align-middle">Nama ASN</th>
+                         <th class="text-center align-middle">Tanggal</th>
+                         <th class="text-center align-middle">Jam</th>
+                         <th class="text-center align-middle">Jenis</th>
+                         <th class="text-center align-middle">Kumulatif</th>
+                         <th class="text-center align-middle">Dokumen</th>
+                         <th class="text-left align-middle">Status</th>
+                         <th class="text-left align-middle">Dikirim</th>
+                         <th class="text-left align-middle">Diubah</th>
+                         <th class="text-left align-middle">Verifikasi</th>
+                      </tr>
+                   </thead>
+                   <tbody></tbody>
+                </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="lupa_modalForm" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg modal-content-sultan">
+      <div class="modal-header bg-maroon" id="lupa_headerModalForm">
+        <h5 class="modal-title font-weight-bold" id="lupa_judulModalForm" style="color: #fff;"><i class="fas fa-file-signature mr-2"></i>Tambah Data</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" id="lupa_closeModalForm"><span>&times;</span></button>
+      </div>
+      <form id="lupa_formUtama">
+      <div class="modal-body bg-light p-4">
+        <input type="hidden" id="lupa_inputIdData">
+        <input type="hidden" id="lupa_inputNipLama">
+        <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Unit Kerja <span class="text-danger">*</span></label>
+            <select class="form-control form-control-sultan font-weight-bold text-maroon bg-light" id="lupa_inputUnit" required disabled>
+                <option value="">- Memuat Data... -</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Nama ASN <span class="text-danger">*</span></label>
+            <select class="form-control form-control-sultan" id="lupa_inputNama" required disabled>
+                <option value="">- Memuat Nama... -</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">NIP</label>
+            <select class="form-control form-control-sultan" id="lupa_inputNip" required disabled>
+                <option value="">- Otomatis -</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tanggal <span class="text-danger">*</span></label>
+                    <input type="date" id="lupa_inputTanggal" class="form-control form-control-sultan" required>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Waktu (Jam) <span class="text-danger">*</span></label>
+                    <input type="time" id="lupa_inputWaktu" class="form-control form-control-sultan" required>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Jenis Presensi <span class="text-danger">*</span></label>
+                    <select id="lupa_inputJenis" class="form-control form-control-sultan" required>
+                        <option value="">- Pilih -</option>
+                        <option value="Datang">Datang</option>
+                        <option value="Pulang">Pulang</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Kumulatif Ke <span class="text-danger">*</span></label>
+                    <select id="lupa_inputKomulatif" class="form-control form-control-sultan" required>
+                        <option value="">- Pilih -</option>
+                        <option value="I">I</option><option value="II">II</option><option value="III">III</option>
+                        <option value="IV">IV</option><option value="V">V</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group mb-0 border p-3 bg-white rounded shadow-sm">
+            <label class="form-label-sultan mb-2" id="lupa_labelFileWrap"><i class="fas fa-file-pdf text-danger mr-1"></i> Unggah File PDF <span class="text-danger">*</span></label>
+            <div class="custom-file">
+                <input type="file" class="custom-file-input border-maroon" id="lupa_inputFile" accept="application/pdf">
+                <label class="custom-file-label text-truncate" for="lupa_inputFile" id="lupa_labelNamaFile">Pilih file PDF...</label>
+            </div>
+            <small class="text-muted font-italic d-block mt-2" id="lupa_pesanFile">
+                <i class="fas fa-info-circle mr-1"></i> Maksimal ukuran file 200 KB.
+            </small>
+        </div>
+      </div>
+      <div class="modal-footer bg-white justify-content-between p-3 border-top">
+          <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+          <button type="submit" id="lupa_btnSimpanForm" class="btn btn-maroon shadow-sm font-weight-bold px-4"><i class="fas fa-save mr-1"></i> Simpan</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="lupa_modalHapus" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Konfirmasi Hapus</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="lupa_formHapus">
+            <div class="modal-body bg-white p-4">
+                <input type="hidden" id="lupa_hapusIdData">
+                <div class="alert alert-warning text-dark border-warning shadow-sm mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mt-1 mr-3 fa-lg"></i>
+                        <div>
+                            <strong>Peringatan!</strong><br>
+                            Anda akan menghapus data Lupa Presensi atas nama:<br>
+                            <span id="lupa_hapusNamaView" class="font-weight-bold text-uppercase" style="font-size: 1.1em; color: #000;">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-uppercase text-muted">Alasan Penghapusan <span class="text-danger">*</span></label>
+                    <textarea id="lupa_hapusAlasan" class="form-control form-control-sultan" rows="3" placeholder="Contoh: Salah input data, Data Ganda..." required></textarea>
+                </div>
+                <div class="form-group mb-0">
+                    <label class="form-label-sultan small font-weight-bold text-uppercase text-muted">Kode Keamanan <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-key text-danger"></i></span></div>
+                        <input type="password" id="lupa_hapusInputKode" class="form-control form-control-sultan border-left-0" placeholder="Hubungi admin Korwil untuk mendapatkan kode." required autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light justify-content-between p-3 border-top">
+                <button type="button" class="btn btn-default border shadow-sm px-4 font-weight-bold" data-dismiss="modal">Batal</button>
+                <button type="submit" id="lupa_btnEksekusiHapus" class="btn btn-danger shadow-sm px-4 font-weight-bold"><i class="fas fa-trash mr-1"></i> HAPUS DATA</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lupa_modalVerif" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-sultan-verif" role="document">
+        <div class="modal-content border-0 shadow-lg d-flex flex-column modal-content-sultan" style="height: 90vh;">
+            <div class="modal-header bg-primary text-white py-2 flex-shrink-0">
+                <h5 class="modal-title font-weight-bold h6 mb-0"><i class="fas fa-clipboard-check mr-2"></i>Panel Verifikasi Dokumen</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="lupa_formVerif" class="d-flex flex-column flex-grow-1 overflow-hidden m-0 p-0">
+                <div class="modal-body p-0 bg-light flex-grow-1 overflow-hidden">
+                    <div class="row no-gutters h-100">
+                        <div class="col-lg-8 bg-dark d-flex align-items-center justify-content-center position-relative border-right">
+                            <iframe id="lupa_verifIframe" class="iframe-sultan-verif d-none w-100 h-100 border-0" src=""></iframe>
+                            <div id="lupa_verifNoFile" class="text-center text-white-50 position-absolute"><i class="fas fa-file-pdf fa-4x mb-3"></i><p class="mb-0">Pratinjau dokumen tidak tersedia.</p></div>
+                        </div>
+                        <div class="col-lg-4 bg-white d-flex flex-column h-100">
+                            <div class="p-4 overflow-auto flex-grow-1">
+                                <input type="hidden" id="lupa_verifIdData">
+                                <h6 class="text-primary font-weight-bold border-bottom pb-2 mb-4"><i class="fas fa-user-circle mr-2"></i> Informasi Ajuan</h6>
+                                <table class="table table-borderless mb-4 text-dark">
+                                    <tr><td class="text-muted font-weight-bold align-middle py-2" width="35%" style="font-size: 14px;">Nama ASN</td><td class="font-weight-bold text-dark py-2 text-wrap" id="lupa_vNama" style="font-size: 18px; text-transform: uppercase;">-</td></tr>
+                                    <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">NIP</td><td class="text-dark py-2 text-wrap" id="lupa_vNip" style="font-size: 16px;">-</td></tr>
+                                    <tr><td colspan="2" class="py-2"><hr class="my-0 dashed"></td></tr>
+                                    <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Tanggal</td><td class="font-weight-bold text-dark py-2" id="lupa_vTgl" style="font-size: 16px;">-</td></tr>
+                                    <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Jam</td><td class="font-weight-bold text-danger py-2" id="lupa_vJam" style="font-size: 16px;">-</td></tr>
+                                    <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Jenis</td><td class="font-weight-bold py-2" id="lupa_vJenis" style="font-size: 16px;">-</td></tr>
+                                    <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Kumulatif</td><td class="py-2" id="lupa_vKom" style="font-size: 16px;">-</td></tr>
+                                </table>
+                                <div class="card bg-light border-0 shadow-sm">
+                                    <div class="card-body p-3">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Keputusan Verifikasi <span class="text-danger">*</span></label>
+                                            <select class="form-control form-control-sultan font-weight-bold text-dark" id="lupa_verifStatus" required style="font-size: 16px; height: auto !important; padding: 10px 15px;">
+                                                <option value="">-- Tentukan Status --</option><option value="Disetujui">Disetujui</option><option value="Revisi">Revisi</option><option value="Ditolak">Ditolak</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Catatan Admin</label>
+                                            <textarea class="form-control form-control-sultan" id="lupa_verifCatatan" rows="3" placeholder="Wajib diisi jika ditolak / direvisi..." style="font-size: 15px; padding: 10px 15px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-white border-top shadow-lg d-flex justify-content-between z-index-10 flex-shrink-0">
+                                <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4 py-2" style="font-size:16px;" data-dismiss="modal">Tutup</button>
+                                <button type="submit" id="lupa_btnVerifEksekusi" class="btn btn-primary font-weight-bold shadow-sm px-4 py-2" style="font-size:16px;"><i class="fas fa-check-double mr-2"></i> Eksekusi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lupa_modalPreviewPDF" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-full" role="document">
+        <div class="modal-content modal-content-full-height border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger py-2 text-white">
+                <h6 class="modal-title font-weight-bold"><i class="fas fa-file-pdf mr-2"></i>Pratinjau Dokumen</h6>
+                <div class="ml-auto">
+                    <a id="lupa_btnUnduhPDF" href="#" class="btn btn-xs btn-light text-danger font-weight-bold shadow-sm mr-2 rounded-pill px-3" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Buka di Tab Baru</a>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body modal-body-full bg-dark position-relative p-0" style="height: calc(100vh - 55px);">
+                <iframe id="lupa_iframePreviewPDF" class="iframe-full w-100 h-100 border-0 d-none" src=""></iframe>
+                <div id="lupa_loadingPreviewPDF" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100">
+                    <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8)
+// ======================================================================
+var LUPA_DATA_MASTER = {}; 
+var LUPA_DB_PEGAWAI = [];
+var LUPA_FILE_UPLOAD = null;
+var LUPA_CACHE_DATA = []; 
+var LUPA_CACHE_THN = "";
+var LUPA_CACHE_BLN = "";
+var LUPA_TABEL_INSTANCE = null; 
+var LUPA_USER_AKTIF = "";
+var LUPA_IS_ADMIN = false;
+var LUPA_UNIT_TERKUNCI = ""; 
+var LUPA_USER_NPSN = "";
+
+$(document).ready(function() {
+    // Reset SPA State
+    LUPA_TABEL_INSTANCE = null;
+    $('#lupa_tableState').hide();
+    $('#lupa_loadingState').show();
+
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        LUPA_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        LUPA_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        LUPA_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { LUPA_USER_NPSN = ""; LUPA_IS_ADMIN = false; }
+
+    // VAKSINASI EVENT SPA DELEGATION (Pemusnahan onClick / onChange Inline)
+    // Pemicu Filter Cache (Zero Blink)
+    $(document).off('change', '#lupa_filterTahun, #lupa_filterBulan, #lupa_filterStatus').on('change', '#lupa_filterTahun, #lupa_filterBulan, #lupa_filterStatus', lupa_prosesCariData);
+    $(document).off('change', '#lupa_filterUnit').on('change', '#lupa_filterUnit', lupa_terapkanFilterLokal);
+    
+    // Pemicu Refresh Paksa
+    $(document).off('click', '#lupa_btnRefresh').on('click', '#lupa_btnRefresh', lupa_tarikDataServer);
+    $(document).off('click', '#lupa_btnTambah').on('click', '#lupa_btnTambah', lupa_bukaModalTambah);
+    
+    // Event Modal Forms
+    $(document).off('submit', '#lupa_formUtama').on('submit', '#lupa_formUtama', lupa_submitFormUtama);
+    $(document).off('submit', '#lupa_formHapus').on('submit', '#lupa_formHapus', lupa_submitHapusPermanen);
+    $(document).off('submit', '#lupa_formVerif').on('submit', '#lupa_formVerif', lupa_submitVerifikasi);
+    
+    // Event Form Inputs
+    $(document).off('change', '#lupa_inputUnit').on('change', '#lupa_inputUnit', lupa_filterDropdownNama);
+    $(document).off('change', '#lupa_inputNama').on('change', '#lupa_inputNama', lupa_filterDropdownNip);
+    $(document).off('change', '#lupa_inputFile').on('change', '#lupa_inputFile', function() { lupa_prosesPilihFile(this); });
+
+    // Event Aksi Tabel Dinamis
+    $(document).off('click', '.lupa-btn-verif').on('click', '.lupa-btn-verif', function() { lupa_bukaModalVerif($(this).data('id')); });
+    $(document).off('click', '.lupa-btn-edit').on('click', '.lupa-btn-edit', function() { lupa_bukaModalEdit($(this).data('id')); });
+    $(document).off('click', '.lupa-btn-hapus').on('click', '.lupa-btn-hapus', function() { lupa_bukaModalHapus($(this).data('id')); });
+    $(document).off('click', '.lupa-btn-preview').on('click', '.lupa-btn-preview', function() { lupa_lihatPreviewPDF($(this).data('id')); });
+    $(document).off('click', '.lupa-btn-catatan').on('click', '.lupa-btn-catatan', function() { lupa_lihatCatatanSultan($(this).data('pesan')); });
+
+    // VAKSIN MEMORI IFRAME
+    $('#lupa_modalVerif').on('hidden.bs.modal', function () { $('#lupa_verifIframe').addClass('d-none').attr('src', ''); });
+    $('#lupa_modalPreviewPDF').on('hidden.bs.modal', function () { $('#lupa_iframePreviewPDF').addClass('d-none').attr('src', ''); $('#lupa_loadingPreviewPDF').removeClass('d-none'); });
+
+    // Inisiasi Waktu Dropdown
+    var thn = new Date().getFullYear();
+    var $selThn = $('#lupa_filterTahun').empty();
+    for(var i = thn - 3; i <= thn + 1; i++){ $selThn.append('<option value="'+i+'">'+i+'</option>'); }
+    $selThn.val(thn); 
+    $('#lupa_filterBulan').val('');  
+    $('#lupa_filterStatus').val(''); 
+
+    lupa_validasiAksesUser();
+});
+
+// =================================================================
+// LOGIKA PINTU MASUK (GATEKEEPER)
+// =================================================================
+function lupa_validasiAksesUser() {
+    if (LUPA_IS_ADMIN) {
+        $('#lupa_loadingText').html('Mempersiapkan Database Admin...');
+        
+        google.script.run.withSuccessHandler(function(data) {
+            if(Array.isArray(data)) LUPA_DB_PEGAWAI = data;
+            
+            var unikUnit = [...new Set(LUPA_DB_PEGAWAI.map(item => item.unit))].sort();
+            var optFilter = '<option value="SEMUA">- Semua Unit Kerja -</option>';
+            var optInput = '<option value="">- Pilih Unit -</option>';
+            
+            unikUnit.forEach(function(u) {
+                if (u) {
+                    optFilter += '<option value="' + lupa_escapeHtml(u) + '">' + lupa_escapeHtml(u) + '</option>';
+                    optInput += '<option value="' + lupa_escapeHtml(u) + '">' + lupa_escapeHtml(u) + '</option>';
+                }
+            });
+            
+            $('#lupa_filterUnit').html(optFilter).prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+            $('#lupa_inputUnit').html(optInput).prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+            $('#lupa_btnRefresh, #lupa_btnTambah').prop('disabled', false);
+            
+            lupa_tarikDataServer(); 
+        }).getDatabasePegawai();
+        
+    } else {
+        if (!LUPA_USER_NPSN) {
+            $('#lupa_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#lupa_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#lupa_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#lupa_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>'+lupa_escapeHtml(dataUnit.error)+'</span>');
+                    return;
+                }
+
+                LUPA_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#lupa_filterUnit').empty().append('<option value="'+lupa_escapeHtml(LUPA_UNIT_TERKUNCI)+'">'+lupa_escapeHtml(LUPA_UNIT_TERKUNCI)+'</option>');
+                $('#lupa_inputUnit').html('<option value="'+lupa_escapeHtml(LUPA_UNIT_TERKUNCI)+'">'+lupa_escapeHtml(LUPA_UNIT_TERKUNCI)+'</option>').prop('disabled', true);
+                
+                google.script.run.withSuccessHandler(function(data){
+                    if(Array.isArray(data)) LUPA_DB_PEGAWAI = data;
+                    lupa_filterDropdownNama(); 
+                }).getDatabasePegawai();
+
+                $('#lupa_btnRefresh, #lupa_btnTambah').prop('disabled', false);
+                lupa_tarikDataServer(); 
+            })
+            .withFailureHandler(function(err) {
+                $('#lupa_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#lupa_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: '+lupa_escapeHtml(err.message)+'</span>');
+            })
+            .getUnitKerjaByNPSN(LUPA_USER_NPSN);
+    }
+}
+
+// =================================================================
+// LOGIKA FETCH & SMART CACHE FILTER (BAB VIII)
+// =================================================================
+function lupa_prosesCariData() {
+    var th = $('#lupa_filterTahun').val(); 
+    var bl = $('#lupa_filterBulan').val();
+    if (!th) { Sultan.notif.info('Tahun harus dipilih.'); return; }
+    
+    // VAKSIN CACHE CERDAS: Gunakan cache LOKAL jika Data Tahun ada, DAN (yang dicari bulan yang sama ATAU cache kita isi "Semua Bulan")
+    if (th === LUPA_CACHE_THN && LUPA_CACHE_DATA.length > 0) { 
+        if (bl === LUPA_CACHE_BLN || LUPA_CACHE_BLN === "") {
+            lupa_terapkanFilterLokal(); 
+            return;
+        }
+    }
+    
+    lupa_tarikDataServer(); 
+}
+
+function lupa_tarikDataServer() {
+    var th = $('#lupa_filterTahun').val();
+    var bl = $('#lupa_filterBulan').val();
+    if (!th) return; 
+
+    var btn = $('#lupa_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#lupa_tabelUtama')) {
+        $('#lupa_tableState').hide();
+        $('#lupa_loadingText').html('Menyinkronkan data dari server...');
+        $('#lupa_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(jsonString) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            try { 
+                var responseData = JSON.parse(jsonString); 
+                if (responseData.error) {
+                    $('#lupa_tableState').hide();
+                    $('#lupa_loadingState').show();
+                    $('#lupa_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + lupa_escapeHtml(responseData.error) + '</span>');
+                    return;
+                }
+                
+                LUPA_CACHE_DATA = responseData; 
+                LUPA_CACHE_THN = th;
+                LUPA_CACHE_BLN = bl;
+                
+                lupa_terapkanFilterLokal(); 
+
+            } catch (e) { 
+                $('#lupa_loadingText').html('<span class="text-danger">Gagal memproses struktur data.</span>'); 
+            }
+        })
+        .withFailureHandler(function(e){
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            $('#lupa_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Server Terputus.</span>');
+        }).getDaftarLupaPresensi(th, bl); 
+}
+
+function lupa_terapkanFilterLokal() {
+    var st = $('#lupa_filterStatus').val();
+    var tStat = (st && st !== "") ? String(st).trim().toUpperCase() : "";
+
+    var bl = $('#lupa_filterBulan').val();
+    var tBulan = (bl && bl !== "") ? String(bl).trim().toLowerCase() : "";
+
+    var tAdminUnit = LUPA_IS_ADMIN ? $('#lupa_filterUnit').val().toUpperCase() : "";
+    var tNpsnUser = String(LUPA_USER_NPSN).trim().toUpperCase(); 
+    var tUnitUser = String(LUPA_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var hasil = LUPA_CACHE_DATA.filter(function(row) {
+        var rNpsn = String(row.npsn || "").trim().toUpperCase(); 
+        var rUnit = String(row.unit || "").trim().toUpperCase(); 
+        var rStat = String(row.status || "").trim().toUpperCase();
+        
+        // 1. Ekstrak Bulan dari string tanggal untuk filter lokal
+        var rBulanRaw = "";
+        var rawTgl = String(row.tanggal || "").replace(/'/g, "").trim();
+        if (rawTgl !== "" && rawTgl !== "-") {
+            var parts = rawTgl.split('-');
+            if (parts.length === 3) {
+                var mIdx = parts[0].length === 4 ? parts[1] : parts[1];
+                var mNames = ["", "januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+                rBulanRaw = mNames[parseInt(mIdx, 10)] || "";
+            }
+        }
+
+        // 2. Filter Sekolah
+        var pSekolah = false;
+        if (LUPA_IS_ADMIN) {
+            if (tAdminUnit === "SEMUA" || rUnit === tAdminUnit) { pSekolah = true; }
+        } else {
+            if (tNpsnUser !== "" && rNpsn === tNpsnUser) { pSekolah = true; } 
+            else if (tUnitUser !== "" && rUnit === tUnitUser) { pSekolah = true; }
+        }
+        
+        // 3. Filter Status
+        var pStat = true;
+        if (tStat !== "") { 
+            if (tStat === "DIPROSES") pStat = (rStat === "" || rStat === "DIPROSES"); 
+            else pStat = rStat.includes(tStat); 
+        }
+
+        // 4. Filter Bulan (Lokal)
+        var pBulan = true;
+        if (tBulan !== "") {
+            pBulan = (rBulanRaw === tBulan);
+        }
+        
+        return pSekolah && pStat && pBulan;
+    });
+    
+    hasil.sort(function(a, b) { return Math.max(lupa_parseDateLogic(b.tglKirim), lupa_parseDateLogic(b.tglEdit), lupa_parseDateLogic(b.tglVerif)) - Math.max(lupa_parseDateLogic(a.tglKirim), lupa_parseDateLogic(a.tglEdit), lupa_parseDateLogic(a.tglVerif)); });
+
+    lupa_renderTabel(hasil);
+}
+
+function lupa_renderTabel(hasil) {
+    var isFirstLoad = !$.fn.DataTable.isDataTable('#lupa_tabelUtama');
+    var dtArray = []; LUPA_DATA_MASTER = {}; 
+    
+    hasil.forEach(function(row) {
+        LUPA_DATA_MASTER[row.rowBaris] = row; 
+        var id = String(row.rowBaris); 
+        var rawTgl = (row.tanggal || "").replace(/'/g, ""); var uiTgl = lupa_formatTanggalIndo(rawTgl); 
+        var badgeJenis = (row.jenis || "").includes('Datang') ? '<span class="badge badge-sultan badge-sultan-light-orange"><i class="fas fa-sun mr-1"></i>Datang</span>' : '<span class="badge badge-sultan badge-sultan-light-dark"><i class="fas fa-moon mr-1"></i>Pulang</span>';
+        
+        var badgeStatus = lupa_buildBadgeStatus(row.status, row.ket);
+        
+        var isLocked = (String(row.status).toLowerCase().includes('ok') || String(row.status).toLowerCase().includes('setuju'));
+        var attrDis = isLocked ? 'disabled style="cursor:not-allowed; opacity:0.6; filter: grayscale(100%);"' : '';
+        
+        // BAB III: Tombol Aksi Kepatuhan Sultan (Admin susut, User lebar)
+        var txtVerif = LUPA_IS_ADMIN ? "" : " Verif";
+        var txtEdit  = LUPA_IS_ADMIN ? "" : " Edit";
+        var txtHapus = LUPA_IS_ADMIN ? "" : " Hapus";
+        var marginIcon = LUPA_IS_ADMIN ? "" : "mr-1";
+
+        var btnAdmin = LUPA_IS_ADMIN ? `<button class="btn btn-sm btn-primary font-weight-bold shadow-sm lupa-btn-verif" data-id="${id}" title="Verifikasi"><i class="fas fa-clipboard-check ${marginIcon}"></i>${txtVerif}</button>` : '';
+        var btnEdit  = `<button class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm lupa-btn-edit" data-id="${id}" title="Edit" ${attrDis}><i class="fas fa-pencil-alt ${marginIcon}"></i>${txtEdit}</button>`;
+        var btnHapus = `<button class="btn btn-sm btn-danger font-weight-bold shadow-sm lupa-btn-hapus" data-id="${id}" title="Hapus" ${attrDis}><i class="fas fa-trash-alt ${marginIcon}"></i>${txtHapus}</button>`;
+        
+        // VAKSIN TATA LETAK: flex-nowrap agar tombol sebaris
+        var aksiHTML = `<div class="d-flex flex-nowrap justify-content-center" style="gap:5px;">${btnAdmin}${btnEdit}${btnHapus}</div>`;
+
+        var btnFile = (row.fileUrl && row.fileUrl.length > 5) ? `<button class="btn btn-sm btn-outline-danger font-weight-bold shadow-sm lupa-btn-preview" data-id="${id}"><i class="fas fa-file-pdf mr-1"></i> Dokumen</button>` : '-';
+        
+        // VAKSIN LEBAR: text-nowrap agar membentang bebas (Kolom Nama) jika layar lebar
+        var txtUnitHtml = LUPA_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${lupa_escapeHtml(row.unit)}</div>` : '';
+        var uiNama = `<div class="font-weight-bold text-dark text-nowrap">${lupa_escapeHtml(row.nama)}</div><div class="small text-muted text-nowrap">${lupa_escapeHtml(row.nip)}</div>${txtUnitHtml}`;
+        
+        var metaKirim = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglKirim||'-'}</span><span class="d-block text-muted text-nowrap">${lupa_cleanText(row.userInput)}</span></div>`;
+        var metaEdit  = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglEdit||'-'}</span><span class="d-block text-muted text-nowrap">${lupa_cleanText(row.userEdit)}</span></div>`;
+        var metaVerif = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglVerif||'-'}</span><span class="d-block text-muted text-nowrap">${lupa_cleanText(row.adminVerif)}</span></div>`;
+
+        dtArray.push([ aksiHTML, uiNama, uiTgl, lupa_escapeHtml((row.jam || "").substring(0, 5)), badgeJenis, (row.komulatif||'-'), btnFile, badgeStatus, metaKirim, metaEdit, metaVerif ]);
+    });
+
+    // ============================================================
+    // UPDATE TURBO SEAMLESS: MUNCUL INSTAN & INISIASI (BAB VII)
+    // ============================================================
+    if (isFirstLoad) {
+        LUPA_TABEL_INSTANCE = $('#lupa_tabelUtama').DataTable({
+            "data": dtArray,
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, // TRIK TURBO
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "columnDefs": [ 
+                // VAKSIN LEBAR: Kolom Aksi (Ketat), Kolom Nama (Lebar Bebas), Kolom Riwayat (Golden Ratio 10%)
+                { "targets": 0, "width": "1%", "className": "col-sticky-left bg-white align-middle border-right text-center text-nowrap" },
+                { "targets": 1, "className": "text-left align-middle" },
+                { "targets": [7,8,9,10], "width": "10%", "className": "text-left align-middle" },
+                { "targets": [2,3,4,5,6], "width": "1%", "className": "text-center align-middle text-nowrap" }
+            ],
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada riwayat Lupa Presensi." }
+        });
+        
+        $('#lupa_loadingState').hide();
+        $('#lupa_tableState').show(); 
+        setTimeout(function(){ LUPA_TABEL_INSTANCE.columns.adjust(); }, 100);
+        
+    } else {
+        LUPA_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        if ($('#lupa_tableState').is(':hidden')) {
+            $('#lupa_loadingState').hide();
+            $('#lupa_tableState').show(); 
+        }
+        setTimeout(function(){ LUPA_TABEL_INSTANCE.columns.adjust(); }, 50);
+    }
+}
+
+// =================================================================
+// KONTROLER MODAL & CRUD
+// =================================================================
+function lupa_bukaModalTambah() {
+    $('#lupa_formUtama')[0].reset(); $('#lupa_inputIdData').val(''); LUPA_FILE_UPLOAD = null;
+    $('#lupa_headerModalForm').removeClass('bg-warning').addClass('bg-maroon'); 
+    $('#lupa_judulModalForm').html('<i class="fas fa-file-signature mr-2"></i>Tambah Data').css('color', '#fff'); 
+    $('#lupa_closeModalForm').removeClass('text-dark').addClass('text-white'); 
+    $('#lupa_btnSimpanForm').removeClass('btn-warning text-dark').addClass('btn-maroon text-white').html('<i class="fas fa-save mr-1"></i> Simpan');
+    
+    $('#lupa_labelFileWrap').html('<i class="fas fa-file-pdf text-danger mr-1"></i> Unggah File PDF <span class="text-danger">*</span>'); 
+    $('#lupa_pesanFile').removeClass('text-success').addClass('text-muted').html('<i class="fas fa-info-circle mr-1"></i> Ukuran Maksimal 200 KB.'); 
+    $('.custom-file-label').removeClass("selected text-success font-weight-bold").html('Pilih file PDF...'); 
+    
+    if (LUPA_IS_ADMIN) {
+        $('#lupa_inputUnit').val('').prop('disabled', false); 
+        $('#lupa_inputNama').empty().append('<option value="">- Pilih Unit Dulu -</option>').prop('disabled', true);
+    } else {
+        $('#lupa_inputUnit').val(LUPA_UNIT_TERKUNCI).trigger('change').prop('disabled', true); 
+    }
+    
+    $('#lupa_inputNip').empty().append('<option value="">- Otomatis -</option>').prop('disabled', true);
+    $('#lupa_modalForm').modal('show');
+}
+
+function lupa_bukaModalEdit(id) {
+    var row = LUPA_DATA_MASTER[id]; if(!row) return; 
+    lupa_bukaModalTambah(); 
+    
+    $('#lupa_inputIdData').val(row.rowBaris); 
+    $('#lupa_headerModalForm').removeClass('bg-maroon').addClass('bg-warning'); 
+    $('#lupa_judulModalForm').html('<i class="fas fa-edit mr-2"></i>Edit Data').css('color', '#343a40'); 
+    $('#lupa_closeModalForm').removeClass('text-white').addClass('text-dark'); 
+    $('#lupa_btnSimpanForm').removeClass('btn-maroon text-white').addClass('btn-warning text-dark').html('<i class="fas fa-save mr-1"></i> Update');
+    
+    $('#lupa_inputUnit').val(row.unit).prop('disabled',true); 
+    
+    setTimeout(() => { 
+        $('#lupa_inputNama').empty().append('<option value="' + lupa_escapeHtml(row.nama) + '">' + lupa_escapeHtml(row.nama) + '</option>').prop('disabled',true); 
+        $('#lupa_inputNip').empty().append('<option value="' + lupa_escapeHtml(row.nip) + '">' + lupa_escapeHtml(row.nip) + '</option>').prop('disabled',true); 
+    }, 200);
+
+    $('#lupa_inputTanggal').val(row.tanggal ? row.tanggal.replace(/'/g,"") : ""); 
+    $('#lupa_inputWaktu').val(row.jam ? row.jam.replace(/'/g,"").substring(0,5) : ""); 
+    $('#lupa_inputJenis').val(row.jenis); 
+    $('#lupa_inputKomulatif').val(row.komulatif);
+    
+    LUPA_FILE_UPLOAD = null; 
+    $('#lupa_labelFileWrap').html('<i class="fas fa-file-pdf text-danger mr-1"></i> Perbarui File <span class="badge badge-info ml-2">Abaikan jika tidak mengganti dokumen.</span>'); 
+    $('#lupa_pesanFile').removeClass('text-muted').addClass('text-success font-weight-bold').html('<i class="fas fa-check-circle mr-1"></i> Dokumen lama sudah tersimpan.'); 
+    $('.custom-file-label').html('Pilih file baru jika ingin mengganti.');
+    
+    $('#lupa_inputNipLama').val(row.nip); 
+    $('#lupa_modalForm').modal('show');
+}
+
+function lupa_submitFormUtama(e) { 
+    e.preventDefault(); 
+    var formAktif = $(e.target);
+    var recId = formAktif.find('#lupa_inputIdData').val(); 
+    if (!recId && !LUPA_FILE_UPLOAD) { Sultan.alert('warning','Dokumen Wajib','Wajib mengunggah surat pernyataan (PDF)!'); return; } 
+    
+    var btn = formAktif.find('button[type="submit"]'); 
+    var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...'); 
+    
+    var finalNpsn = LUPA_USER_NPSN; 
+    if (LUPA_IS_ADMIN) {
+        var inputNama = formAktif.find('#lupa_inputNama').val();
+        var inputNip = formAktif.find('#lupa_inputNip').val();
+        var pgw = LUPA_DB_PEGAWAI.find(p => p.nama === inputNama && p.nip === inputNip);
+        if(pgw) finalNpsn = pgw.npsn;
+    }
+
+    var dataForm = { 
+        recId: recId, unit_kerja: formAktif.find('#lupa_inputUnit').val(), nama_asn: formAktif.find('#lupa_inputNama').val(), nip_asn: formAktif.find('#lupa_inputNip').val(), 
+        tanggal: formAktif.find('#lupa_inputTanggal').val(), waktu: formAktif.find('#lupa_inputWaktu').val(), jenis: formAktif.find('#lupa_inputJenis').val(), 
+        komulatif: formAktif.find('#lupa_inputKomulatif').val(), user_login: LUPA_USER_AKTIF, nip_lama: formAktif.find('#lupa_inputNipLama').val(),
+        npsn: finalNpsn 
+    }; 
+    
+    var cbSuccess = function(res) { 
+        btn.prop('disabled', false).html(txt); 
+        var pesan = String(res).toLowerCase(); 
+        if (pesan.includes('sukses') || pesan.includes('berhasil')) { 
+            formAktif.closest('.modal').modal('hide'); 
+            setTimeout(() => { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); lupa_tarikDataServer(); Sultan.notif.sukses('Data berhasil disimpan.'); }, 400); 
+        } else { Sultan.alert('error', 'Gagal Menyimpan', res); } 
+    }; 
+    var cbFail = function(err) { btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Koneksi Server Gagal', err.message); };
+
+    if (recId) { google.script.run.withSuccessHandler(cbSuccess).withFailureHandler(cbFail).updateLupaPresensi(dataForm, LUPA_FILE_UPLOAD); } 
+    else { dataForm.file = LUPA_FILE_UPLOAD; google.script.run.withSuccessHandler(cbSuccess).withFailureHandler(cbFail).simpanLupaPresensi(dataForm); } 
+}
+
+function lupa_lihatPreviewPDF(id) {
+    var row = LUPA_DATA_MASTER[id]; 
+    var url = row ? row.fileUrl : null; 
+    if(!url) { Sultan.notif.gagal('Dokumen tidak ditemukan.'); return; }
+    
+    var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+        var previewUrl = 'https://drive.google.com/file/d/' + match[1] + '/preview';
+        $('#lupa_iframePreviewPDF').addClass('d-none').attr('src', ''); 
+        $('#lupa_loadingPreviewPDF').removeClass('d-none'); 
+        $('#lupa_modalPreviewPDF').modal('show');
+        
+        $('#lupa_iframePreviewPDF').attr('src', previewUrl); 
+        $('#lupa_btnUnduhPDF').attr('href', url);
+        
+        // VAKSIN BAB V: Event onload & fallback 2.5s
+        $('#lupa_iframePreviewPDF').off('load').on('load', function() { 
+            $('#lupa_loadingPreviewPDF').addClass('d-none'); 
+            $(this).removeClass('d-none'); 
+        });
+        setTimeout(function() {
+            $('#lupa_loadingPreviewPDF').addClass('d-none');
+            $('#lupa_iframePreviewPDF').removeClass('d-none');
+        }, 2500);
+        
+    } else { window.open(url, '_blank'); } 
+}
+
+function lupa_bukaModalVerif(id) {
+    var row = LUPA_DATA_MASTER[id]; if (!row) return; 
+    $('#lupa_verifIdData').val(row.rowBaris); $('#lupa_verifStatus').val(''); $('#lupa_verifCatatan').val(row.ket || '');
+    $('#lupa_vNama').text(row.nama || '-'); $('#lupa_vNip').text(row.nip || '-'); var rawTgl = (row.tanggal || "").replace(/'/g, ""); $('#lupa_vTgl').text(lupa_formatTanggalIndo(rawTgl)); 
+    $('#lupa_vJam').text(row.jam ? String(row.jam).substring(0,5) : '-'); $('#lupa_vJenis').html((row.jenis || "").includes('Datang') ? '<i class="fas fa-sun mr-2 text-warning"></i>Datang' : '<i class="fas fa-moon mr-2 text-dark"></i>Pulang');
+    var kom = row.komulatif ? row.komulatif.replace(/'/g, "") : '-'; $('#lupa_vKom').html('<span class="badge badge-sultan badge-sultan-light-info px-3 py-1 text-uppercase" style="font-size:14px;">Ke-' + kom + '</span>');
+    var url = row.fileUrl; $('#lupa_verifIframe').addClass('d-none').attr('src', ''); $('#lupa_verifNoFile').removeClass('d-none');
+    if (url && url.length > 10) { 
+        var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
+        if (match && match[1]) { 
+            $('#lupa_verifIframe').attr('src', 'https://drive.google.com/file/d/' + match[1] + '/preview').removeClass('d-none'); 
+            $('#lupa_verifNoFile').addClass('d-none'); 
+        } 
+    }
+    $('#lupa_modalVerif').modal('show');
+}
+
+function lupa_submitVerifikasi(e){
+    e.preventDefault(); 
+    var formAktif = $(e.target);
+    var st = formAktif.find('#lupa_verifStatus').val(); 
+    var ket = formAktif.find('#lupa_verifCatatan').val().trim();
+    if(!st) { Sultan.alert('warning', 'Pilih Status', 'Tentukan status verifikasi.'); return; }
+    if((st === 'Ditolak' || st === 'Revisi') && !ket){ Sultan.alert('warning', 'Catatan Wajib', 'Berikan alasan untuk perbaikan user agar tidak diulangi.'); return; }
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled',true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Mengeksekusi...');
+    var payload = { recId: formAktif.find('#lupa_verifIdData').val(), status: st, keterangan: ket, user_verif: LUPA_USER_AKTIF };
+    
+    google.script.run
+        .withSuccessHandler(function(res){ 
+            btn.prop('disabled',false).html(txt); 
+            if (res === "Sukses" || String(res).includes("Sukses")) {
+                formAktif.closest('.modal').modal('hide'); setTimeout(() => { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); lupa_tarikDataServer(); Sultan.notif.sukses('Status berhasil diperbarui!'); }, 400);
+            } else { Sultan.alert('error', 'Gagal Verifikasi', res); }
+        })
+        .withFailureHandler(function(err){ btn.prop('disabled',false).html(txt); Sultan.alert('error', 'Koneksi Server Gagal', err.message); })
+        .verifikasiLupaPresensi(payload);
+}
+
+function lupa_bukaModalHapus(id) {
+    var row = LUPA_DATA_MASTER[id]; if(!row) return; 
+    $('#lupa_hapusIdData').val(id); var detailNip = row.nip ? ' (' + lupa_cleanText(row.nip) + ')' : ''; $('#lupa_hapusNamaView').text(lupa_cleanText(row.nama) + detailNip); 
+    $('#lupa_hapusAlasan').val(''); $('#lupa_hapusInputKode').val(''); $('#lupa_modalHapus').modal('show');
+}
+
+function lupa_submitHapusPermanen(e) {
+    e.preventDefault();
+    var formAktif = $(e.target);
+    var d = new Date(); var kd = d.getFullYear()+""+String(d.getMonth()+1).padStart(2,'0')+""+String(d.getDate()).padStart(2,'0');
+    var inputUser = formAktif.find('#lupa_hapusInputKode').val().trim();
+    if(inputUser !== kd) { Sultan.notif.gagal('Kode Validasi keamanan salah!'); return; }
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menghapus...');
+    var payload = { recId: formAktif.find('#lupa_hapusIdData').val(), kode: inputUser, alasan: formAktif.find('#lupa_hapusAlasan').val(), user_login: LUPA_USER_AKTIF };
+    
+    google.script.run
+        .withSuccessHandler(function(r) {
+            btn.prop('disabled', false).html(txt);
+            if (r === "KODE_SALAH") Sultan.notif.gagal('Kode Validasi keamanan salah!');
+            else if (r === "Sukses" || String(r).includes("Sukses")) { 
+                formAktif.closest('.modal').modal('hide'); setTimeout(() => { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); lupa_tarikDataServer(); Sultan.notif.sukses('Data telah dihapus permanen.'); }, 400);
+            } else Sultan.alert('error', 'Gagal Menghapus', r);
+        })
+        .withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Koneksi Server Gagal', err.message); })
+        .hapusLupaPresensi(payload);
+}
+
+// =================================================================
+// HELPER UTILITIES
+// =================================================================
+function lupa_formatTanggalIndo(tglStr) { if(!tglStr) return '-'; var parts = tglStr.split('-'); if(parts.length !== 3) return tglStr; var thn = parts[0].length === 4 ? parts[0] : parts[2]; var bln = parts[0].length === 4 ? parts[1] : parts[1]; var tgl = parts[0].length === 4 ? parts[2] : parts[0]; var namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]; return parseInt(tgl, 10) + " " + namaBulan[parseInt(bln, 10)] + " " + thn; }
+
+function lupa_prosesPilihFile(input){ 
+    if(input.files && input.files[0]){ 
+        var file = input.files[0]; 
+        if(file.type !== "application/pdf"){ Sultan.alert('warning','Hanya PDF','Sistem hanya menerima file berformat PDF.'); $(input).val(''); return; } 
+        if(file.size > 200 * 1024){ Sultan.alert('warning','Ukuran File Terlalu Besar','Maksimal 200 KB.'); $(input).val(''); return; } 
+        var reader = new FileReader(); 
+        reader.onload = function(e){ 
+            LUPA_FILE_UPLOAD = { data: e.target.result.split(',')[1], mimeType: file.type, name: file.name }; 
+            $('#lupa_labelNamaFile').html('<i class="fas fa-check text-success mr-1"></i> ' + file.name).addClass('text-success font-weight-bold'); 
+            $('#lupa_pesanFile').removeClass('text-muted').addClass('text-success font-weight-bold').html('<i class="fas fa-check"></i> Dokumen siap disimpan.'); 
+        }; 
+        reader.readAsDataURL(file); 
+    } 
+}
+
+function lupa_filterDropdownNama(){
+    var $selNama = $('#lupa_inputNama').empty().append('<option value="">- Pilih Nama -</option>').prop('disabled',true);
+    $('#lupa_inputNip').empty().append('<option value="">- Otomatis -</option>').prop('disabled',true);
+    var unitTerpilih = $('#lupa_inputUnit').val();
+    if (LUPA_IS_ADMIN && !unitTerpilih) return; 
+    var filtered = LUPA_IS_ADMIN ? LUPA_DB_PEGAWAI.filter(x => x.unit === unitTerpilih) : LUPA_DB_PEGAWAI.filter(x => String(x.npsn).trim() === String(LUPA_USER_NPSN).trim());
+    var unikNama = [...new Set(filtered.map(item => item.nama))].sort();
+    unikNama.forEach(function(nama) { $selNama.append('<option value="' + lupa_escapeHtml(nama) + '">' + lupa_escapeHtml(nama) + '</option>'); });
+    $selNama.prop('disabled',false);
+}
+
+function lupa_filterDropdownNip(){
+    var nama = $('#lupa_inputNama').val(); var unitTerpilih = $('#lupa_inputUnit').val(); var $selNip = $('#lupa_inputNip').empty();
+    if(!nama){ $selNip.append('<option value="">- Otomatis -</option>').prop('disabled',true); return; }
+    var kandidat = LUPA_IS_ADMIN ? LUPA_DB_PEGAWAI.filter(x => x.unit === unitTerpilih && x.nama === nama) : LUPA_DB_PEGAWAI.filter(x => String(x.npsn).trim() === String(LUPA_USER_NPSN).trim() && x.nama === nama);
+    if(kandidat.length === 1){ $selNip.append('<option value="' + lupa_escapeHtml(kandidat[0].nip) + '" selected>' + lupa_escapeHtml(kandidat[0].nip) + '</option>').prop('disabled',true); }
+    else{ $selNip.append('<option value="">- Pilih NIP -</option>'); kandidat.forEach(function(x) { $selNip.append('<option value="' + lupa_escapeHtml(x.nip) + '">' + lupa_escapeHtml(x.nip) + '</option>'); }); $selNip.prop('disabled',false); }
+}
+
+function lupa_cleanText(text) { if (text == null) return ""; return String(text).replace(/(\r\n|\n|\r)/gm, " ").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+function lupa_escapeHtml(text) { if (!text) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+function lupa_parseDateLogic(str){if(!str||str.length<5)return 0;var clean=String(str).replace(/'/g,"").trim();if(clean==="-"||clean==="")return 0;try{var parts=clean.split(/\s+/);var d=parts[0].split(/[-/]/);if(d.length!==3)return 0;var t=(parts[1]||"00:00:00").split(":");return new Date(parseInt(d[2]),parseInt(d[1])-1,parseInt(d[0]),parseInt(t[0]||0),parseInt(t[1]||0),parseInt(t[2]||0)).getTime();}catch(e){return 0;}}
+
+// =================================================================
+// HUKUM KE-6: VAKSIN POP-UP CATATAN (ANTI-HOVER)
+// =================================================================
+function lupa_escapeJs(str) { 
+    if (!str) return ""; 
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>"); 
+}
+
+function lupa_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Verifikasi',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+function lupa_buildBadgeStatus(status, ket) { 
+    var s = String(status || "").toLowerCase(); 
+    var style = 'badge-sultan-light-warning'; 
+    var icon = 'clock'; 
+    var labelStatus = status || 'Diproses';
+    
+    if (s.includes('ok') || s.includes('setuju')) { style = 'badge-sultan-light-success'; icon = 'check-circle'; } 
+    else if (s.includes('revisi')) { style = 'badge-sultan-light-info'; icon = 'sync-alt'; } 
+    else if (s.includes('tolak')) { style = 'badge-sultan-light-danger'; icon = 'times-circle'; } 
+    
+    var badgeHtml = '<span class="badge badge-sultan ' + style + '"><i class="fas fa-' + icon + ' mr-1"></i>' + lupa_escapeHtml(labelStatus) + '</span>';
+
+    if (ket && ket.trim().length > 2 && (s.includes('revisi') || s.includes('tolak'))) {
+        var safeKet = lupa_escapeJs(ket);
+        // VAKSIN EVENT: Hapus onClick, gunakan class
+        var btnCatatan = '<div class="mt-2"><button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm lupa-btn-catatan" style="font-size:10px; border-radius:4px;" data-pesan="' + safeKet + '"><i class="fas fa-comment-dots mr-1"></i> Baca Catatan</button></div>';
+        return badgeHtml + btnCatatan;
+    }
+
+    return badgeHtml; 
+}
+</script>

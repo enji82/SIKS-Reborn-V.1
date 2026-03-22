@@ -1,191 +1,318 @@
-<div id="gerbang-login" class="login-screen-wrapper">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<div class="login-screen-wrapper">
+  
+  <div class="edu-bg-icons">
+    <i class="fas fa-graduation-cap"></i>
+    <i class="fas fa-book-open"></i>
+    <i class="fas fa-school"></i>
+    <i class="fas fa-chalkboard-teacher"></i>
+    <i class="fas fa-pencil-alt"></i>
+    <i class="fas fa-globe-asia"></i>
+    <i class="fas fa-laptop-code"></i>
+    <i class="fas fa-award"></i>
+  </div>
+
   <style>
     /* ========================================================= */
-    /* PREMIUM LOGIN – SIKS REBORN                                */
+    /* PREMIUM THEME (IN-CARD TRANSITION)                        */
     /* ========================================================= */
 
-    :root{
-      --maroon-main:#7a0c0c;
-      --maroon-dark:#3b0404;
-      --gold-accent:#d4af37;
-      --text-dark:#2b2b2b;
+    :root {
+      --maroon-primary: #800000;
+      --maroon-gradient: linear-gradient(135deg, #800000 0%, #4a0404 100%);
+      --gold-luxury: #FFD700;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.4);
     }
 
-    .login-screen-wrapper{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:
-        linear-gradient(145deg, rgba(58,5,5,0.95), rgba(15,15,15,0.95)),
-        url("https://images.unsplash.com/photo-1557683316-973673baf926");
-      background-size:cover;
-      background-position:center;
-      z-index:99999;
-      font-family:'Segoe UI', 'Inter', sans-serif;
+    /* FIX Z-INDEX SWEETALERT (Hanya untuk Error) */
+    .swal2-container { z-index: 2147483647 !important; }
+
+    /* WRAPPER */
+    .login-screen-wrapper {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at center, #5e0a0a 0%, #1a0000 100%);
+      font-family: 'Segoe UI', 'Inter', sans-serif;
+      z-index: 9999; overflow: hidden; 
     }
 
-    .login-box{
-      width:420px;
-      max-width:92%;
+    /* BACKGROUND ICONS */
+    .edu-bg-icons i {
+      position: absolute; color: rgba(255, 215, 0, 0.05);
+      animation: floatUp 20s linear infinite; z-index: 0; pointer-events: none;
+    }
+    .edu-bg-icons i:nth-child(1) { left: 10%; font-size: 80px; animation-duration: 25s; bottom: -100px; }
+    .edu-bg-icons i:nth-child(2) { left: 80%; font-size: 100px; animation-duration: 22s; bottom: -120px; animation-delay: 1s; }
+    .edu-bg-icons i:nth-child(3) { left: 50%; font-size: 150px; animation-duration: 40s; bottom: -200px; opacity: 0.03 !important; }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
     }
 
-    .card-maroon{
-      background:rgba(255,255,255,0.96);
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:
-        0 25px 50px rgba(0,0,0,.55),
-        inset 0 1px 0 rgba(255,255,255,.6);
-      border-top:6px solid var(--gold-accent);
+    /* LOGIN BOX */
+    .login-box {
+      width: 400px; max-width: 90%; position: relative; z-index: 10;
+      opacity: 0; animation: zoomIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
-    .card-header{
-      background:linear-gradient(
-        to bottom,
-        rgba(255,255,255,.95),
-        rgba(245,245,245,.95)
-      );
-      padding:28px 24px 22px;
-      border-bottom:1px solid #e5e5e5;
+    .card-glass {
+      background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      overflow: hidden; transition: all 0.5s ease;
     }
 
-    .card-header i{
-      color:var(--maroon-main);
-      filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));
+    .card-header-premium {
+      background: var(--maroon-gradient); padding: 40px 30px 50px; text-align: center;
+      border-bottom-left-radius: 50% 20px; border-bottom-right-radius: 50% 20px; margin-bottom: -20px;
+      position: relative; z-index: 2; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      transition: all 0.5s ease;
     }
 
-    .card-header h2{
-      margin:10px 0 4px;
-      font-weight:800;
-      letter-spacing:.5px;
-      color:var(--text-dark);
+    .logo-container {
+      width: 90px; height: 90px; background: white; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;
+      box-shadow: 0 0 0 5px rgba(255,255,255,0.2); border: 3px solid var(--gold-luxury);
+      transition: all 0.5s ease;
     }
 
-    .card-header h2 span{
-      color:var(--maroon-main);
+    .login-body { padding: 50px 35px 30px; position: relative; min-height: 250px; }
+
+    .input-wrapper { position: relative; margin-bottom: 20px; }
+    .input-wrapper i {
+      position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+      color: #999; font-size: 18px; transition: 0.3s;
     }
 
-    .card-header p{
-      font-size:12px;
-      color:#666;
-      margin:0;
-      letter-spacing:.8px;
-      text-transform:uppercase;
+    .form-control-premium {
+      width: 100%; padding: 14px 15px 14px 50px; border: 2px solid transparent;
+      border-radius: 12px; background: #f0f2f5; font-size: 15px; font-weight: 500;
+      transition: all 0.3s ease; outline: none; color: #333;
+    }
+    .form-control-premium:focus { background: white; border-color: var(--maroon-primary); box-shadow: 0 5px 15px rgba(128, 0, 0, 0.1); }
+    .form-control-premium:focus + i { color: var(--maroon-primary); }
+
+    .btn-premium {
+      width: 100%; padding: 15px; border-radius: 12px; border: none;
+      background: var(--maroon-gradient); color: white; font-weight: 700; font-size: 15px;
+      letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(128, 0, 0, 0.3); text-transform: uppercase; margin-top: 10px;
+    }
+    .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(128, 0, 0, 0.4); }
+    .btn-premium:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* SUCCESS STATE STYLES */
+    #viewSuccess {
+        display: none; /* Hidden by default */
+        text-align: center;
+        padding-top: 10px;
+        animation: fadeIn 0.8s ease;
+    }
+    
+    .success-avatar {
+        width: 100px; height: 100px; border-radius: 50%; 
+        border: 4px solid var(--gold-luxury);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        margin-bottom: 20px;
+        object-fit: cover;
+    }
+    
+    .welcome-text { font-size: 24px; font-weight: 800; color: var(--maroon-primary); margin-bottom: 5px; }
+    .user-name { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
+    
+    .loading-bar {
+        height: 4px; width: 50%; background: #eee; margin: 0 auto; border-radius: 2px; overflow: hidden;
+    }
+    .loading-progress {
+        height: 100%; width: 0%; background: var(--maroon-gradient);
+        animation: progressLoad 1.5s ease-in-out forwards;
     }
 
-    .login-card-body{
-      padding:26px 26px 30px;
+    .login-footer {
+      text-align: center; font-size: 11px; color: #888; margin-top: 25px;
+      border-top: 1px solid rgba(0,0,0,0.05); padding-top: 15px;
     }
 
-    .input-group{
-      border-radius:12px;
-      overflow:hidden;
-      box-shadow:0 4px 10px rgba(0,0,0,.08);
-    }
-
-    .form-control{
-      height:50px;
-      padding-left:14px;
-      font-size:18px;
-    }
-
-    .form-control:focus{
-      box-shadow:none;
-    }
-
-    .input-group-text{
-      background:#fff;
-      border:none;
-      color:var(--maroon-main);
-      padding:0 16px;
-      font-size:16px;
-    }
-
-    #loginNotif{
-      border-radius:10px;
-      font-size:12px;
-      margin-bottom:16px;
-    }
-
-    .btn-login{
-      height:52px;
-      border-radius:14px;
-      font-weight:700;
-      letter-spacing:1px;
-      background:
-        linear-gradient(135deg,
-          var(--maroon-main),
-          var(--maroon-dark)
-        );
-      border:none;
-      box-shadow:
-        0 10px 25px rgba(122,12,12,.45),
-        inset 0 1px 0 rgba(255,255,255,.25);
-      transition:.25s ease;
-    }
-
-    .btn-login:hover{
-      transform:translateY(-1px);
-      box-shadow:
-        0 14px 30px rgba(122,12,12,.6);
-    }
-
-    .btn-login:active{
-      transform:scale(.98);
-    }
-
-    .login-footer{
-      text-align:center;
-      font-size:11px;
-      color:#777;
-      margin-top:18px;
-    }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes progressLoad { 0% { width: 0%; } 100% { width: 100%; } }
+    @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } }
+    
+    .shake-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    
+    #confetti-wrapper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2147483647; }
   </style>
 
   <div class="login-box">
-    <div class="card card-maroon">
-      <div class="card-header text-center">
-        <i class="fa-solid fa-paperclip fa-3x mb-2"></i>
-        <h2><span>SIKS</span> – REBORN</h2>
-        <p>Ruang Edukasi dan Layanan Berbasis Online Terintegrasi</p>
+    <div class="card-glass" id="mainCard">
+      
+      <div class="card-header-premium" id="cardHeader">
+        <div class="logo-container" id="logoBox">
+          <i class="fas fa-book-reader fa-3x text-maroon"></i>
+        </div>
+        <div id="headerText">
+            <h2 class="font-weight-bold text-white mb-0" style="font-size: 24px; letter-spacing: 2px;">SIKS-REBORN</h2>
+            <p></p>
+            <p class="text-white-50 small mt-1 text-uppercase" style="letter-spacing: 1px;">SISTEM INFORMASI KORWIL SECANG<br>-<br>
+            Ruang Edukasi dan Layanan Berbasis Online Terintegrasi</p>
+        </div>
       </div>
 
-      <div class="card-body login-card-body">
-        <div id="loginNotif" style="display:none;" class="alert alert-danger py-2 px-3">
-          <i class="fas fa-exclamation-triangle mr-1"></i>
-          <span id="loginNotifMsg"></span>
-        </div>
-
-        <form id="formLogin" onsubmit="handleLoginV2(event)">
-          <div class="input-group mb-3">
-            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
-            <div class="input-group-append">
-              <span class="input-group-text">
-                <i class="fas fa-user"></i>
-              </span>
-            </div>
-          </div>
-
-          <div class="input-group mb-4">
-            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
-            <div class="input-group-append">
-              <span class="input-group-text">
+      <div class="login-body">
+        
+        <div id="viewForm">
+            <form id="formLogin" onsubmit="handleLoginExec(event)">
+              <div class="input-wrapper">
+                <input type="text" id="username" name="username" class="form-control-premium" placeholder="NPSN / Username" required autocomplete="off">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <div class="input-wrapper">
+                <input type="password" id="password" name="password" class="form-control-premium" placeholder="Kata Sandi" required>
                 <i class="fas fa-lock"></i>
-              </span>
+                <i class="fas fa-eye" id="togglePass" style="left: auto; right: 15px; font-size: 16px; cursor: pointer; z-index:5;" onclick="togglePassword()"></i>
+              </div>
+              <button type="submit" id="tombolLogin" class="btn-premium">
+                <i class="fas fa-sign-in-alt mr-2"></i> MASUK APLIKASI
+              </button>
+            </form>
+            <div class="login-footer">
+              <strong>Layanan Pendidikan Terintegrasi</strong><br>
+              &copy; 2026 Korwil Disdikbud Kecamatan Secang
             </div>
-          </div>
-
-          <button type="submit" id="tombolLogin" class="btn btn-login btn-block text-white">
-            LOGIN
-          </button>
-        </form>
-
-        <div class="login-footer">
-          © 2026 Korwil Disdikbud Kecamatan Secang
         </div>
+
+        <div id="viewSuccess">
+            <img src="https://ui-avatars.com/api/?name=User&background=random" id="userAvatar" class="success-avatar">
+            <h3 class="welcome-text">Selamat Datang!</h3>
+            <p class="user-name" id="welcomeName">Administrator</p>
+            
+            <div class="loading-bar mt-3">
+                <div class="loading-progress"></div>
+            </div>
+            <p class="small text-muted mt-2">Menyiapkan Dashboard...</p>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
+
+<div id="confetti-wrapper"></div>
+
+<script>
+  console.log("🔥 Login Page Loaded v3 (In-Card).");
+
+  function togglePassword() {
+    var x = document.getElementById("password");
+    var icon = document.getElementById("togglePass");
+    if (x.type === "password") {
+      x.type = "text"; icon.classList.remove("fa-eye"); icon.classList.add("fa-eye-slash"); icon.style.color = "#800000";
+    } else {
+      x.type = "password"; icon.classList.remove("fa-eye-slash"); icon.classList.add("fa-eye"); icon.style.color = "#999";
+    }
+  }
+
+  function runFireworks() {
+    if(typeof confetti !== 'undefined'){
+       var duration = 3000; var animationEnd = Date.now() + duration;
+       var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2147483647 };
+       var interval = setInterval(function() {
+         var timeLeft = animationEnd - Date.now();
+         if (timeLeft <= 0) { return clearInterval(interval); }
+         var particleCount = 50 * (timeLeft / duration);
+         confetti(Object.assign({}, defaults, { particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#FFD700', '#800000'] }));
+       }, 250);
+    }
+  }
+
+  function handleLoginExec(e) {
+    e.preventDefault(); 
+    var u = $('#username').val();
+    var p = $('#password').val();
+    var btn = $('#tombolLogin');
+    var box = $('.login-box');
+
+    // UI Loading Button
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> MEMERIKSA...');
+    
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res && res.status === 'success') {
+          // --- SUKSES: JANGAN PAKAI ALERT, GANTI TAMPILAN KARTU ---
+          console.log("✅ Login Sukses");
+          
+          // 1. Simpan Session
+          var fullName = "User";
+          if (res.userData) {
+             fullName = res.userData.nama_lengkap || res.userData.username;
+             if(!res.userData.nama_lengkap) res.userData.nama_lengkap = res.userData.username;
+             localStorage.setItem("siksUser", JSON.stringify(res.userData));
+          }
+
+          // 2. Jalankan Kembang Api
+          runFireworks();
+
+          // 3. TRANSISI UI (FADE OUT FORM -> FADE IN SUCCESS)
+          // Siapkan data tampilan sukses
+          $('#welcomeName').text(fullName);
+          var avatarUrl = "https://ui-avatars.com/api/?name=" + encodeURIComponent(fullName) + "&background=800000&color=fff&bold=true";
+          if(res.userData.photo && res.userData.photo.startsWith("http")) avatarUrl = res.userData.photo;
+          else if(res.userData.photo) avatarUrl = "https://drive.google.com/thumbnail?id=" + res.userData.photo + "&sz=200";
+          $('#userAvatar').attr('src', avatarUrl);
+
+          // Animasi Header (Menyusut sedikit biar elegan)
+          $('#logoBox').css('transform', 'scale(0.8)');
+          $('#headerText').slideUp(300); // Sembunyikan teks judul biar fokus ke user
+          $('.card-header-premium').css('padding-bottom', '20px');
+
+          // Ganti Konten Body
+          $('#viewForm').fadeOut(300, function() {
+              $('#viewSuccess').fadeIn(500);
+          });
+
+          // 4. TRANSISI KE DASHBOARD (Setelah 2 detik menikmati animasi)
+          setTimeout(function(){
+            // Gunakan updateNavbarUI global jika ada
+            if(typeof updateNavbarUI === 'function' && res.userData) {
+                updateNavbarUI(res.userData);
+            }
+            
+            // Fade Out Login Screen
+            $('.login-screen-wrapper').fadeOut(600, function(){
+                $('#konten-aplikasi').fadeIn(600); // Tampilkan Dashboard
+                if(typeof loadContent === 'function') {
+                    loadContent('home'); 
+                }
+                $(window).trigger('resize');
+            });
+          }, 2000);
+
+        } else {
+          // --- GAGAL (TETAP PAKAI TOAST) ---
+          console.log("⛔ Login Gagal: " + res.message);
+          btn.prop('disabled', false).html('<i class="fas fa-sign-in-alt mr-2"></i> MASUK APLIKASI');
+          
+          box.addClass('shake-effect');
+          setTimeout(() => box.removeClass('shake-effect'), 500);
+          
+          if(typeof Swal !== 'undefined'){
+              const Toast = Swal.mixin({
+                toast: true, position: 'top', showConfirmButton: false, timer: 3000,
+                timerProgressBar: true, background: '#fff', color: '#333', iconColor: '#dc3545',
+                didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
+              });
+              Toast.fire({ icon: 'error', title: 'Login Gagal', text: res.message || "Periksa kembali data Anda." });
+          } else {
+              alert("LOGIN GAGAL: " + (res.message || "Username/Password Salah"));
+          }
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.prop('disabled', false).html('<i class="fas fa-sign-in-alt mr-2"></i> MASUK APLIKASI');
+        alert("Koneksi Server Terputus!");
+      })
+      .processLogin({username: u, password: p});
+  }
+</script>

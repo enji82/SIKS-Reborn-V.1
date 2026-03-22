@@ -1,115 +1,820 @@
-<header>
-  <h2>UNGGAH FORMULIR PERMINTAAN DAN PEMBERIAN CUTI</h2>
-</header>
-
-<main class="manual-form form-tab-container">
-  
-  <div id="skeleton-loader">
-    <div class="form-grid"><div class="form-group"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-input"></div></div><div class="form-group"><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-input"></div></div></div>
-    <div class="form-footer"><div class="skeleton skeleton-button" style="width: 150px;"></div></div>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-file-upload text-maroon mr-2"></i>Unggah Surat Cuti
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
+</div>
 
-  <form id="cutiUnggahForm" style="display: none;">
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#unggahcuti_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="unggahcuti_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Halaman ini untuk mengunggah Surat Permintaan dan Pemberian Cuti yang sudah ditandatangani.</li>
+                  <li>Scan dokumen dalam format PDF dengan ukuran maksimal 200 KB.</li>
+                  <li>Klik tombol <span class="badge badge-warning text-dark"><i class="fas fa-file-upload"></i> Unggah</span> pada kolom Aksi untuk melampirkan surat cuti.</li>
+                  <li>Klik tombol <span class="badge badge-outline-danger">💬 Baca Catatan</span> untuk melihat alasan dari admin jika status ditolak/revisi.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="unggahcuti_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <select id="unggahcuti_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80"></select>
+
+                <select id="unggahcuti_filterBulan" class="form-control form-control-sultan input-auto-width min-w-120">
+                    <option value="">- Semua Bulan -</option>
+                    <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Maret">Maret</option>
+                    <option value="April">April</option><option value="Mei">Mei</option><option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option><option value="Agustus">Agustus</option><option value="September">September</option>
+                    <option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                </select>
+
+                <select id="unggahcuti_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Status Unggah -</option>
+                    <option value="Belum">Belum Unggah</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Revisi">Revisi</option>
+                    <option value="Ditolak">Ditolak</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="unggahcuti_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server">
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+               
+               <div id="unggahcuti_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="unggahcuti_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+               </div>
+
+               <div id="unggahcuti_tableState" style="display: none;">
+                   <table id="unggahcuti_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100">
+                     <thead class="bg-light">
+                        <tr>
+                            <th class="col-sticky-left border-right text-center align-middle" style="z-index: 5;">Aksi</th>
+                            <th class="text-left align-middle">Nama ASN</th>
+                            <th class="text-center align-middle">Jenis Cuti</th>
+                            <th class="text-center align-middle">Tgl Mulai</th>
+                            <th class="text-center align-middle">Tgl Selesai</th>
+                            <th class="text-center align-middle">Jml</th>
+                            <th class="text-center align-middle">File</th>
+                            <th class="text-center align-middle">Status</th>
+                            <th class="text-left align-middle">Dikirim</th>
+                            <th class="text-left align-middle">Diubah</th>
+                            <th class="text-left align-middle">Verifikasi</th>
+                        </tr>
+                     </thead>
+                     <tbody></tbody>
+                   </table>
+               </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="unggahcuti_modalUpload" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg modal-content-sultan">
+      <div class="modal-header bg-maroon text-white">
+        <h5 class="modal-title font-weight-bold"><i class="fas fa-cloud-upload-alt mr-2"></i>Unggah Surat Cuti</h5>
+        <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <form id="unggahcuti_formUpload">
+      <div class="modal-body bg-white p-4">
+        <input type="hidden" id="unggahcuti_upRecId">
+        <input type="hidden" id="unggahcuti_upNama">
+        <input type="hidden" id="unggahcuti_upJenis">
+        
+        <div class="alert alert-light border-left-maroon text-dark shadow-sm">
+            <h6 class="font-weight-bold mb-1" id="unggahcuti_lblNama" style="text-transform: uppercase;">Nama Pegawai</h6>
+            <span class="d-block small text-muted mb-2" id="unggahcuti_lblInfo">Jenis Cuti | Tanggal</span>
+        </div>
+
+        <div class="form-group mb-0 border p-3 bg-light rounded shadow-sm">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase"><i class="fas fa-file-pdf text-danger mr-1"></i> Unggah File PDF <span class="text-danger">*</span></label> 
+            <div class="custom-file">
+                <input type="file" class="custom-file-input border-maroon" id="unggahcuti_inputFile" accept="application/pdf" required>
+                <label class="custom-file-label text-truncate" for="unggahcuti_inputFile" id="unggahcuti_labelFile">Pilih file PDF...</label>
+            </div>
+            <small class="form-text text-muted mt-2 font-italic">
+                <i class="fas fa-info-circle mr-1"></i> Formulir Permintaan dan Pemberian Cuti yang sudah ditandatangani. Maksimal 200 KB.
+            </small>
+            <small class="text-success font-italic d-none mt-2 font-weight-bold d-block" id="unggahcuti_pesanFile"><i class="fas fa-check-circle mr-1"></i> Dokumen siap diunggah.</small>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between bg-light p-3">
+          <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+          <button type="submit" id="unggahcuti_btnSimpanUpload" class="btn btn-maroon text-white shadow-sm px-4 font-weight-bold">
+              <i class="fas fa-paper-plane mr-1"></i> Simpan Dokumen
+          </button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="unggahcuti_modalVerif" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-sultan-verif" role="document">
+    <div class="modal-content border-0 shadow-lg d-flex flex-column modal-content-sultan-verif" style="height: 90vh;">
+      
+      <div class="modal-header bg-primary text-white py-2 flex-shrink-0">
+        <h5 class="modal-title font-weight-bold h6 mb-0"><i class="fas fa-clipboard-check mr-2"></i>Panel Verifikasi Dokumen Cuti</h5>
+        <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+
+      <div class="modal-body p-0 bg-light flex-grow-1 overflow-hidden">
+        <div class="row no-gutters h-100">
+            
+            <div class="col-lg-8 h-100 bg-dark border-right position-relative d-flex align-items-center justify-content-center">
+                <iframe id="unggahcuti_frameVerif" src="" class="iframe-sultan-verif w-100 h-100 border-0 d-none"></iframe>
+                
+                <div id="unggahcuti_loadingPreviewVerif" class="d-none h-100 flex-column justify-content-center align-items-center text-white-50 w-100 position-absolute" style="top:0; left:0; z-index: 10; pointer-events: none;">
+                    <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-4x mb-3"></i><p>Memuat Dokumen...</p></div>
+                </div>
+
+                <div id="unggahcuti_noFileVerif" class="text-center text-white-50 position-absolute d-none" style="top:50%; left:50%; transform: translate(-50%, -50%);">
+                    <i class="fas fa-file-pdf fa-4x mb-3"></i><p>Pratinjau dokumen tidak tersedia.</p>
+                </div>
+
+                <a href="#" id="unggahcuti_btnUnduhVerif" class="btn btn-sm btn-success shadow-sm position-absolute font-weight-bold px-3" style="bottom: 15px; left: 15px; z-index: 20; display: none;" target="_blank">
+                    <i class="fas fa-download mr-1"></i> Unduh PDF
+                </a>
+            </div>
+
+            <div class="col-lg-4 h-100 d-flex flex-column bg-white">
+                <form id="unggahcuti_formVerif" class="d-flex flex-column h-100 w-100 m-0 p-0">
+                    <input type="hidden" id="unggahcuti_verRecId">
+                    
+                    <div class="p-4 flex-grow-1 overflow-auto">
+                        <h6 class="text-primary font-weight-bold border-bottom pb-2 mb-4"><i class="fas fa-user-circle mr-2"></i> Informasi Ajuan</h6>
+                        
+                        <table class="table table-borderless mb-4 text-dark">
+                            <tr><td class="text-muted font-weight-bold align-middle py-2" width="35%" style="font-size: 14px;">Nama ASN</td><td class="font-weight-bold text-dark py-2" id="unggahcuti_vNama" style="font-size: 16px; text-transform: uppercase;">-</td></tr>
+                            <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">NIP</td><td class="text-dark py-2" id="unggahcuti_vNip" style="font-size: 15px;">-</td></tr>
+                            <tr><td colspan="2" class="py-2"><hr class="my-0 dashed"></td></tr>
+                            <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Jenis Cuti</td><td class="font-weight-bold text-primary py-2" id="unggahcuti_vJenis" style="font-size: 15px;">-</td></tr>
+                            <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Tanggal</td><td class="font-weight-bold text-dark py-2" id="unggahcuti_vTgl" style="font-size: 15px;">-</td></tr>
+                        </table>
+
+                        <div class="card bg-light border-0 shadow-sm mb-0">
+                            <div class="card-body p-3">
+                                <div class="form-group mb-3">
+                                    <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Keputusan Verifikasi <span class="text-danger">*</span></label>
+                                    <select id="unggahcuti_verStatus" class="form-control form-control-sultan font-weight-bold text-dark" required style="font-size: 16px; height: auto !important; padding: 10px 15px;">
+                                        <option value="">- Tentukan Keputusan -</option>
+                                        <option value="Disetujui">Disetujui</option>
+                                        <option value="Revisi">Revisi</option>
+                                        <option value="Ditolak">Ditolak</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Catatan Admin</label>
+                                    <textarea id="unggahcuti_verKet" class="form-control form-control-sultan" rows="3" placeholder="Wajib diisi jika ditolak / direvisi..." style="font-size: 15px; padding: 10px 15px;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-white border-top shadow-lg d-flex justify-content-between z-index-10 flex-shrink-0">
+                        <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4 py-2" style="font-size:16px;" data-dismiss="modal">Tutup</button>
+                        <button type="submit" id="unggahcuti_btnSimpanVerif" class="btn btn-primary font-weight-bold shadow-sm px-4 py-2" style="font-size:16px;">
+                            <i class="fas fa-check-double mr-2"></i> Eksekusi
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="unggahcuti_modalPreviewFile" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-full" role="document">
+        <div class="modal-content modal-content-full-height border-0 shadow-lg bg-dark">
+            <div class="modal-header bg-dark text-white py-2 border-bottom-0">
+                <h6 class="modal-title font-weight-bold"><i class="fas fa-file-pdf text-danger mr-2"></i>Pratinjau Dokumen Formulir Cuti</h6>
+                <div class="ml-auto d-flex align-items-center">
+                    <a href="#" id="unggahcuti_btnUnduhDirect" class="btn btn-xs btn-success font-weight-bold shadow-sm mr-2 rounded-pill px-3" target="_blank">
+                        <i class="fas fa-download mr-1"></i> Unduh
+                    </a>
+                    <a id="unggahcuti_btnUnduhPDF" href="#" class="btn btn-xs btn-outline-light font-weight-bold shadow-sm mr-2 rounded-pill px-3" target="_blank">
+                        <i class="fas fa-external-link-alt mr-1"></i> Tab Baru
+                    </a>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+            </div>
+            <div class="modal-body p-0 position-relative d-flex align-items-center justify-content-center bg-secondary" style="height:calc(100vh - 50px);" id="unggahcuti_previewContainer">
+                <iframe id="unggahcuti_framePreviewFile" src="" class="iframe-full w-100 h-100 border-0 d-none"></iframe>
+                <div id="unggahcuti_loadingPreviewPDF" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100" style="top:0; left:0; z-index: 10; pointer-events: none;">
+                    <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - FULL COMPLIANCE)
+// ======================================================================
+var UNGGAHCUTI_CACHE_DATA = []; 
+var UNGGAHCUTI_DATA_MASTER = {};
+var UNGGAHCUTI_CACHE_THN = "";
+var UNGGAHCUTI_CACHE_BLN = "";   
+var UNGGAHCUTI_FILE_BLOB = null;
+var UNGGAHCUTI_TABEL_INSTANCE = null;
+
+var UNGGAHCUTI_USER_AKTIF = "";
+var UNGGAHCUTI_IS_ADMIN = false;
+var UNGGAHCUTI_UNIT_TERKUNCI = ""; 
+var UNGGAHCUTI_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE
+// =================================================================
+$(document).ready(function() {
+    UNGGAHCUTI_TABEL_INSTANCE = null;
+    $('#unggahcuti_tableState').hide();
+    $('#unggahcuti_loadingState').show();
+
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        UNGGAHCUTI_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        UNGGAHCUTI_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        UNGGAHCUTI_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { UNGGAHCUTI_USER_NPSN = ""; UNGGAHCUTI_IS_ADMIN = false; }
+
+    var yNow = new Date().getFullYear();
+    var elTahun = $('#unggahcuti_filterTahun').empty();
+    for (var i = yNow + 1; i >= 2020; i--) {
+        var selected = (i === yNow) ? 'selected' : '';
+        elTahun.append(`<option value="${i}" ${selected}>${i}</option>`);
+    }
+
+    $('#unggahcuti_filterBulan, #unggahcuti_filterStatus').val('');
+
+    $('#unggahcuti_modalPreviewFile').on('hidden.bs.modal', function () { 
+        $('#unggahcuti_framePreviewFile').addClass('d-none').attr('src', ''); 
+        $('#unggahcuti_loadingPreviewPDF').removeClass('d-none').addClass('d-flex'); 
+    });
+    $('#unggahcuti_modalVerif').on('hidden.bs.modal', function () { 
+        $('#unggahcuti_frameVerif').addClass('d-none').attr('src', ''); 
+        $('#unggahcuti_noFileVerif').removeClass('d-none');
+        $('#unggahcuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+        $('#unggahcuti_btnUnduhVerif').hide();
+    });
+
+    // VAKSINASI EVENT DELEGATION
+    $(document).off('click', '#unggahcuti_btnRefresh').on('click', '#unggahcuti_btnRefresh', unggahcuti_tarikDataServer); 
+    $(document).off('change', '#unggahcuti_filterTahun, #unggahcuti_filterBulan, #unggahcuti_filterStatus, #unggahcuti_filterUnit').on('change', '#unggahcuti_filterTahun, #unggahcuti_filterBulan, #unggahcuti_filterStatus, #unggahcuti_filterUnit', unggahcuti_applyFilter);
+
+    $(document).off('submit', '#unggahcuti_formUpload').on('submit', '#unggahcuti_formUpload', unggahcuti_submitUpload);
+    $(document).off('submit', '#unggahcuti_formVerif').on('submit', '#unggahcuti_formVerif', unggahcuti_submitVerif);
     
-    <h3 class="sub-section-title-large">Data Pegawai</h3>
+    $(document).off('change', '#unggahcuti_inputFile').on('change', '#unggahcuti_inputFile', function() { unggahcuti_bacaFile(this); });
+
+    $(document).off('click', '.unggahcuti-btn-upload').on('click', '.unggahcuti-btn-upload', function(){ unggahcuti_bukaModalUpload($(this).attr('data-id')); });
+    $(document).off('click', '.unggahcuti-btn-verif').on('click', '.unggahcuti-btn-verif', function(){ unggahcuti_bukaModalVerif($(this).attr('data-id')); });
+    $(document).off('click', '.unggahcuti-btn-preview').on('click', '.unggahcuti-btn-preview', function(){ unggahcuti_previewFile($(this).attr('data-id')); });
+    $(document).off('click', '.unggahcuti-btn-catatan').on('click', '.unggahcuti-btn-catatan', function(){ unggahcuti_lihatCatatanSultan($(this).attr('data-pesan')); });
     
-    <div class="form-grid-12">
-      <div class="col-span-6">
-        <div class="form-group">
-          <label for="unitKerjaUnggah">Unit Kerja</label>
-          <select id="unitKerjaUnggah" name="unitKerja" required>
-            <option value="" disabled selected>-- Memuat... --</option>
-          </select>
-        </div>
-      </div>
-      <div class="col-span-6">
-        <div class="form-group">
-          <label for="namaAsnUnggah">Nama ASN</label>
-          <select id="namaAsnUnggah" name="namaAsn" required disabled>
-            <option value="" disabled selected>-- Pilih Unit Kerja Dahulu --</option>
-          </select>
-        </div>
-      </div>
-    </div>
+    unggahcuti_validasiAksesUser();
+});
 
-    <div class="form-grid-12">
-      <div class="col-span-6">
-        <div class="form-group">
-          <label>NIP</label>
-          <input type="text" id="nipUnggah" name="nip" readonly style="background: rgba(0,0,0,0.3);">
-        </div>
-      </div>
-      <div class="col-span-6">
-        <div class="form-group">
-          <label for="statusUnggah">Status</label>
-          <select id="statusUnggah" name="status" required>
-            <option value="" disabled selected>-- Pilih --</option>
-            <option value="PNS">PNS</option>
-            <option value="PPPK">PPPK</option>
-          </select>
-        </div>
-      </div>
-    </div>
+// =================================================================
+// 2. GATEKEEPER MUTLAK
+// =================================================================
+function unggahcuti_validasiAksesUser() {
+    if (UNGGAHCUTI_IS_ADMIN) {
+        $('#unggahcuti_loadingText').html('Mempersiapkan Akses Admin...');
+        $('#unggahcuti_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        unggahcuti_tarikDataServer(); 
+    } else {
+        if (!UNGGAHCUTI_USER_NPSN) {
+            $('#unggahcuti_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#unggahcuti_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
 
-    <h3 class="sub-section-title-large" style="margin-top: 30px;">Rincian Cuti</h3>
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#unggahcuti_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#unggahcuti_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${unggahcuti_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
 
-    <div class="form-group">
-      <label for="jenisCutiUnggah">Jenis Cuti</label>
-      <select id="jenisCutiUnggah" name="jenisCuti" required disabled>
-        <option value="" disabled selected>-- Pilih Status Dahulu --</option>
-      </select>
-    </div>
+                UNGGAHCUTI_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#unggahcuti_filterUnit').empty().append($('<option>', {value: UNGGAHCUTI_UNIT_TERKUNCI, text: UNGGAHCUTI_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                unggahcuti_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#unggahcuti_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#unggahcuti_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${unggahcuti_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNPSN(UNGGAHCUTI_USER_NPSN);
+    }
+}
 
-    <div class="form-grid-12">
-      <div class="col-span-4">
-        <div class="form-group">
-          <label for="tglMulaiUnggah">Tanggal Mulai Cuti</label>
-          <input type="date" id="tglMulaiUnggah" name="tglMulai" required>
-        </div>
-      </div>
-      <div class="col-span-4">
-        <div class="form-group">
-          <label for="tglSelesaiUnggah">Tanggal Selesai Cuti</label>
-          <input type="date" id="tglSelesaiUnggah" name="tglSelesai" required>
-        </div>
-      </div>
-      <div class="col-span-4">
-        <div class="form-group">
-          <label for="jmlHariUnggah">Jumlah Hari</label>
-          <input type="number" id="jmlHariUnggah" name="jmlHari" required>
-        </div>
-      </div>
-    </div>
+// =================================================================
+// 3. FETCH DATA & SMART CACHE FILTER 
+// =================================================================
+function unggahcuti_applyFilter() {
+    var th = $('#unggahcuti_filterTahun').val(); 
+    var bl = $('#unggahcuti_filterBulan').val();
+    if (!th) { Sultan.notif.info('Pilih Tahun terlebih dahulu.'); return; }
+    
+    if (th === UNGGAHCUTI_CACHE_THN && UNGGAHCUTI_CACHE_DATA.length > 0) { 
+        unggahcuti_terapkanFilterLokal(); 
+    } else { 
+        unggahcuti_tarikDataServer(); 
+    }
+}
 
-    <h3 class="sub-section-title-large" style="margin-top: 30px;">Dokumen</h3>
+function unggahcuti_tarikDataServer() {
+    var th = $('#unggahcuti_filterTahun').val(); 
+    if (!th) return; 
 
-    <div class="form-group">
-      <label for="fileCuti">Unggah Formulir (PDF, Maks. 100 KB)</label>
-      <input type="file" id="fileCuti" name="fileData" accept=".pdf" required>
-      <p class="input-hint">Unggah scan formulir permintaan dan pemberian cuti yang sudah ditandatangani dalam format PDF ukuran maksimal 100 KB.</p>
-    </div>
+    var btn = $('#unggahcuti_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#unggahcuti_tabelUtama')) {
+        $('#unggahcuti_tableState').hide();
+        $('#unggahcuti_loadingText').html('Menyinkronkan data pengajuan...');
+        $('#unggahcuti_loadingState').show();
+    }
 
-    <div class="tab-form-footer">
-      <button type="submit" class="submit-btn" id="submitBtnUnggahCuti">Kirim Data</button>
-    </div>
+    // Tarik Setahun Penuh
+    google.script.run.withSuccessHandler(function(jsonStr) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        
+        var data;
+        try { data = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr; } 
+        catch(e) { $('#unggahcuti_loadingText').html('<span class="text-danger">Gagal memproses struktur JSON Server.</span>'); return; }
 
-  </form>
-</main>
+        if (data && data.error) { 
+            $('#unggahcuti_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + unggahcuti_escapeHtml(data.error) + '</span>'); 
+            return; 
+        }
+        
+        try {
+            UNGGAHCUTI_CACHE_DATA = data || []; 
+            UNGGAHCUTI_CACHE_THN = th;
+            
+            if (UNGGAHCUTI_IS_ADMIN) unggahcuti_initDropdownUnitList();
 
-<style>
-  /* Reuse Global Styles */
-  main.manual-form.form-tab-container {
-      display: flex !important; flex-direction: column !important;
-      height: calc(100vh - 140px) !important; max-height: calc(100vh - 140px) !important;
-      min-height: 400px !important; overflow-y: auto !important;
-      padding-bottom: 20px !important; position: relative !important;
-      scrollbar-width: none; -ms-overflow-style: none; 
-  }
-  main.manual-form.form-tab-container::-webkit-scrollbar { display: none; }
-  .sub-section-title-large {
-      font-size: 1.2em; color: #00c3ff; font-weight: 600;
-      border-bottom: 2px solid rgba(0, 195, 255, 0.3); padding-bottom: 10px; margin: 10px 0 20px 0;
-  }
-  .form-group label { font-weight: 600; color: #ecf0f1; display: block; margin-bottom: 5px; }
-  .input-hint { font-size: 0.85em; color: #bdc3c7; margin-top: 5px; }
-</style>
+            if (!$.fn.DataTable.isDataTable('#unggahcuti_tabelUtama')) {
+                UNGGAHCUTI_TABEL_INSTANCE = $('#unggahcuti_tabelUtama').DataTable({
+                    "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+                    "deferRender": true, 
+                    "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                           "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                           "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "columnDefs": [ 
+                        { "targets": 0, "width": "1%", "className": "col-sticky-left bg-white align-middle border-right text-center text-nowrap" }, 
+                        { "targets": [2,3,4,5,6,7], "width": "1%", "className": "text-center align-middle text-nowrap" },
+                        { "targets": [8,9,10], "width": "12%", "className": "text-left align-middle text-nowrap" },
+                        { "targets": 1, "width": "auto", "className": "text-left align-middle" }
+                    ],
+                    "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada pengajuan cuti untuk diunggah." }
+                });
+            }
+
+            unggahcuti_terapkanFilterLokal();
+
+            $('#unggahcuti_loadingState').hide();
+            $('#unggahcuti_tableState').show();
+            if(UNGGAHCUTI_TABEL_INSTANCE) { setTimeout(function() { UNGGAHCUTI_TABEL_INSTANCE.columns.adjust(); }, 50); }
+
+        } catch(e) { 
+            $('#unggahcuti_loadingText').html('<span class="text-danger">Gagal merakit tabel: ' + unggahcuti_escapeHtml(e.message) + '</span>'); 
+        }
+
+    }).withFailureHandler(function(err) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#unggahcuti_tableState').hide();
+        $('#unggahcuti_loadingState').show();
+        $('#unggahcuti_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus.</span>');
+    }).getDaftarUnggahCuti(th, "", "", ""); 
+}
+
+function unggahcuti_initDropdownUnitList() {
+    var unique = new Set();
+    UNGGAHCUTI_CACHE_DATA.forEach(function(row) {
+        var unit = String(row.unit || "").trim();
+        if (unit) unique.add(unit);
+    });
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#unggahcuti_filterUnit');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${unggahcuti_escapeHtml(u)}">${unggahcuti_escapeHtml(u)}</option>`); });
+    
+    select.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    if(currentVal && unique.has(currentVal)) { select.val(currentVal); }
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK
+// =================================================================
+function unggahcuti_terapkanFilterLokal() {
+    if (!UNGGAHCUTI_TABEL_INSTANCE) return;
+
+    var tAdminUnit = UNGGAHCUTI_IS_ADMIN ? $('#unggahcuti_filterUnit').val().toUpperCase() : "";
+    var tUnitUser  = String(UNGGAHCUTI_UNIT_TERKUNCI).trim().toUpperCase();
+    var fStatus = $('#unggahcuti_filterStatus').val();
+    var fBulan = $('#unggahcuti_filterBulan').val();
+    var tBulan = (fBulan && fBulan !== "") ? String(fBulan).trim().toLowerCase() : "";
+
+    var hasil = UNGGAHCUTI_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row.unit || "").trim().toUpperCase(); 
+        
+        var rBulanRaw = "";
+        var rawTgl = String(row.tglMulai || "").replace(/'/g, "").trim().toLowerCase(); 
+        var mNames = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+        
+        for(var m=0; m<mNames.length; m++) {
+            if(rawTgl.indexOf(mNames[m]) > -1) { rBulanRaw = mNames[m]; break; }
+        }
+        if(rBulanRaw === "") {
+            var pDate = rawTgl.split(/[-/]/);
+            if (pDate.length === 3) {
+                var mIdx = pDate[0].length === 4 ? pDate[1] : pDate[1];
+                rBulanRaw = mNames[parseInt(mIdx, 10) - 1] || "";
+            }
+        }
+
+        var passSekolah = false;
+        if (UNGGAHCUTI_IS_ADMIN) {
+            if (tAdminUnit === "SEMUA" || rUnit === tAdminUnit) passSekolah = true;
+        } else {
+            if (rUnit === tUnitUser) passSekolah = true;
+        }
+        if(!passSekolah) return false;
+
+        var st = String(row.statusUnggah || "");
+        if (fStatus === "Belum") {
+            if (st !== "") return false;
+        } else if (fStatus && fStatus !== "") {
+            if (st !== fStatus) return false;
+        }
+
+        if (tBulan !== "" && rBulanRaw !== tBulan) return false;
+
+        return true;
+    });
+
+    unggahcuti_renderTabel(hasil);
+}
+
+function unggahcuti_renderTabel(data) {
+    var dtArray = []; UNGGAHCUTI_DATA_MASTER = {}; 
+
+    data.forEach(function(row) {
+        var id = String(row.rowBaris);
+        UNGGAHCUTI_DATA_MASTER[id] = row;
+        
+        var st = row.statusUnggah;
+        var badgeStatus = unggahcuti_buildBadgeStatus(st, row.ket);
+
+        var btnFile = '<span class="text-muted small">-</span>';
+        if (row.fileUrl && row.fileUrl.length > 5) {
+            btnFile = `<button type="button" class="btn btn-sm btn-outline-danger font-weight-bold shadow-sm unggahcuti-btn-preview" data-id="${id}" title="Lihat File"><i class="fas fa-file-pdf mr-1"></i> Dokumen</button>`;
+        }
+
+        var txtVerif = UNGGAHCUTI_IS_ADMIN ? "" : " Verif";
+        var txtUp    = UNGGAHCUTI_IS_ADMIN ? "" : " Unggah";
+        var marginIcon = UNGGAHCUTI_IS_ADMIN ? "" : "mr-1";
+
+        var btnAction = ""; 
+        var btnVer = "";
+        
+        if (st !== "Disetujui") {
+            btnAction = `<button type="button" class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm unggahcuti-btn-upload" data-id="${id}" title="Unggah PDF"><i class="fas fa-file-upload ${marginIcon}"></i>${txtUp}</button>`;
+        } else {
+            btnAction = `<button type="button" class="btn btn-sm btn-light border font-weight-bold shadow-sm text-success" disabled><i class="fas fa-check-circle ${marginIcon}"></i> Selesai</button>`;
+        }
+
+        if (UNGGAHCUTI_IS_ADMIN && row.fileUrl && row.fileUrl.length > 5) {
+            btnVer = `<button type="button" class="btn btn-sm btn-primary font-weight-bold shadow-sm unggahcuti-btn-verif" data-id="${id}" title="Verifikasi"><i class="fas fa-clipboard-check ${marginIcon}"></i>${txtVerif}</button>`;
+        }
+        var aksiHTML = `<div class="d-flex flex-nowrap justify-content-center" style="gap:5px;">${btnVer}${btnAction}</div>`;
+
+        var txtUnitHtml = UNGGAHCUTI_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${unggahcuti_escapeHtml(row.unit || '-')}</div>` : '';
+        var uiNama   = `<div class="font-weight-bold text-dark text-wrap">${unggahcuti_escapeHtml(row.nama)}</div><div class="small text-muted text-nowrap">${unggahcuti_escapeHtml(row.nip)}</div>${txtUnitHtml}`;
+        
+        var metaKirim= `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglUnggah||'-'}</span><span class="d-block text-muted text-nowrap">${unggahcuti_escapeHtml(row.userUnggah)}</span></div>`;
+        var metaUbah = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglEdit||'-'}</span><span class="d-block text-muted text-nowrap">${unggahcuti_escapeHtml(row.userEdit)}</span></div>`;
+        var metaVerif= `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglVerif||'-'}</span><span class="d-block text-muted text-nowrap">${unggahcuti_escapeHtml(row.verifikator)}</span></div>`;
+
+        dtArray.push([ 
+            aksiHTML, uiNama, unggahcuti_escapeHtml(row.jenis), 
+            row.tglMulai, row.tglSelesai, `<span class="badge badge-sultan badge-sultan-light-dark px-2">${row.jumlah || '0'}</span>`, 
+            btnFile, badgeStatus, metaKirim, metaUbah, metaVerif 
+        ]);
+    });
+
+    UNGGAHCUTI_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+    setTimeout(function(){ UNGGAHCUTI_TABEL_INSTANCE.columns.adjust(); }, 50);
+}
+
+// =================================================================
+// 5. HELPER UTILITIES
+// =================================================================
+function unggahcuti_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); 
+}
+
+function unggahcuti_escapeJs(str) { 
+    if (!str) return ""; 
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>"); 
+}
+
+function unggahcuti_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Verifikasi',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+function unggahcuti_buildBadgeStatus(status, ket) { 
+    var st = status || "Belum";
+    var badgeClass = 'badge-sultan-light-dark'; 
+    var badgeIcon = 'clock';
+    
+    if(st === "Diproses") { badgeClass = 'badge-sultan-light-warning'; badgeIcon = 'spinner'; }
+    else if(st === "Disetujui") { badgeClass = 'badge-sultan-light-success'; badgeIcon = 'check-circle'; }
+    else if(st === "Ditolak") { badgeClass = 'badge-sultan-light-danger'; badgeIcon = 'times-circle'; }
+    else if(st === "Revisi") { badgeClass = 'badge-sultan-light-info'; badgeIcon = 'sync-alt'; } 
+    
+    var badgeHtml = `<span class="badge badge-sultan ${badgeClass}"><i class="fas fa-${badgeIcon} mr-1"></i>${st}</span>`;
+
+    if (ket && ket.trim().length > 2 && (st === "Revisi" || st === "Ditolak")) {
+        var safeKet = unggahcuti_escapeJs(ket);
+        var btnCatatan = `<div class="mt-2"><button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm unggahcuti-btn-catatan" style="font-size:10px; border-radius:4px;" data-pesan="${safeKet}"><i class="fas fa-comment-dots mr-1"></i> Baca Catatan</button></div>`;
+        return badgeHtml + btnCatatan;
+    }
+    return badgeHtml; 
+}
+
+function unggahcuti_previewFile(rowId) {
+    try {
+        var row = UNGGAHCUTI_DATA_MASTER[rowId];
+        if(row && row.fileUrl) { 
+            var url = row.fileUrl;
+            var finalUrl = url;
+            var directDownloadUrl = url;
+            
+            var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                var fileId = match[1];
+                finalUrl = 'https://drive.google.com/file/d/' + fileId + '/preview';
+                directDownloadUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+            }
+
+            $('#unggahcuti_loadingPreviewPDF').removeClass('d-none').addClass('d-flex');
+            $('#unggahcuti_framePreviewFile').addClass('d-none').attr('src', finalUrl);
+            
+            $('#unggahcuti_btnUnduhPDF').attr('href', url);
+            $('#unggahcuti_btnUnduhDirect').attr('href', directDownloadUrl);
+
+            $('#unggahcuti_modalPreviewFile').modal('show');
+
+            $('#unggahcuti_framePreviewFile').off('load').on('load', function() { 
+                $('#unggahcuti_loadingPreviewPDF').removeClass('d-flex').addClass('d-none'); 
+                $(this).removeClass('d-none'); 
+            });
+
+            setTimeout(function() {
+                $('#unggahcuti_loadingPreviewPDF').removeClass('d-flex').addClass('d-none');
+                $('#unggahcuti_framePreviewFile').removeClass('d-none');
+            }, 2500);
+
+        } else { 
+            Sultan.alert('error', 'Error', 'Tautan file tidak valid.'); 
+        }
+    } catch(e) {
+        console.error(e);
+        Sultan.alert('error', 'Gagal', 'Terjadi kesalahan saat memuat dokumen.');
+    }
+}
+
+// =================================================================
+// 6. CRUD FUNCTIONS (UPLOAD & ZERO BLINK VERIF)
+// =================================================================
+function unggahcuti_bacaFile(input) {
+    if (input.files && input.files[0]) {
+        var f = input.files[0];
+        if(f.type !== "application/pdf") { Sultan.alert('warning', 'Hanya PDF', 'Dokumen harus berformat PDF.'); $(input).val(''); return; }
+        if(f.size > 200 * 1024) { Sultan.alert('warning', 'Terlalu Besar', 'Maksimal ukuran file 200 KB.'); $(input).val(''); return; }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            UNGGAHCUTI_FILE_BLOB = { data: e.target.result.split(',')[1], mimeType: f.type, name: f.name };
+            $('#unggahcuti_labelFile').html('<i class="fas fa-check text-success mr-1"></i> ' + f.name).addClass('text-success font-weight-bold');
+            $('#unggahcuti_pesanFile').removeClass('d-none');
+        };
+        reader.readAsDataURL(f);
+    }
+}
+
+function unggahcuti_bukaModalUpload(id) {
+    var d = UNGGAHCUTI_DATA_MASTER[id]; if(!d) return;
+    $('#unggahcuti_upRecId').val(id); $('#unggahcuti_upNama').val(d.nama); $('#unggahcuti_upJenis').val(d.jenis);
+    $('#unggahcuti_lblNama').text(d.nama); $('#unggahcuti_lblInfo').text(`${d.jenis} | ${d.tglMulai} s.d ${d.tglSelesai}`);
+    
+    $('#unggahcuti_inputFile').val(''); 
+    $('#unggahcuti_labelFile').text('Pilih file PDF...').removeClass('text-success font-weight-bold'); 
+    $('#unggahcuti_pesanFile').addClass('d-none');
+    UNGGAHCUTI_FILE_BLOB = null; 
+    
+    $('#unggahcuti_modalUpload').modal('show');
+}
+
+function unggahcuti_submitUpload(e) {
+    e.preventDefault();
+    if(!UNGGAHCUTI_FILE_BLOB) { Sultan.alert('warning', 'Pilih File', 'Silakan pilih file PDF terlebih dahulu.'); return; }
+    
+    var btn = $('#unggahcuti_btnSimpanUpload'); var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...');
+    
+    var recId = $('#unggahcuti_upRecId').val();
+    var form = { recId: recId, nama: $('#unggahcuti_upNama').val(), jenis: $('#unggahcuti_upJenis').val(), user_login: UNGGAHCUTI_USER_AKTIF };
+    
+    google.script.run
+        .withSuccessHandler(function(resStr) {
+            btn.prop('disabled', false).html(txt);
+            var res;
+            try { res = JSON.parse(resStr); } catch(e) { res = { status: resStr }; }
+
+            if (res.status === "Sukses") {
+                $('#unggahcuti_modalUpload').modal('hide');
+                
+                // VAKSIN ZERO BLINK: Update Cache Lokal Langsung (Tanpa Tarik Server)
+                for (var i=0; i<UNGGAHCUTI_CACHE_DATA.length; i++) {
+                    if (String(UNGGAHCUTI_CACHE_DATA[i].rowBaris) === String(recId)) {
+                        UNGGAHCUTI_CACHE_DATA[i].statusUnggah = "Diproses";
+                        UNGGAHCUTI_CACHE_DATA[i].fileUrl = res.url || "";
+                        UNGGAHCUTI_CACHE_DATA[i].tglUnggah = "Baru saja";
+                        UNGGAHCUTI_CACHE_DATA[i].userUnggah = UNGGAHCUTI_USER_AKTIF;
+                        UNGGAHCUTI_CACHE_DATA[i].tglVerif = "";
+                        UNGGAHCUTI_CACHE_DATA[i].verifikator = "";
+                        UNGGAHCUTI_CACHE_DATA[i].ket = "";
+                        break;
+                    }
+                }
+
+                setTimeout(function() { 
+                    $('.modal-backdrop').remove(); 
+                    $('body').removeClass('modal-open').css('padding-right', ''); 
+                    unggahcuti_terapkanFilterLokal(); 
+                    Sultan.notif.sukses('Dokumen berhasil diunggah.'); 
+                }, 400);
+
+            } else { Sultan.alert('error', 'Gagal Simpan', res.status || resStr); }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html(txt);
+            Sultan.alert('error', 'Gagal Simpan', err.message);
+        })
+        .simpanUnggahSurat(form, UNGGAHCUTI_FILE_BLOB);
+}
+
+function unggahcuti_bukaModalVerif(id) {
+    var d = UNGGAHCUTI_DATA_MASTER[id]; if(!d) return;
+
+    $('#unggahcuti_verRecId').val(id);
+    $('#unggahcuti_vNama').text(d.nama); $('#unggahcuti_vNip').text(d.nip);
+    $('#unggahcuti_vJenis').text(d.jenis); $('#unggahcuti_vTgl').text(`${d.tglMulai} s.d ${d.tglSelesai} (${d.jumlah} Hari)`);
+    
+    $('#unggahcuti_verStatus').val(''); 
+    if(d.statusUnggah === "Disetujui" || d.statusUnggah === "Ditolak" || d.statusUnggah === "Revisi") { $('#unggahcuti_verStatus').val(d.statusUnggah); }
+    $('#unggahcuti_verKet').val(d.ket || '');
+
+    $('#unggahcuti_frameVerif').addClass('d-none').attr('src', ''); 
+    $('#unggahcuti_noFileVerif').removeClass('d-none');
+    $('#unggahcuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+    $('#unggahcuti_btnUnduhVerif').hide();
+
+    if (d.fileUrl && d.fileUrl.length > 10) {
+        var match = d.fileUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || d.fileUrl.match(/id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            var fileId = match[1];
+            var previewUrl = 'https://drive.google.com/file/d/' + fileId + '/preview';
+            var directDownloadUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+            
+            $('#unggahcuti_loadingPreviewVerif').removeClass('d-none').addClass('d-flex');
+            $('#unggahcuti_frameVerif').attr('src', previewUrl);
+            $('#unggahcuti_btnUnduhVerif').attr('href', directDownloadUrl).show();
+            
+            $('#unggahcuti_frameVerif').off('load').on('load', function() {
+                $('#unggahcuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+                $(this).removeClass('d-none');
+            });
+            
+            setTimeout(function() {
+                $('#unggahcuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+                $('#unggahcuti_frameVerif').removeClass('d-none');
+            }, 2500);
+        }
+    }
+
+    $('#unggahcuti_modalVerif').modal('show');
+}
+
+function unggahcuti_submitVerif(e) {
+    e.preventDefault();
+    var st = $('#unggahcuti_verStatus').val(); var ket = $('#unggahcuti_verKet').val().trim();
+    if(!st) { Sultan.alert('warning', 'Pilih Keputusan', 'Tentukan status verifikasi.'); return; }
+    if((st === 'Ditolak' || st === 'Revisi') && !ket){ Sultan.alert('warning', 'Catatan Wajib', 'Berikan alasan penolakan/revisi.'); return; }
+
+    var btn = $('#unggahcuti_btnSimpanVerif'); var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Eksekusi...');
+
+    var rowId = $('#unggahcuti_verRecId').val();
+    var form = { recId: rowId, status: st, ket: ket, user_verif: UNGGAHCUTI_USER_AKTIF };
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            btn.prop('disabled', false).html(txt);
+            if (res === "Sukses") {
+                $('#unggahcuti_modalVerif').modal('hide');
+                
+                // VAKSIN ZERO BLINK: Update Cache Lokal Langsung
+                for (var i=0; i<UNGGAHCUTI_CACHE_DATA.length; i++) {
+                    if (String(UNGGAHCUTI_CACHE_DATA[i].rowBaris) === String(rowId)) {
+                        UNGGAHCUTI_CACHE_DATA[i].statusUnggah = st;
+                        UNGGAHCUTI_CACHE_DATA[i].ket = ket;
+                        UNGGAHCUTI_CACHE_DATA[i].tglVerif = "Baru saja";
+                        UNGGAHCUTI_CACHE_DATA[i].verifikator = UNGGAHCUTI_USER_AKTIF;
+                        break;
+                    }
+                }
+
+                setTimeout(function() { 
+                    $('.modal-backdrop').remove(); 
+                    $('body').removeClass('modal-open').css('padding-right', ''); 
+                    unggahcuti_terapkanFilterLokal(); 
+                    Sultan.notif.sukses('Verifikasi dokumen ' + st + '.'); 
+                }, 400);
+
+            } else { Sultan.alert('error', 'Gagal', res); }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html(txt);
+            Sultan.alert('error', 'Gagal Verifikasi', err.message);
+        })
+        .verifikasiUnggahSurat(form);
+}
+</script>

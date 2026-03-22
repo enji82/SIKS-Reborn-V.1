@@ -1,0 +1,97 @@
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="m-0 text-maroon font-weight-bold"><i class="fas fa-cogs mr-2"></i>Pengaturan Website</h1>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    
+    <div class="card shadow-sm mb-4" style="border-top: 4px solid #FFD700;">
+      <div class="card-header">
+        <h3 class="card-title text-maroon font-weight-bold">
+          <i class="fas fa-bullhorn mr-2"></i> Teks Berjalan (Info)
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Isi Pengumuman:</label>
+          <textarea id="inputRunningText" class="form-control" rows="3" placeholder="Contoh: Info Rapat Hari Senin | Server Maintenance..."></textarea>
+          <small class="text-muted">Gunakan tanda <code>|</code> untuk memisahkan kalimat.</small>
+        </div>
+        <div class="text-right">
+          <button id="btnSimpanText" onclick="simpanRunningText()" class="btn btn-maroon btn-sm">
+            <i class="fas fa-save mr-1"></i> Simpan Info
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4" style="border-top: 4px solid #28a745;">
+      <div class="card-header">
+        <h3 class="card-title text-success font-weight-bold">
+          <i class="fab fa-whatsapp mr-2"></i> Kontak Bantuan (WA)
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Nomor WA Admin:</label>
+          <input type="text" id="inputWA" class="form-control" placeholder="Contoh: 628123456789">
+          <small class="text-muted">Awali dengan 62 (Tanpa tanda + atau 0 di depan).</small>
+        </div>
+        <div class="text-right">
+          <button id="btnSimpanWA" onclick="simpanWA()" class="btn btn-success btn-sm">
+            <i class="fas fa-save mr-1"></i> Simpan Kontak
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .btn-maroon { background-color: #800000; color: #fff; }
+  .btn-maroon:hover { background-color: #5c0000; color: #FFD700; }
+</style>
+
+<script>
+  // 1. LOAD SEMUA PENGATURAN SAAT DIBUKA
+  $(document).ready(function(){
+      // Panggil Server
+      google.script.run.withSuccessHandler(function(data){
+          if(data) {
+             // Isi Kotak Running Text
+             if(data.info) $('#inputRunningText').val(data.info);
+             
+             // Isi Kotak WA (Jika nanti backendnya sudah siap)
+             // if(data.wa) $('#inputWA').val(data.wa);
+          }
+      }).getVisitorStats(); // Kita masih numpang fungsi ini
+  });
+
+  // 2. FUNGSI SIMPAN RUNNING TEXT
+  function simpanRunningText() {
+      var txt = $('#inputRunningText').val();
+      var btn = $('#btnSimpanText');
+      var ori = btn.html();
+      
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+      
+      google.script.run
+        .withSuccessHandler(function(res){
+           btn.prop('disabled', false).html(ori);
+           alert(res.message);
+        })
+        .saveRunningText(txt);
+  }
+
+  // 3. FUNGSI SIMPAN WA (Dummy Dulu)
+  function simpanWA() {
+      alert("Fitur simpan WA belum diaktifkan di backend (Code.gs). Ini hanya contoh tampilan bahwa menu Setting bisa ditambah.");
+  }
+</script>

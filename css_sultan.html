@@ -1,0 +1,823 @@
+<style>
+  /* ===================================================================
+     1. PALET WARNA SULTAN (PUSAT KONTROL TEMA)
+     Ganti --warna-maroon di sini, seluruh web otomatis berubah.
+     =================================================================== */
+  :root {
+    /* --- WARNA UTAMA (BRANDING) --- */
+    --warna-maroon: #800000;       /* Warna Dasar (Header, Tombol, Sidebar) */
+    --warna-maroon-dark: #4a0404;  /* Sidebar lebih gelap */
+    --warna-maroon-light: #a33b3b; /* Hover state */
+    
+    /* --- AKSEN LEVEL SIDEBAR --- */
+    --warna-emas: #FFD700;         /* Level 1 (Bapak) */
+    --warna-emas-soft: #ffc107;    /* Aksen umum */
+    --warna-cyan: #00ffff;         /* Level 2 (Anak) */
+    --warna-hijau: #00ff00;        /* Level 3 (Cucu) */
+    --warna-header-tabel: #fff4d4;
+    
+    /* --- UTILITY --- */
+    --warna-tegas: #343a40;
+    --warna-abu-bg: #f4cccc;       /* Background Body */
+    --shadow-sultan: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --radius-sultan: 8px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--warna-abu-bg);
+  }
+
+  /* ===================================================================
+     2. ADMINLTE OVERRIDES (MEMAKSA TEMPLATE TUNDUK PADA VARIABEL)
+     =================================================================== */
+  
+  /* A. NAVBAR (HEADER ATAS) */
+  .main-header { 
+    background-color: var(--warna-maroon) !important; 
+    border-bottom: none !important; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .main-header .nav-link { color: rgba(255,255,255,0.9) !important; }
+  .main-header .nav-link:hover { color: var(--warna-emas) !important; }
+
+  /* B. SIDEBAR DASAR & LOGO */
+  .main-sidebar, .sidebar-custom { 
+    background-color: var(--warna-maroon-dark) !important; 
+    border-right: none !important;
+  }
+  
+  .brand-link { 
+    background-color: var(--warna-maroon-dark) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important; 
+    color: #fff !important;
+  }
+  .brand-link:hover { color: var(--warna-emas) !important; }
+
+  /* C. FOOTER */
+  .main-footer { 
+    position: fixed; bottom: 0; width: 100%; z-index: 1032; background: #fff; 
+    border-top: 3px solid var(--warna-emas-soft) !important; padding: 10px 20px; 
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+  }
+  .main-footer a { color: var(--warna-maroon); font-weight: bold; }
+
+  /* D. CONTENT WRAPPER */
+  .content-wrapper { padding-bottom: 70px !important; background-color: var(--warna-abu-bg); }
+
+  /* ===================================================================
+     3. SIDEBAR SULTAN HIERARCHY (BAPAK-ANAK-CUCU)
+     =================================================================== */
+  
+  /* LEVEL 1 (BAPAK) */
+  .nav-sidebar > .nav-item > .nav-link { color: rgba(255, 255, 255, 0.9) !important; margin-bottom: 2px; }
+  .nav-sidebar > .nav-item > .nav-link > i, .nav-sidebar > .nav-item > .nav-link > p { color: #ffffff !important; }
+  
+  /* Active State Level 1 */
+  .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: var(--warna-maroon) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    border-left: 4px solid var(--warna-emas);
+  }
+  .nav-sidebar > .nav-item > .nav-link.active > i, .nav-sidebar > .nav-item > .nav-link.active > p {
+    color: var(--warna-emas) !important; font-weight: bold !important;
+  }
+
+  /* LEVEL 2 (ANAK) */
+  .nav-treeview { background-color: rgba(0, 0, 0, 0.25) !important; }
+  .nav-treeview > .nav-item > .nav-link { color: #d1d1d1 !important; padding-left: 30px !important; }
+  .nav-treeview .nav-icon { display: none !important; }
+  .nav-treeview > .nav-item > .nav-link::before {
+    content: "•"; position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+    font-size: 1.2em; color: rgba(255,255,255,0.4);
+  }
+  /* Active State Level 2 */
+  .nav-treeview > .nav-item > .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--warna-cyan) !important; border-left: 3px solid var(--warna-cyan) !important; font-weight: 700 !important;
+  }
+  .nav-treeview > .nav-item > .nav-link.active::before { color: var(--warna-cyan) !important; }
+
+  /* LEVEL 3 (CUCU) */
+  .nav-treeview .nav-treeview > .nav-item > .nav-link { background-color: rgba(0, 0, 0, 0.45) !important; padding-left: 45px !important; color: #aaa !important; }
+  .nav-treeview .nav-treeview > .nav-item > .nav-link::before { left: 30px; }
+  /* Active State Level 3 */
+  .nav-treeview .nav-treeview > .nav-item > .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: var(--warna-hijau) !important; border-left: 3px solid var(--warna-hijau) !important; font-weight: 700 !important;
+  }
+  .nav-treeview .nav-treeview > .nav-item > .nav-link.active::before { color: var(--warna-hijau) !important; }
+
+  /* ===================================================================
+     4. KOMPONEN UI SULTAN (BUTTONS, CARDS, INPUTS)
+     =================================================================== */
+  
+  /* Tombol & Background Maroon */
+  .bg-maroon { background-color: var(--warna-maroon) !important; color: #fff !important; }
+  .text-maroon { color: var(--warna-maroon) !important; font-weight: 700; }
+  
+  .btn-maroon { 
+    background-color: var(--warna-maroon) !important; 
+    border-color: var(--warna-maroon) !important; 
+    color: #fff !important; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .btn-maroon:hover { 
+    background-color: var(--warna-maroon-light) !important; 
+    border-color: var(--warna-maroon-light) !important; 
+  }
+
+  /* Card Sultan */
+  .card-sultan { border: none; border-radius: var(--radius-sultan); box-shadow: var(--shadow-sultan); background: #fff; margin-bottom: 1.5rem; }
+  .border-left-dark { border-left: 5px solid var(--warna-tegas) !important; }
+  .style-sultan-solid { border: 0; height: 2px; background-color: var(--warna-maroon); opacity: 1; margin: 1rem 0; }
+
+  /* Form Controls */
+  .form-control-sultan { border-radius: 4px !important; border: 1px solid #ced4da; height: calc(2.25rem + 2px) !important; font-size: 14px; }
+  .form-control-sultan:focus { border-color: var(--warna-maroon) !important; box-shadow: 0 0 0 0.2rem rgba(128, 0, 0, 0.25) !important; }
+  .form-label-sultan { font-weight: 700 !important; font-size: 12px !important; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  
+  /* VAKSIN ANTI-SPINNER (Hukum BAB II) */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+  }
+
+  /* User Capsule (Navbar Profile) */
+  .user-capsule {
+    display: flex; align-items: center; background: rgba(255, 255, 255, 0.1);
+    padding: 3px 12px 3px 3px; border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.3s ease;
+  }
+  .user-capsule:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--warna-emas); }
+  .user-capsule img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; margin-right: 8px; }
+  .user-capsule span { color: #fff; font-size: 0.9rem; font-weight: 500; }
+
+  /* ===================================================================
+     5. TABEL & DATA GRID (PREMIUM STYLE - GOLD EDITION)
+     =================================================================== */
+  
+  /* Header Tabel Gold Light */
+  .table-premium thead th, table.dataTable thead th {
+    background-color: #fff4d4 !important; /* Ganti Hex ini jika kurang cocok */
+    color: var(--warna-maroon) !important; /* Teks Wajib Gelap/Maroon */
+    font-weight: 700 !important;
+    border-bottom: 1px solid var(--warna-maroon) !important; 
+    border-top: none !important;
+    vertical-align: middle !important; white-space: nowrap; font-size: 0.9rem; padding: 10px;
+  }
+  
+  /* Efek Hover Header (Sedikit lebih gelap saat disorot) */
+  .table-premium thead th:hover, table.dataTable thead th:hover {
+      background-color: #ffeeb0 !important; 
+  }
+  
+  /* Sisanya Tetap Sama ... */
+  .table-premium tbody td, .table-sultan-compact tbody td {
+    vertical-align: middle !important; font-size: 14px; padding: 8px 10px; border-bottom: 1px solid #f0f0f0;
+  }
+  .table-sultan-compact tbody td { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .table-premium tbody tr:hover td { background-color: #fff8f8 !important; }
+
+  /* Sticky Column (Sesuaikan warna BG agar menyatu dengan header baru) */
+  .col-sticky-left { 
+    position: sticky !important; left: 0; z-index: 5; background-color: #fff; 
+    box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); border-right: 1px solid #dee2e6; 
+  }
+  /* Sticky Header Khusus Kolom 1 (Ikut Warna Header Baru) */
+  thead th.col-sticky-left {
+      background-color: #fff4d4 !important; /* SAMAKAN DENGAN HEADER */
+      z-index: 10;
+  }
+
+  /* Sticky Column - Center */
+.col-sticky-center { 
+  position: sticky !important;
+  left: 0;
+  z-index: 5;
+  background-color: #fff;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1);
+  border-right: 1px solid #dee2e6;
+
+  /* RATA TENGAH KIRI-KANAN */
+  text-align: center;
+}
+
+/* Sticky Header Kolom 1 */
+thead th.col-sticky-center {
+  background-color: #fff4d4 !important; /* samakan dengan header */
+  z-index: 10;
+
+  /* RATA TENGAH HEADER */
+  text-align: center;
+}
+
+
+  /* ===================================================================
+   UPDATE HOVER TABLE (Agar terlihat jelas)
+   =================================================================== */
+
+/* 1. Warna Hover Baris Biasa (Pink Muda Sultan) */
+.table-premium tbody tr:hover {
+    background-color: #ffe8e8 !important;
+}
+
+/* 2. PAKSA SEMUA SEL (td) MENGIKUTI WARNA HOVER BARIS */
+/* Penting: Gunakan selector spesifik agar menimpa background putih default */
+.table-premium tbody tr:hover td {
+    background-color: #ffe8e8 !important; 
+    color: #800000 !important; /* Opsional: Teks jadi Maroon saat disorot */
+    cursor: default;
+}
+
+/* 3. FIX KHUSUS STICKY COLUMN SAAT HOVER */
+/* Tanpa ini, kolom nama (kiri) akan tetap putih saat di-hover */
+.table-premium tbody tr:hover td.col-sticky-left {
+    background-color: #ffe8e8 !important;
+}
+
+  /* ===================================================================
+     6. UTILITY CLASSES (LAYOUT & HELPER)
+     =================================================================== */
+  .cursor-pointer { cursor: pointer !important; }
+  .gap-10 { gap: 10px !important; }
+  .d-flex-gap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  
+  /* Input Widths */
+  .input-auto-width { width: auto !important; display: inline-block; min-width: 120px; }
+  .min-w-100 { min-width: 100px !important; }
+  .min-w-120 { min-width: 120px !important; }
+  .min-w-250 { min-width: 250px !important; }
+  
+  /* Aksi & Spinner */
+  .td-aksi { white-space: nowrap !important; text-align: center !important; }
+  .td-spinner { padding: 3rem !important; height: 150px !important; text-align: center !important; background-color: #fff !important; }
+  .divider-vertical { height: 25px; border-left: 1px solid #ccc; margin: 0 10px; }
+
+  /* ===================================================================
+     7. BADGE & TOMBOL AKSI (SULTAN STYLE)
+     =================================================================== */
+  
+  /* Badge Status (Pill & Timbul) */
+  .badge-sultan-status {
+      padding: 6px 12px !important; border-radius: 50rem !important;
+      text-transform: uppercase !important; font-weight: 700 !important; font-size: 10px !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); vertical-align: middle;
+  }
+  .badge-warning { background: linear-gradient(45deg, #f6c23e, #fdfd96); color: #856404 !important; }
+  .badge-danger { background: linear-gradient(45deg, #e74a3b, #ff8a80); color: white !important; }
+  .badge-success { background: linear-gradient(45deg, #1cc88a, #69f0ae); color: #856404 !important; }
+  
+  /* Tombol Aksi Bulat 3D */
+  .btn-icon-sultan {
+      width: 30px; height: 30px; padding: 0; border-radius: 50%; border: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin: 0 2px; color: #fff !important; transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .btn-icon-sultan:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+  .btn-icon-sultan i { font-size: 12px !important; }
+  
+  .btn-icon-sultan-warning { background: linear-gradient(145deg, #ffc107, #e0a800); color: #212529 !important; }
+  .btn-icon-sultan-danger { background: linear-gradient(145deg, #dc3545, #c82333); }
+  .btn-icon-sultan-info { background: linear-gradient(145deg, #17a2b8, #138496); }
+  
+  /* Tombol Unduh Khusus */
+  .btn-unduh-preview {
+    background-color: var(--warna-tegas); color: var(--warna-emas) !important;
+    border: 1px solid var(--warna-tegas); border-radius: 50px; padding: 6px 15px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: all 0.3s;
+  }
+  .btn-unduh-preview:hover {
+    background-color: var(--warna-emas); color: var(--warna-tegas) !important;
+    border-color: var(--warna-emas); transform: translateY(-2px);
+  }
+  .btn-unduh-preview i { margin-right: 6px; }
+
+  /* ===================================================================
+     8. ANIMASI & WARNA TAMBAHAN
+     =================================================================== */
+  .tr-animasi { opacity: 0; animation: slideDownFade 0.5s ease forwards; }
+  @keyframes slideDownFade { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  .tr-animasi:nth-child(1) { animation-delay: 0.05s; }
+  .tr-animasi:nth-child(2) { animation-delay: 0.1s; }
+  .tr-animasi:nth-child(3) { animation-delay: 0.15s; }
+  
+  /* Warna Background Khusus (Presensi) */
+  .bg-green-sultan { background-color: #d1e7dd !important; color: #0f5132 !important; }
+  .bg-yellow-sultan { background-color: #fff3cd !important; color: #664d03 !important; }
+  .bg-pink-alert { background-color: #f8d7da !important; color: #842029 !important; font-weight: bold; }
+  .bg-abu-terang { background-color: #f8f9fa !important; color: #adb5bd !important; }
+  
+  /* Warna Teks Khusus */
+  .text-gold-sultan { color: #d4af37 !important; font-weight: 800; }
+  .text-green-sultan { color: #198754 !important; font-weight: 800; }
+  .text-blue-sultan { color: #0d6efd !important; font-weight: 800; }
+  .text-orange-sultan { color: #fd7e14 !important; font-weight: 800; }
+  .text-danger-bold { color: #dc3545 !important; font-weight: 800; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--warna-maroon); }
+
+  /* ===================================================================
+   DATA TABLES CONTROLS (LAYOUT ATAS & BAWAH)
+   =================================================================== */
+
+  /* 1. INPUT SEARCH (Kotak Pencarian) */
+  div.dataTables_wrapper div.dataTables_filter input {
+      border-radius: 20px !important;
+      border: 1px solid #d1d3e2 !important;
+      padding: 5px 15px !important;
+      width: 200px !important; /* Lebar fix biar rapi */
+  }
+
+  /* 2. DROPDOWN LENGTH (Show Entries) - UPDATE PERBAIKAN */
+  div.dataTables_wrapper div.dataTables_length select {
+      border-radius: 20px !important;
+      border: 1px solid #d1d3e2 !important;
+      
+      /* FIX: Memberi ruang agar angka 100 tidak tertutup panah */
+      padding-top: 5px !important;
+      padding-bottom: 5px !important;
+      padding-left: 15px !important; 
+      padding-right: 30px !important; /* Jarak kanan lebih lebar untuk panah */
+      
+      min-width: 80px !important;    /* LEBAR MINIMAL (Kunci agar angka 100 muat) */
+  }
+
+  /* 3. PAGINASI & INFO (Tetap seperti sebelumnya) */
+  div.dataTables_wrapper div.dataTables_paginate {
+      font-size: 0.9rem !important; font-weight: 500;
+  }
+  div.dataTables_wrapper div.dataTables_info {
+      font-size: 0.9rem !important; padding-top: 10px !important;
+      color: #858796 !important; font-weight: 600;
+  }
+
+  /* ===================================================================
+   PALET WARNA BACKGROUND SOFT (UNTUK GROUPING KOLOM)
+   =================================================================== */
+.bg-soft-primary   { background-color: #e3f2fd !important; } /* Biru Muda */
+.bg-soft-success   { background-color: #e8f5e9 !important; } /* Hijau Muda */
+.bg-soft-warning   { background-color: #fffde7 !important; } /* Kuning Muda */
+.bg-soft-danger    { background-color: #ffebee !important; } /* Merah Muda */
+.bg-soft-info      { background-color: #e0f7fa !important; } /* Cyan Muda */
+.bg-soft-purple    { background-color: #f3e5f5 !important; } /* Ungu Muda */
+.bg-soft-orange    { background-color: #fff3e0 !important; } /* Orange Muda */
+.bg-soft-grey      { background-color: #f5f5f5 !important; } /* Abu Muda */
+
+/* ===================================================================
+   WARNA TEKS KHUSUS (PRESET SULTAN)
+   =================================================================== */
+.text-gold-sultan   { color: #e0a800 !important; font-weight: 800; } /* Kuning/Emas (AV) */
+.text-orange-sultan { color: #fd7e14 !important; font-weight: 800; } /* Orange (AL) */
+.text-blue-sultan   { color: #0d6efd !important; font-weight: 800; } /* Biru (DD, DL) */
+.text-green-sultan  { color: #198754 !important; font-weight: 800; } /* Hijau (Cuti, dll) */
+.text-purple-sultan { color: #6f42c1 !important; font-weight: 800; } /* Ungu (U) */
+.text-danger-bold   { color: #dc3545 !important; font-weight: 800; } /* Merah (TA, PLA) */
+
+/* ===================================================================
+   UTILITY KHUSUS: HEADER BERTINGKAT COMPACT
+   Gunakan class ini di tag <table> agar header tidak terlalu tinggi
+   =================================================================== */
+.table-header-compact thead th {
+    padding-top: 4px !important;    /* Atas tipis */
+    padding-bottom: 4px !important; /* Bawah tipis */
+    padding-left: 6px !important;   /* Kiri sedikit rapat */
+    padding-right: 6px !important;  /* Kanan sedikit rapat */
+    
+    font-size: 13px !important;     /* Ukuran font sedikit dikecilkan */
+    line-height: 1.1 !important;    /* Jarak antar baris teks dirapatkan */
+    height: auto !important;        /* Reset tinggi */
+}
+
+/* Fix khusus untuk input filter di header (jika ada) agar muat */
+.table-header-compact thead input {
+    font-size: 12px !important;
+    padding: 2px 4px !important;
+    height: 25px !important;
+}
+
+/* ===================================================================
+   MODAL FULL SCREEN UTILITIES
+   Digunakan untuk Preview File agar lega
+   =================================================================== */
+
+/* 1. Dialog (Wrapper Luar): Lebar 95% */
+.modal-dialog-full {
+    max-width: 95% !important;
+    width: 95% !important;
+    margin: 1.75rem auto; 
+}
+
+/* 2. Content (Kotak Putih): Tinggi 90% Layar (Viewport Height) */
+.modal-content-full-height {
+    height: 90vh !important; /* KUNCI: Memaksa tinggi 90% dari layar */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Mencegah scroll ganda */
+}
+
+/* 3. Body (Tempat Iframe): Mengisi sisa ruang antara Header & Footer */
+.modal-body-full {
+    flex: 1 1 auto; /* Flex grow agar mengisi ruang kosong */
+    padding: 0 !important;
+    overflow: hidden;
+    background-color: #343a40; /* Background gelap biar fokus */
+}
+
+/* 4. Iframe: Full 100% Induknya */
+.iframe-full {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ===================================================================
+   UPDATE V5.1: BADGE STATUS & TOMBOL AKSI STANDAR SULTAN
+   (Gunakan class ini di seluruh halaman SIKS-Reborn)
+   =================================================================== */
+
+/* --- 1. BADGE STATUS SULTAN (Pastel/Soft Background) --- */
+.badge-sultan {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;       /* Sudut tumpul modern */
+    letter-spacing: 0.5px;    /* Jarak huruf sedikit renggang */
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Standar Warna Status:
+   - DIPROSES  : Kuning/Warning
+   - DISETUJUI : Hijau/Success
+   - REVISI    : Biru/Info
+   - DITOLAK   : Merah/Danger
+*/
+.badge-sultan-light-warning { background-color: #fff3cd !important; color: #664d03 !important; border-color: #ffecb5 !important; } /* Diproses */
+.badge-sultan-light-success { background-color: #d1e7dd !important; color: #0f5132 !important; border-color: #badbcc !important; } /* Disetujui */
+.badge-sultan-light-info    { background-color: #cff4fc !important; color: #055160 !important; border-color: #b6effb !important; } /* Revisi */
+.badge-sultan-light-danger  { background-color: #f8d7da !important; color: #842029 !important; border-color: #f5c2c7 !important; } /* Ditolak */
+
+/* Varian Lain (Untuk Jenis Presensi: Datang/Pulang, dll) */
+.badge-sultan-light-dark    { background-color: #e2e3e5 !important; color: #41464b !important; border-color: #d3d6d8 !important; } /* Pulang */
+.badge-sultan-light-orange  { background-color: #ffe5d0 !important; color: #fd7e14 !important; border-color: #ffdec5 !important; } /* Datang */
+
+/* --- 2. TOMBOL AKSI BULAT SULTAN (Icon Only) --- */
+.btn-icon-sultan {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 50%;       /* Bulat Sempurna */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek memantul */
+    background-color: #eaecf4; /* Default abu */
+    color: #5a5c69;
+    margin: 0 3px;             /* Jarak antar tombol */
+}
+
+.btn-icon-sultan:hover {
+    transform: scale(1.15) translateY(-2px); /* Membesar & terangkat */
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-icon-sultan i { font-size: 13px !important; } /* Ukuran ikon pas di tengah */
+
+/* Standar Warna Tombol Aksi:
+   - PREVIEW PDF : Merah (Danger)
+   - VERIFIKASI  : Biru (Primary)
+   - EDIT        : Kuning (Warning)
+   - HAPUS       : Merah Gelap (Maroon)
+*/
+.btn-icon-sultan-danger  { background-color: #e74a3b !important; color: #fff !important; } /* Preview PDF / Aksi Merah */
+.btn-icon-sultan-primary { background-color: #4e73df !important; color: #fff !important; } /* Verifikasi (Biru) */
+.btn-icon-sultan-warning { background-color: #f6c23e !important; color: #fff !important; } /* Edit (Kuning) */
+.btn-icon-sultan-maroon  { background-color: var(--warna-maroon) !important; color: #fff !important; } /* Hapus Permanen */
+
+
+/* 3. MODAL UTILITIES (Pastikan ini ada untuk Preview Full Screen) */
+/* Jika sudah ditambahkan di langkah Unduh Rekap, biarkan saja. Jika belum, tambahkan ini. */
+
+.modal-dialog-full {
+    max-width: 95% !important;
+    width: 95% !important;
+    margin: 1.75rem auto; 
+}
+.modal-content-full-height {
+    height: 90vh !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+.modal-body-full {
+    flex: 1 1 auto;
+    padding: 0 !important;
+    overflow: hidden;
+    background-color: #343a40;
+}
+.iframe-full {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Perkecil padding kolom status agar ikon rapat */
+.table-sultan-compact td:not(:first-child) {
+    padding: 8px 4px !important; /* Atas-Bawah 8px, Kiri-Kanan 4px */
+    width: 60px !important;      /* Lebar paksa kecil */
+    text-align: center;
+}
+
+/* =========================================
+   OVERRIDE: MODAL VERIFIKASI LUPA PRESENSI
+   (Menggunakan ID #modalVerif agar tidak merusak halaman lain)
+   ========================================= */
+
+/* 1. Perbesar Label */
+#modalVerif .small, 
+#modalVerif .text-muted {
+    font-size: 14px !important;
+    margin-bottom: 5px;
+}
+
+/* 2. Perbesar Data Utama (Nama, NIP, Unit) */
+#modalVerif .font-weight-bold,
+#modalVerif h6,
+#modalVerif #vNama, 
+#modalVerif #vNip, 
+#modalVerif #vUnit {
+    font-size: 18px !important;
+    line-height: 1.5;
+}
+
+/* 3. Perbesar Badge Status & Waktu */
+#modalVerif #vJenis span,
+#modalVerif #vWaktu {
+    font-size: 16px !important;
+    padding: 8px 12px; /* Tambah padding biar badge lebih tebal */
+}
+
+/* 4. Perbesar Form Input (Select & Textarea) */
+#modalVerif .form-control {
+    font-size: 16px !important;
+    height: auto !important; /* Biar tinggi menyesuaikan font */
+    padding: 10px 12px !important;
+}
+
+/* 5. Perbesar Tombol Aksi */
+#modalVerif .btn {
+    font-size: 16px !important;
+    font-weight: 600; /* Semi-bold */
+    padding: 10px 24px;
+}
+
+/* ==============================================================
+   ANIMASI TRANSISI HALAMAN (SPA SULTAN)
+   ============================================================== */
+/* 1. Loading Bar Atas (NProgress) */
+#nprogress .bar {
+  background: #800000 !important; /* Warna Maroon Sultan */
+  height: 4px !important;
+  z-index: 99999 !important;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px #800000, 0 0 5px #800000 !important;
+}
+
+/* 2. Animasi Konten Muncul (Fade In + Slide Up) */
+.sultan-page-transition {
+  animation: fadeInUpSultan 0.5s ease-out forwards;
+}
+
+@keyframes fadeInUpSultan {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================================= */
+/* TAMBAHAN KELAS UTILITAS SULTAN (Untuk Master Blueprint)   */
+/* ========================================================= */
+
+/* Modal Verifikasi Ekstra Lebar (Side-by-side PDF & Form) */
+.modal-dialog-sultan-verif {
+    max-width: 98% !important;
+    width: 98% !important;
+    margin: 10px auto !important;
+}
+.modal-content-sultan-verif {
+    height: 95vh !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Wrapper Iframe Responsif */
+.iframe-sultan-verif {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Utilitas Z-Index & Gap (Jika belum ada di Bootstrap) */
+.z-index-10 { z-index: 10 !important; }
+
+
+/* ===================================================================
+   OBAT GLOBAL: TRACKPAD SCROLL FIX (ANTI ADMINLTE BLOCK)
+   =================================================================== */
+
+/* Memaksa area tabel untuk menerima sentuhan trackpad secara mandiri */
+.table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important; /* Wajib untuk Mac/iOS */
+    
+    /* KUNCI UTAMA: Mencegah swipe 2 jari memicu tombol Back/Forward browser */
+    overscroll-behavior-x: contain !important; 
+    
+    /* Memberi ruang nafas agar trackpad tidak kaku */
+    padding-bottom: 5px; 
+    width: 100% !important;
+    display: block !important;
+}
+
+/* Memastikan baris tabel tidak tumpang tindih dengan wrapper */
+table.dataTable {
+    border-collapse: collapse !important;
+    max-width: none !important;
+}
+
+/* ===================================================================
+   UTILITAS TABEL & SCROLL TRACKPAD SULTAN
+   =================================================================== */
+
+/* Obat Kuat Anti-Macet Scroll Trackpad (Dipakai di semua halaman) */
+.sultan-scroll { 
+    overflow-x: auto !important; 
+    -webkit-overflow-scrolling: touch !important; 
+    width: 100% !important; 
+    border-radius: 4px; 
+}
+
+/* Modifikasi Textarea & Sel Tabel (Dipakai di Perjadin & Cuti) */
+textarea.form-control-sultan { height: auto !important; min-height: 100px !important; }
+.table-sultan-compact td.col-wrap-sultan { white-space: normal !important; min-width: 200px; line-height: 1.3; }
+
+/* ===================================================================
+   UTILITAS WARNA & BADGE KHUSUS CUTI
+   =================================================================== */
+
+/* Warna Background Tabel Sisa Cuti */
+.val-minus { background-color: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; min-width: 30px; }
+.bg-col-highlight-1 { background-color: #fff8e1 !important; color: #856404; font-weight:bold; } /* Kuning Soft */
+.bg-col-highlight-2 { background-color: #e8f5e9 !important; color: #155724; font-weight:bold; } /* Hijau Soft */
+
+/* Badge Jenis Cuti (Dipakai di Pengajuan Cuti) */
+.badge-cuti-ct { background-color: #d1e7dd; color: #0f5132; }
+.badge-cuti-cs { background-color: #fff3cd; color: #664d03; }
+.badge-cuti-cap { background-color: #f8d7da; color: #842029; }
+
+/* ===================================================================
+   UTILITAS HEADER BERTINGKAT (REKAP CUTI)
+   =================================================================== */
+
+.th-main {
+    background-color: #f4f6f9 !important; /* Disamakan dengan header sultan */
+    color: #343a40 !important;
+    font-weight: bold;
+    border-bottom: 2px solid #dee2e6 !important;
+    vertical-align: middle !important;
+}
+
+.th-sub {
+    background-color: #ffffff !important; 
+    color: #6c757d !important;
+    font-size: 12px;
+    font-weight: 600;
+    vertical-align: middle !important;
+}
+
+/* Background Abu untuk nilai rekap kosong */
+.bg-abu-terang {
+    background-color: #f8f9fa !important;
+    color: #adb5bd !important;
+}
+
+/* ==========================================================================
+   VAKSIN DATATABLES V8 (HOVER, FREEZE BORDER, & COMPLEX HEADER FIX)
+   ========================================================================== */
+
+/* 1. Efek Hover untuk tabel dengan kolom Sticky/Freeze */
+table.table-sultan-compact tbody tr:hover td {
+    box-shadow: inset 0 0 0 9999px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 2. Menajamkan garis batas (border) pada kolom yang di-freeze */
+table.table-sultan-compact th.col-sticky-left, 
+table.table-sultan-compact td.col-sticky-left {
+    border-right: 1px solid #dee2e6 !important;
+}
+
+/* 3. Mencegah Garis Dobel pada DataTables dengan fitur ScrollX & Complex Header */
+.dataTables_scrollHeadInner {
+    box-sizing: content-box !important;
+}
+.dataTables_scrollHeadInner table.table-bordered {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+}
+.dataTables_scrollHeadInner table.table-bordered thead th {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+.dataTables_scrollBody table.table-bordered {
+    border-top: none !important;
+    margin-top: -1px !important; /* Menarik body naik 1px agar menyatu tanpa garis ganda */
+}
+table.dataTable.no-footer {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* ==========================================================================
+   BUTTON ICON SULTAN (AKSI TABEL & ICON STATUS BULAT ELEGANT)
+   ========================================================================== */
+.btn-icon-sultan {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: default; /* Default untuk icon status (div/span) */
+    margin: 0 2px;
+}
+
+/* Jika berupa tombol yang bisa diklik */
+button.btn-icon-sultan, a.btn-icon-sultan {
+    cursor: pointer;
+}
+
+/* Animasi melayang saat disorot (hanya untuk yang bisa diklik) */
+button.btn-icon-sultan:hover, a.btn-icon-sultan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15) !important;
+}
+
+button.btn-icon-sultan:active, a.btn-icon-sultan:active {
+    transform: translateY(0);
+}
+
+/* --- VARIAN WARNA SULTAN (Soft BG -> Solid Hover) --- */
+
+/* 1. SUCCESS (Hijau) */
+.btn-icon-sultan-success { background-color: #d4edda; color: #155724; }
+button.btn-icon-sultan-success:hover, a.btn-icon-sultan-success:hover { background-color: #28a745; color: #ffffff; }
+
+/* 2. DANGER (Merah) */
+.btn-icon-sultan-danger { background-color: #f8d7da; color: #721c24; }
+button.btn-icon-sultan-danger:hover, a.btn-icon-sultan-danger:hover { background-color: #dc3545; color: #ffffff; }
+
+/* 3. WARNING (Kuning/Oranye) */
+.btn-icon-sultan-warning { background-color: #fff3cd; color: #856404; }
+button.btn-icon-sultan-warning:hover, a.btn-icon-sultan-warning:hover { background-color: #ffc107; color: #212529; }
+
+/* 4. INFO (Biru Muda/Cyan) */
+.btn-icon-sultan-info { background-color: #d1ecf1; color: #0c5460; }
+button.btn-icon-sultan-info:hover, a.btn-icon-sultan-info:hover { background-color: #17a2b8; color: #ffffff; }
+
+/* 5. PRIMARY (Biru Tua) */
+.btn-icon-sultan-primary { background-color: #cce5ff; color: #004085; }
+button.btn-icon-sultan-primary:hover, a.btn-icon-sultan-primary:hover { background-color: #007bff; color: #ffffff; }
+
+/* 6. MAROON (Warna Utama Aplikasi) */
+.btn-icon-sultan-maroon { background-color: #f8dada; color: #800000; }
+button.btn-icon-sultan-maroon:hover, a.btn-icon-sultan-maroon:hover { background-color: #800000; color: #ffffff; }
+
+.preloader { display: none !important; }
+</style>

@@ -1,761 +1,514 @@
-function getSkArsipFolderIds() {
-  try {
-    return {
-      'MAIN_SK': FOLDER_CONFIG.MAIN_SK
-    };
-  } catch (e) {
-    return handleError('getSkArsipFolderIds', e);
-  }
+/* ======================================================================
+   SK.gs - LOGIKA BACKEND SIABA SK (BAB VIII COMPLIANT)
+   Variabel Global (SPREADSHEET_IDS & FOLDER_CONFIG) diambil dari Code.gs
+   ====================================================================== */
+
+/* ======================================================================
+   HELPER FUNCTIONS
+   ====================================================================== */
+function handleError(context, error) {
+  Logger.log("ERROR [" + context + "]: " + error);
+  rekamCCTV("ERROR " + context, error.toString()); 
+  return { success: false, message: error.message || error.toString() };
 }
 
+function getOrCreateFolder(parentFolder, folderName) {
+  var folders = parentFolder.getFoldersByName(folderName);
+  return folders.hasNext() ? folders.next() : parentFolder.createFolder(folderName);
+}
+
+/* ======================================================================
+   CORE: PROSES SIMPAN DATA BARU (INSERT)
+   ====================================================================== */
 function processManualForm(formData) {
   try {
-    Logger.log("--- [DEBUG] MULAI UPLOAD SK ---");
-    Logger.log("User Input yang diterima dari Form: " + formData.userInput);
-
-    const targetSheetName = "Unggah_SK"; 
-    const config = SPREADSHEET_CONFIG.SK_FORM_RESPONSES; 
-    const ss = SpreadsheetApp.openById(config.id);
-    const sheet = ss.getSheetByName(targetSheetName);
-
-    if (!sheet) throw new Error(`Sheet "${targetSheetName}" tidak ditemukan.`);
-
-    const mainFolder = DriveApp.getFolderById(FOLDER_CONFIG.MAIN_SK);  
-    const tahunAjaranFolderName = formData.tahunAjaran.replace(/\//g, '-');
-    const tahunAjaranFolder = getOrCreateFolder(mainFolder, tahunAjaranFolderName);
-    const semesterFolderName = formData.semester;
-    const targetFolder = getOrCreateFolder(tahunAjaranFolder, semesterFolderName);
-
-    const newFilename = `${formData.namaSD} - ${tahunAjaranFolderName} - ${formData.semester} - ${formData.kriteriaSK}.pdf`;
+    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    const sheet = ss.getSheetByName("Unggah_SK");
     
-    const decodedData = Utilities.base64Decode(formData.fileData.data);
-    const blob = Utilities.newBlob(decodedData, formData.fileData.mimeType, newFilename);
-    const newFile = targetFolder.createFile(blob);
-    const fileUrl = newFile.getUrl();
+    const mainFolder = DriveApp.getFolderById(FOLDER_CONFIG.MAIN_SK);
+    const folderTahun = getOrCreateFolder(mainFolder, formData.tahunAjaran.replace(/\//g, '-'));
+    const targetFolder = getOrCreateFolder(folderTahun, formData.semester);
     
-    // LOGIKA PENYIMPANAN
-    const newRow = [ 
-      new Date(),                   
-      formData.namaSD,              
-      formData.tahunAjaran,         
-      formData.semester,            
-      formData.nomorSK,             
-      new Date(formData.tanggalSK), 
-      formData.kriteriaSK,          
-      fileUrl,                      
-      formData.userInput,           // <--- Titik Kritis 1
-      "Diproses"                    
-    ];
+    const namaFile = `${formData.namaSd} - ${formData.tahunAjaran.replace(/\//g,'-')} - ${formData.semester} - ${formData.kriteriaSk} - ${formData.nomorSk}.pdf`;
     
-    Logger.log("Data yang akan disimpan ke Sheet: " + JSON.stringify(newRow));
-    sheet.appendRow(newRow);
-    
-    const lastRow = sheet.getLastRow();
-    sheet.getRange(lastRow, 6).setNumberFormat("dd-MM-yyyy");
+    const blob = Utilities.newBlob(Utilities.base64Decode(formData.fileData.data), formData.fileData.mimeType, namaFile);
+    const file = targetFolder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
-    Logger.log("--- [DEBUG] SELESAI UPLOAD ---");
-    return "Dokumen SK berhasil diunggah dan status 'Diproses'.";
-  } catch (e) {
-    Logger.log("ERROR processManualForm: " + e.message);
-    return handleError('processManualForm', e);
-  }
+    sheet.appendRow([
+      "'" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss"), // A
+      formData.namaSd,        
+      formData.tahunAjaran,   
+      formData.semester,      
+      "'" + formData.nomorSk, 
+      "'" + formData.tanggalSk, 
+      formData.kriteriaSk,    
+      file.getUrl(),          
+      formData.userInput,     
+      "Diproses",             
+      "", "", "", "", ""      
+    ]);
+
+    return { success: true, message: "Data SK berhasil disimpan." };
+  } catch (e) { return handleError('processManualForm', e); }
 }
 
-function getSKRiwayatData() {
+/* ======================================================================
+   CORE: UPDATE DATA (EDIT)
+   ====================================================================== */
+function simpanPerubahanSK(form) {
   try {
-    // === KONFIGURASI ===
-    // Pastikan SPREADSHEET_CONFIG sudah ada di file Config.gs atau Code.gs
-    // Jika belum ada, ganti baris di bawah dengan ID manual: 
-    // const sheetId = "ID_SPREADSHEET_ANDA_DISINI";
-    
-    const config = SPREADSHEET_CONFIG.SK_FORM_RESPONSES; 
-    const targetSheetName = "Unggah_SK"; 
-    
-    const ss = SpreadsheetApp.openById(config.id);
-    const sheet = ss.getSheetByName(targetSheetName);
+    rekamCCTV("START EDIT", "No SK: " + form.nomorSk);
 
-    if (!sheet) {
-      return { headers: [], rows: [] }; 
-    }
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    var sheet = ss.getSheetByName("Unggah_SK");
+    var rowIdx = parseInt(form.editRowId);
 
-    const allData = sheet.getDataRange().getValues();
-    if (allData.length < 2) return { headers: [], rows: [] };
+    if (isNaN(rowIdx)) throw "Row ID Invalid";
 
-    // Mapping Header (Lowercase)
-    const originalHeaders = allData[0].map(h => String(h).trim().toLowerCase());
-    const headerMap = {};
-    originalHeaders.forEach((h, index) => { headerMap[h] = index; });
-
-    const dataRows = allData.slice(1);
-    
-    // Sort Data (Terbaru di atas)
-    const timestampIndex = headerMap['tanggal unggah'];
-    if (timestampIndex !== undefined) {
-        dataRows.sort((a, b) => {
-            const dateA = a[timestampIndex] instanceof Date ? a[timestampIndex].getTime() : 0;
-            const dateB = b[timestampIndex] instanceof Date ? b[timestampIndex].getTime() : 0;
-            return dateB - dateA; 
-        });
-    }
-
-    // Ambil Data
-    let structuredRows = dataRows.map(row => {
-      const getVal = (key) => {
-         const idx = headerMap[key];
-         return (idx !== undefined) ? row[idx] : null;
-      };
-
-      const rowObj = {};
-      rowObj['Nama SD']      = getVal('nama sd') || '-';
-      rowObj['Tahun Ajaran'] = getVal('tahun ajaran') || '-';
-      rowObj['Semester']     = getVal('semester') || '-';
-      rowObj['Nomor SK']     = getVal('nomor sk') || '-';
-      rowObj['Kriteria SK']  = getVal('kriteria sk') || '-';
-      
-      // Handle Link Dokumen
-      const dokVal = getVal('link dokumen') || getVal('dokumen');
-      rowObj['Dokumen'] = dokVal || '#';
-
-      // Handle User Input
-      const userVal = getVal('user input') || getVal('userinput');
-      rowObj['User Input'] = userVal || '-';
-
-      // Handle Status
-      rowObj['Status'] = getVal('status') || 'Diproses';
-
-      // Format Tanggal SK
-      const tglSK = getVal('tanggal sk');
-      rowObj['Tanggal SK'] = (tglSK instanceof Date) ? 
-          Utilities.formatDate(tglSK, Session.getScriptTimeZone(), "dd/MM/yyyy") : (tglSK || '');
-
-      return rowObj;
-    });
-
-    return { headers: [], rows: structuredRows };
-  } catch (e) {
-    throw new Error("Backend Error (getSKRiwayatData): " + e.message);
-  }
-}
-
-function getSKStatusData() {
-  try {
-    const config = SPREADSHEET_CONFIG.SK_FORM_RESPONSES; 
-    const targetSheetName = "Status_SK"; 
-    
-    const ss = SpreadsheetApp.openById(config.id);
-    const sheet = ss.getSheetByName(targetSheetName);
-
-    if (!sheet) return { headers: [], rows: [] }; 
-
-    // Ambil Semua Data
-    const data = sheet.getDataRange().getDisplayValues(); // getDisplayValues agar tanggal/angka sesuai tampilan sheet
-    if (data.length < 2) return { headers: [], rows: [] };
-
-    // BARIS 1: Header
-    const headers = data[0]; // ["No", "Nama Sekolah", "2021 Ganjil", "2021 Genap", ...]
-
-    // BARIS 2 dst: Isi Data
-    const rows = data.slice(1);
-
-    return { 
-      headers: headers,
-      rows: rows 
+    var KOLOM = {
+      NAMA_SD:   2,  
+      TAHUN:     3,  
+      SEMESTER:  4,  
+      NO_SK:     5,  
+      TGL_SK:    6,  
+      KRITERIA:  7,  
+      FILE_URL:  8,  
+      STATUS:    10, 
+      TGL_UPD:   11, 
+      USER_UPD:  12  
     };
-    
+
+    if (form.namaSd && form.namaSd !== "") sheet.getRange(rowIdx, KOLOM.NAMA_SD).setValue(form.namaSd);
+    if (form.tahunAjaran && form.tahunAjaran !== "") sheet.getRange(rowIdx, KOLOM.TAHUN).setValue(form.tahunAjaran);
+    if (form.semester && form.semester !== "") sheet.getRange(rowIdx, KOLOM.SEMESTER).setValue(form.semester);
+
+    sheet.getRange(rowIdx, KOLOM.NO_SK).setValue("'" + form.nomorSk);
+    sheet.getRange(rowIdx, KOLOM.TGL_SK).setValue("'" + form.tanggalSk); 
+    sheet.getRange(rowIdx, KOLOM.KRITERIA).setValue(form.kriteriaSk);
+
+    if (form.fileData && form.fileData.data) {
+       const mainFolder = DriveApp.getFolderById(FOLDER_CONFIG.MAIN_SK);
+       
+       var thn = (form.tahunAjaran && form.tahunAjaran !== "") ? form.tahunAjaran : sheet.getRange(rowIdx, KOLOM.TAHUN).getDisplayValue();
+       var sem = (form.semester && form.semester !== "") ? form.semester : sheet.getRange(rowIdx, KOLOM.SEMESTER).getDisplayValue();
+       
+       const folderTahun = getOrCreateFolder(mainFolder, thn.toString().replace(/\//g, '-'));
+       const targetFolder = getOrCreateFolder(folderTahun, sem);
+
+       var namaSdFix = (form.namaSd && form.namaSd !== "") ? form.namaSd : sheet.getRange(rowIdx, KOLOM.NAMA_SD).getDisplayValue();
+       const namaFile = `${namaSdFix} - ${thn.toString().replace(/\//g,'-')} - ${sem} - ${form.kriteriaSk} - ${form.nomorSk}.pdf`;
+
+       var blob = Utilities.newBlob(Utilities.base64Decode(form.fileData.data), form.fileData.mimeType, namaFile);
+       var file = targetFolder.createFile(blob);
+       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+       
+       sheet.getRange(rowIdx, KOLOM.FILE_URL).setValue(file.getUrl());
+       rekamCCTV("UPLOAD", "File baru tersimpan: " + file.getUrl());
+    }
+
+    sheet.getRange(rowIdx, KOLOM.STATUS).setValue("Diproses");
+    sheet.getRange(rowIdx, KOLOM.TGL_UPD).setValue("'" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss"));
+    sheet.getRange(rowIdx, KOLOM.USER_UPD).setValue(form.userUpdate);
+
+    rekamCCTV("SUKSES", "Data baris " + rowIdx + " berhasil diupdate.");
+    return { success: true, message: "Data berhasil diperbarui." };
+
   } catch (e) {
-    throw new Error("Gagal mengambil data Status: " + e.message);
+    rekamCCTV("ERROR", e.toString());
+    return { success: false, message: "Error Server: " + e.toString() };
   }
 }
 
-function getArsipData(folderId) {
+/* ======================================================================
+   CORE: GET DATA LIST 
+   ====================================================================== */
+function getDaftarSK() {
   try {
-    // 1. AMBIL ID DARI CONFIG TERPUSAT (Code.gs)
-    // Pastikan FOLDER_CONFIG.MAIN_SK sudah didefinisikan di Code.gs
-    const rootId = FOLDER_CONFIG.MAIN_SK; 
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    var sheet = ss.getSheetByName("Unggah_SK");
+    var data = sheet.getDataRange().getDisplayValues();
+    var result = [];
     
-    if (!rootId) {
-      throw new Error("ID Folder belum diset di FOLDER_CONFIG.MAIN_SK (Code.gs)");
+    function parseTimeInternal(val) {
+      if (!val) return 0;
+      var s = String(val).replace(/'/g, "").trim();
+      if (s === "") return 0;
+      var parts = s.split(" ");
+      var sep = parts[0].includes("-") ? "-" : "/";
+      var dP = parts[0].split(sep);
+      if (dP.length !== 3) return 0;
+      var tP = (parts[1]||"00:00:00").split(":");
+      var y = dP[2].length === 4 ? dP[2] : dP[0];
+      var m = dP[1];
+      var d = dP[0].length <= 2 ? dP[0] : dP[2];
+      return new Date(parseInt(y), parseInt(m)-1, parseInt(d), parseInt(tP[0]||0), parseInt(tP[1]||0), parseInt(tP[2]||0)).getTime();
     }
-    
-    // Jika frontend tidak kirim ID (saat pertama buka), pakai Root ID dari Config
-    const targetId = folderId || rootId; 
-    
-    const folder = DriveApp.getFolderById(targetId);
-    if (!folder) throw new Error("Folder tidak ditemukan di Google Drive");
 
-    let items = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (!row[1]) continue; 
 
-    // 2. AMBIL FOLDER (Sub-folder)
-    const subFolders = folder.getFolders();
-    while (subFolders.hasNext()) {
-      let f = subFolders.next();
-      items.push({
-        id: f.getId(),
-        name: f.getName(),
-        type: 'folder',
-        mimeType: 'application/vnd.google-apps.folder',
-        date: f.getLastUpdated(),
-        size: '-'
+      var tUnggah = parseTimeInternal(row[0]);
+      var tUpdate = parseTimeInternal(row[10]);
+      var tVerval = parseTimeInternal(row[12]);
+      
+      var lastActivity = Math.max(tUnggah, tUpdate, tVerval);
+
+      result.push({
+        rowBaris: i + 1,
+        tglUnggah: row[0],
+        namaSd: row[1], tahun: row[2], semester: row[3], noSk: row[4],
+        tglSk: row[5], tglSkDisplay: row[5], 
+        kriteria: row[6], fileUrl: row[7], userInput: row[8], status: row[9],
+        tglUpdate: row[10], userUpdate: row[11],
+        tglVerval: row[12], verifikator: row[13], keterangan: row[14],
+        timestamp: lastActivity
       });
     }
+    
+    result.sort(function(a, b) { return b.timestamp - a.timestamp; });
+    
+    return result;
+  } catch (e) { return []; }
+}
 
-    // 3. AMBIL FILE
-    const files = folder.getFiles();
-    while (files.hasNext()) {
-      let f = files.next();
-      // Format ukuran file (KB/MB)
-      let sizeBytes = f.getSize();
-      let sizeStr = (sizeBytes / 1024).toFixed(1) + " KB";
-      if (sizeBytes > 1024 * 1024) sizeStr = (sizeBytes / (1024 * 1024)).toFixed(1) + " MB";
+/* ======================================================================
+   HELPER: CEK DUPLIKAT, HAPUS, & VERIFIKASI 
+   ====================================================================== */
+function cekDuplikatSK(payload) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    const sheet = ss.getSheetByName("Unggah_SK");
+    var data = sheet.getDataRange().getDisplayValues();
+    
+    var tSd = String(payload.namaSd).trim().toUpperCase();
+    var tTh = String(payload.tahunAjaran).trim().toUpperCase();
+    var tSm = String(payload.semester).trim().toUpperCase();
+    var tKr = String(payload.kriteria).trim().toUpperCase();
+    
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      
+      var dbSd = String(row[1] || "").trim().toUpperCase(); 
+      var dbTh = String(row[2] || "").trim().toUpperCase(); 
+      var dbSm = String(row[3] || "").trim().toUpperCase(); 
+      var dbKr = String(row[6] || "").trim().toUpperCase(); 
+      
+      if (dbSd === tSd && dbTh === tTh && dbSm === tSm && dbKr === tKr) {
+        var status = String(row[9] || "").toLowerCase(); 
+        var isLocked = (status.includes("ok") || status.includes("setuju"));
+        
+        return { 
+          found: true, isLocked: isLocked,
+          data: {
+            rowId: i + 1, namaSd: row[1], tahun: row[2], semester: row[3],
+            noSk: row[4], tglSk: row[5], kriteria: row[6], fileUrl: row[7], status: row[9]
+          }
+        };
+      }
+    }
+    return { found: false };
+  } catch (e) { return { found: false }; }
+}
 
-      items.push({
-        id: f.getId(),
-        name: f.getName(),
-        type: 'file',
-        mimeType: f.getMimeType(),
-        url: f.getUrl(), // Link untuk buka file
-        date: f.getLastUpdated(),
-        size: sizeStr
-      });
+function hapusDataSK(form) {
+  try {
+    var KODE_RAHASIA = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd");
+    if (String(form.hapusKode).trim() !== KODE_RAHASIA) {
+      return { success: false, message: "KODE_SALAH" };
     }
 
-    // 4. SORTING: Folder di atas, File di bawah. Lalu urut abjad.
-    items.sort((a, b) => {
-      if (a.type === b.type) return a.name.localeCompare(b.name);
-      return a.type === 'folder' ? -1 : 1;
+    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    const sheetSource = ss.getSheetByName("Unggah_SK");
+    
+    var sheetTrash = ss.getSheetByName("Trash_SK");
+    if (!sheetTrash) {
+       sheetTrash = ss.insertSheet("Trash_SK");
+       var headers = sheetSource.getRange("A1:Q1").getDisplayValues();
+       headers[0].push("TGL HAPUS", "USER HAPUS", "ALASAN");
+       sheetTrash.appendRow(headers[0]); 
+    }
+
+    var rowIdx = parseInt(form.hapusRowId);
+    if (isNaN(rowIdx)) return { success: false, message: "Row ID Invalid" };
+
+    var rangeData = sheetSource.getRange(rowIdx, 1, 1, sheetSource.getLastColumn());
+    var values = rangeData.getDisplayValues()[0]; 
+    
+    var tahun = values[2];   
+    var semester = values[3]; 
+    var fileUrl = values[7];  
+
+    if (fileUrl && fileUrl.indexOf("drive.google.com") !== -1) {
+        try {
+          var fileIdMatch = fileUrl.match(/[-\w]{25,}/);
+          if (fileIdMatch) {
+             var file = DriveApp.getFileById(fileIdMatch[0]);
+             var trashRoot = DriveApp.getFolderById(FOLDER_CONFIG.TRASH_SK);
+             var folderTahun = getOrCreateFolder(trashRoot, String(tahun).replace(/\//g, '-'));
+             var folderSmt = getOrCreateFolder(folderTahun, String(semester));
+             file.moveTo(folderSmt); 
+          }
+        } catch (errFile) {
+          rekamCCTV("ERROR HAPUS FILE", errFile.toString());
+        }
+    }
+
+    var trashValues = values.slice(); 
+    trashValues.push("'" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss"));        
+    trashValues.push(form.userDelete);   
+    trashValues.push(form.hapusAlasan || "-");  
+
+    sheetTrash.appendRow(trashValues);
+    sheetSource.deleteRow(rowIdx);
+
+    rekamCCTV("HAPUS DATA", "Menghapus Baris " + rowIdx + " oleh " + form.userDelete);
+    return { success: true, message: "Data berhasil dihapus." };
+
+  } catch (e) {
+    rekamCCTV("ERROR HAPUS", e.toString());
+    return { success: false, message: "Gagal menghapus: " + e.toString() };
+  }
+}
+
+function verifikasiDataSK(form) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    var sheet = ss.getSheetByName("Unggah_SK");
+    var rowIdx = parseInt(form.verifRowId);
+
+    if (isNaN(rowIdx) || rowIdx < 2) return { success: false, message: "ID Baris tidak valid!" };
+
+    sheet.getRange(rowIdx, 10).setValue(form.verifStatus);
+    sheet.getRange(rowIdx, 13).setValue("'" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss")); 
+    sheet.getRange(rowIdx, 14).setValue(form.verifikator); 
+    sheet.getRange(rowIdx, 15).setValue("'" + form.verifKeterangan);
+
+    SpreadsheetApp.flush();
+    return { success: true, message: "Data diverifikasi: " + form.verifStatus };
+  } catch (e) { return { success: false, message: "Error Verifikasi: " + e.toString() }; }
+}
+
+/* ======================================================================
+   HELPER: REKAM JEJAK CCTV
+   ====================================================================== */
+function rekamCCTV(aktivitas, data) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA); 
+    var sheet = ss.getSheetByName("Log_CCTV");
+    if (!sheet) {
+      sheet = ss.insertSheet("Log_CCTV");
+      sheet.appendRow(["TIMESTAMP", "AKTIVITAS", "DATA MENTAH"]);
+    }
+    var dataString = (typeof data === 'object') ? JSON.stringify(data) : data;
+    sheet.appendRow(["'" + Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss"), aktivitas, dataString]);
+  } catch (e) { Logger.log("CCTV Error"); }
+}
+
+/* ======================================================================
+   CORE: GET DATA SAMPAH (TRASH)
+   ====================================================================== */
+function getTrashSK() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+  const sheet = ss.getSheetByName("Trash_SK");
+  if (!sheet) return [];
+
+  var data = sheet.getDataRange().getDisplayValues();
+  var result = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    if (!row[1]) continue; 
+
+    result.push({
+      rowBaris: i + 1,
+      namaSd: row[1], 
+      noSk: row[4],   
+      tglHapus: row[15],  
+      userHapus: row[16],      
+      alasanHapus: row[17]     
     });
+  }
+  return result;
+}
 
-    // 5. BREADCRUMB (Jalur Navigasi)
-    let parentId = null;
-    // Cek apakah kita sedang berada di dalam sub-folder (bukan di root)
-    if (targetId !== rootId) {
-      const parents = folder.getParents();
-      if (parents.hasNext()) parentId = parents.next().getId();
+/* ======================================================================
+   CORE: RESTORE DATA (PULIHKAN DARI TRASH)
+   ====================================================================== */
+function restoreDataSK(form) {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    const sheetTrash = ss.getSheetByName("Trash_SK");
+    const sheetActive = ss.getSheetByName("Unggah_SK");
+    
+    var rowIdx = parseInt(form.rowId);
+    var values = sheetTrash.getRange(rowIdx, 1, 1, sheetTrash.getLastColumn()).getDisplayValues()[0];
+    
+    var cleanValues = values.slice(0, 15);
+    
+    var fileUrl = cleanValues[7];
+    if (fileUrl && fileUrl.indexOf("drive.google.com") !== -1) {
+        try {
+          var fileIdMatch = fileUrl.match(/[-\w]{25,}/);
+          if (fileIdMatch) DriveApp.getFileById(fileIdMatch[0]).moveTo(DriveApp.getFolderById(FOLDER_CONFIG.MAIN_SK));
+        } catch (e) {}
     }
+
+    sheetActive.appendRow(cleanValues);
+    sheetTrash.deleteRow(rowIdx);
+    
+    return { success: true, message: "Data berhasil dipulihkan." };
+    
+  } catch (e) {
+    return { success: false, message: "Gagal Restore: " + e.toString() };
+  }
+}
+
+/* ======================================================================
+   MODULE: STATUS PENGIRIMAN SK (BAB VIII & MULTI-LEVEL HEADER FIX)
+   ====================================================================== */
+function getSiabaStatusData() {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
+    const sheet = ss.getSheetByName("Status_SK");
+    
+    // BAB VIII: getDisplayValues Validated
+    var rawData = sheet.getDataRange().getDisplayValues();
+    
+    // Karena Baris 1 dan 2 sekarang adalah Header Bertingkat, 
+    // minimal harus ada 3 baris jika ada datanya.
+    if (rawData.length < 3) return { error: "Data Status SK belum tersedia." };
+
+    // Potong 2 baris pertama, ambil dari indeks 2 (baris ke-3) sampai habis
+    var rows = rawData.slice(2); 
+
+    // Ambil list nama sekolah dari Kolom 1 (Index 0) untuk dropdown filter
+    var listSekolah = [];
+    rows.forEach(r => {
+      if(r[0] && r[0] !== "") {
+         listSekolah.push(r[0]);
+      }
+    });
+    
+    listSekolah = [...new Set(listSekolah)].sort();
 
     return {
-      currentId: targetId,
-      currentName: folder.getName(),
-      parentId: parentId,
-      isRoot: (targetId === rootId),
-      items: items.map(i => ({
-         ...i,
-         date: Utilities.formatDate(i.date, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm")
-      }))
+       rows: rows,
+       schools: listSekolah
     };
 
   } catch (e) {
-    throw new Error("Gagal akses Drive: " + e.message);
+    return { error: "Gagal ambil data: " + e.toString() };
   }
 }
 
-function getSKDataByRow(rowIndex) {
+/* ======================================================================
+   MODULE: DASHBOARD SK 
+   ====================================================================== */
+function getDashboardSK(filterTahun, filterSemester) {
   try {
-    const config = SPREADSHEET_CONFIG.SK_FORM_RESPONSES;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
+    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
     
-    // Ambil nilai mentah (RAW) untuk mendapatkan objek Date asli
-    const rawValues = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getValues()[0];
-    // Ambil nilai tampilan (DISPLAY) untuk konsistensi string/angka
-    const displayValues = sheet.getRange(rowIndex, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
-    
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    
-    const rowData = {};
-    headers.forEach((header, i) => {
-      // KUNCI PERBAIKAN: Format Tanggal SK ke YYYY-MM-DD
-      if (header === 'Tanggal SK' && rawValues[i] instanceof Date) {
-        // Format yang wajib untuk HTML input type="date"
-        rowData[header] = Utilities.formatDate(rawValues[i], "UTC", "yyyy-MM-dd");
-      } else {
-        // Gunakan display value untuk field lain (Nomor SK, dll.)
-        rowData[header] = displayValues[i];
-      }
-    });
-    return rowData;
-  } catch (e) {
-    return handleError("getSKDataByRow", e);
-  }
-}
+    const sheetData = ss.getSheetByName("Unggah_SK");
+    if (!sheetData) return { error: "Sheet 'Unggah_SK' tidak ditemukan!" };
+    var rawData = sheetData.getDataRange().getDisplayValues();
+    var rows = rawData.slice(1); 
 
-function updateSKData(formData) {
-  try {
-    const config = SPREADSHEET_CONFIG.SK_FORM_RESPONSES;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    
-    const range = sheet.getRange(formData.rowIndex, 1, 1, headers.length);
-    const existingRowValues = range.getDisplayValues()[0];
-    const existingRowObject = {};
-    headers.forEach((header, i) => { existingRowObject[header] = existingRowValues[i]; });
-
-    const mainFolder = DriveApp.getFolderById(FOLDER_CONFIG.MAIN_SK);
-    const tahunAjaranFolderName = existingRowObject['Tahun Ajaran'].replace(/\//g, '-');
-    const tahunAjaranFolder = getOrCreateFolder(mainFolder, tahunAjaranFolderName);
-    
-    let fileUrl = existingRowObject['Dokumen'];
-    const fileUrlIndex = headers.indexOf('Dokumen');
-
-    const newSemesterFolderName = formData['Semester'];
-    const newTargetFolder = getOrCreateFolder(tahunAjaranFolder, newSemesterFolderName);
-    const newFilename = `${existingRowObject['Nama SD']} - ${tahunAjaranFolderName} - ${newSemesterFolderName} - ${formData['Kriteria SK']}.pdf`;
-
-    if (formData.fileData && formData.fileData.data) {
-      if (fileUrlIndex > -1 && existingRowObject['Dokumen']) {
-        try {
-          const fileId = existingRowObject['Dokumen'].match(/[-\w]{25,}/);
-          if (fileId) DriveApp.getFileById(fileId[0]).setTrashed(true);
-        } catch (e) {
-          Logger.log(`Gagal menghapus file lama saat upload baru: ${e.message}`);
-        }
-      }
-      
-      const decodedData = Utilities.base64Decode(formData.fileData.data);
-      const blob = Utilities.newBlob(decodedData, formData.fileData.mimeType, newFilename);
-      const newFile = newTargetFolder.createFile(blob);
-      fileUrl = newFile.getUrl();
-
-    } else if (fileUrlIndex > -1 && existingRowObject['Dokumen']) {
-        const fileIdMatch = existingRowObject['Dokumen'].match(/[-\w]{25,}/);
-        if (fileIdMatch) {
-            const fileId = fileIdMatch[0];
-            const file = DriveApp.getFileById(fileId);
-            const currentFileName = file.getName();
-            const currentParentFolder = file.getParents().next();
-
-            if (currentFileName !== newFilename || currentParentFolder.getName() !== newSemesterFolderName) {
-                file.moveTo(newTargetFolder);
-                file.setName(newFilename);
-                fileUrl = file.getUrl();
-            }
+    var masterSekolah = [];
+    var sheetMaster = ss.getSheetByName("Master_Sekolah");
+    if (sheetMaster) {
+        var rawMaster = sheetMaster.getDataRange().getDisplayValues();
+        for (var i = 1; i < rawMaster.length; i++) {
+            if(rawMaster[i][0]) masterSekolah.push(String(rawMaster[i][0]).trim());
         }
     }
-    
-    formData['Dokumen'] = fileUrl;
-    formData['Update'] = new Date();
-
-    const newRowValuesForSheet = headers.map(header => {
-      return formData.hasOwnProperty(header) ? formData[header] : existingRowObject[header];
-    });
-
-    sheet.getRange(formData.rowIndex, 1, 1, headers.length).setValues([newRowValuesForSheet]);
-    
-    const tanggalSKIndex = headers.indexOf('Tanggal SK');
-    if (tanggalSKIndex !== -1) {
-      sheet.getRange(formData.rowIndex, tanggalSKIndex + 1).setNumberFormat("dd-MM-yyyy");
-    }
-    
-    return "Data berhasil diperbarui!";
-  } catch (e) {
-    return handleError('updateSKData', e);
-  }
-}
-
-function deleteSKData(rowIndex, deleteCode) {
-  try {
-    const todayCode = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd");
-    if (String(deleteCode).trim() !== todayCode) throw new Error("Kode Hapus salah.");
-
-    const config = SPREADSHEET_CONFIG.SK_FORM_RESPONSES;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
-    
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    const fileUrlIndex = headers.findIndex(h => h.trim().toLowerCase() === 'dokumen');
-    
-    if (fileUrlIndex !== -1) {
-        const fileUrl = sheet.getRange(rowIndex, fileUrlIndex + 1).getValue();
-        if (fileUrl && typeof fileUrl === 'string') {
-            const fileId = fileUrl.match(/[-\w]{25,}/);
-            if (fileId) {
-                try {
-                    DriveApp.getFileById(fileId[0]).setTrashed(true);
-                } catch (err) {
-                    Logger.log(`Gagal menghapus file dengan ID ${fileId[0]}: ${err.message}`);
-                }
-            }
-        }
-    }
-    
-    sheet.deleteRow(rowIndex);
-    return "Data dan file terkait berhasil dihapus.";
-  } catch (e) {
-    return handleError("deleteSKData", e);
-  }
-}
-
-function getSKDashboardData() {
-  try {
-    var ssId = "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4"; 
-    var ss;
-    try { ss = SpreadsheetApp.openById(ssId); } catch(e) { return { error: "Gagal buka Spreadsheet." }; }
-
-    var sheetUnggah = ss.getSheetByName("Unggah_SK");
-    if (!sheetUnggah) return { error: "Sheet 'Unggah_SK' tidak ditemukan." };
-
-    var dataUnggah = sheetUnggah.getDataRange().getDisplayValues();
-    var rowsUnggah = dataUnggah.length > 1 ? dataUnggah.slice(1) : [];
-    var headUnggah = dataUnggah[0] || [];
-
-    // Mapping Index
-    var idxTgl = headUnggah.indexOf("Timestamp"); 
-    if(idxTgl < 0) idxTgl = headUnggah.indexOf("Waktu Input");
-    if(idxTgl < 0) idxTgl = 0; 
-
-    var idxStatus = headUnggah.indexOf("Status");
-    
-    // Index Data Lain
-    var idxSD = headUnggah.indexOf("Nama Sekolah"); if(idxSD < 0) idxSD = headUnggah.indexOf("Nama SD");
-    var idxThn = headUnggah.indexOf("Tahun Ajaran");
-    var idxSem = headUnggah.indexOf("Semester");
-    var idxKrit = headUnggah.indexOf("Kriteria SK");
 
     var stats = {
-      total: rowsUnggah.length,
-      statusCounts: { 'OK': 0, 'Ditolak': 0, 'Diproses': 0 },
-      monthlyCounts: {},
-      recent: []
+      totalMasuk: 0, diproses: 0, revisi: 0, disetujui: 0, ditolak: 0,
+      progress: 0, belumLaporCount: 0, belumLaporList: [], recent: []
     };
 
-    // LOOPING DATA
-    rowsUnggah.forEach(function(row) {
-      
-      // 1. PERBAIKAN LOGIKA STATUS (Case Insensitive & Trim)
-      var rawStatus = (row[idxStatus] || '').toString().trim().toUpperCase(); // Ubah ke Huruf Besar semua
-      
-      if (rawStatus === 'OK' || rawStatus.includes('TERIMA')) {
-        stats.statusCounts['OK']++;
-      } 
-      else if (rawStatus.includes('TOLAK') || rawStatus.includes('REVISI')) {
-        stats.statusCounts['Ditolak']++;
-      } 
-      else {
-        // Sisanya (Diproses, Kosong, dll)
-        stats.statusCounts['Diproses']++;
-      }
+    var sekolahSudahLapor = new Set();
 
-      // 2. Hitung Tren Bulanan
-      var tglStr = row[idxTgl];
-      if (tglStr) {
-        var dateObj = parseDateRobust(tglStr); 
-        if (dateObj) {
-             var monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-             var monthLabel = monthNames[dateObj.getMonth()];
-             if (!stats.monthlyCounts[monthLabel]) stats.monthlyCounts[monthLabel] = 0;
-             stats.monthlyCounts[monthLabel]++;
-        }
+    var filteredRows = rows.filter(function(r) {
+      if (!r[1]) return false;
+      
+      var rTahun = String(r[2] || "").trim();
+      var rSmt = String(r[3] || "").trim();
+      
+      var matchTahun = (filterTahun === "" || rTahun === String(filterTahun));
+      var matchSmt = (filterSemester === "" || rSmt === String(filterSemester));
+      
+      if (matchTahun && matchSmt) {
+          sekolahSudahLapor.add(String(r[1]).trim());
+          return true;
       }
+      return false;
     });
 
-    // 3. Ambil 5 Aktivitas Terakhir
-    var recentData = rowsUnggah.slice(-5).reverse();
-    stats.recent = recentData.map(function(row) {
-      var rawTgl = row[idxTgl] || '';
-      var displayDate = rawTgl.split(' ')[0]; 
+    stats.totalMasuk = filteredRows.length;
 
-      return {
-        'Tanggal': displayDate || '-',
-        'NamaSD': (idxSD > -1) ? row[idxSD] : '-',
-        'Tahun': (idxThn > -1) ? row[idxThn] : '-',
-        'Semester': (idxSem > -1) ? row[idxSem] : '-',
-        'Kriteria': (idxKrit > -1) ? row[idxKrit] : '-'
-      };
+    filteredRows.forEach(function(r) {
+      var s = String(r[9] || "").toLowerCase(); 
+
+      if (s.includes("ok") || s.includes("setuju") || s.includes("valid")) stats.disetujui++;
+      else if (s.includes("revisi")) stats.revisi++;
+      else if (s.includes("tolak")) stats.ditolak++;
+      else stats.diproses++;
+    });
+
+    if (masterSekolah.length > 0) {
+        stats.belumLaporList = masterSekolah.filter(x => !sekolahSudahLapor.has(x)).sort();
+        stats.belumLaporCount = stats.belumLaporList.length;
+        stats.progress = Math.round((stats.disetujui / masterSekolah.length) * 100);
+    }
+
+    // VAKSIN PARSER ABSOLUT UNTUK WAKTU TERAKHIR
+    function parseStringDateToTime(str) {
+        if(!str || str==="" || str==="-") return 0;
+        try {
+            var cleanStr = String(str).replace(/['"]/g, "").trim();
+            if(cleanStr === "") return 0;
+            var p = cleanStr.split(' '); 
+            var dateParts = p[0].split(/[-/]/); 
+            if(dateParts.length !== 3) return 0;
+            var timeParts = (p[1] || "00:00:00").split(':');
+            var y, m, d;
+            if(dateParts[0].length === 4) { y = parseInt(dateParts[0],10); m = parseInt(dateParts[1],10)-1; d = parseInt(dateParts[2],10); } 
+            else { y = parseInt(dateParts[2],10); m = parseInt(dateParts[1],10)-1; d = parseInt(dateParts[0],10); }
+            var hr = parseInt(timeParts[0]||0,10); var mn = parseInt(timeParts[1]||0,10); var sc = parseInt(timeParts[2]||0,10);
+            return new Date(y, m, d, hr, mn, sc).getTime(); 
+        } catch(e) { return 0; }
+    }
+
+    // Sort menggunakan kombinasi 3 kolom waktu
+    var sorted = filteredRows.sort(function(a, b) {
+      var timeA = Math.max(parseStringDateToTime(a[0]), parseStringDateToTime(a[10]), parseStringDateToTime(a[12]));
+      var timeB = Math.max(parseStringDateToTime(b[0]), parseStringDateToTime(b[10]), parseStringDateToTime(b[12]));
+      return timeB - timeA; 
+    }).slice(0, 7); 
+
+    stats.recent = sorted.map(function(r) {
+        var tKirim = parseStringDateToTime(r[0]);
+        var tEdit = parseStringDateToTime(r[10]);
+        var tVerif = parseStringDateToTime(r[12]);
+        var maxTime = Math.max(tKirim, tEdit, tVerif);
+        
+        var displayTime = String(r[0]);
+        if (maxTime === tEdit && tEdit > 0) displayTime = String(r[10]);
+        if (maxTime === tVerif && tVerif > 0) displayTime = String(r[12]);
+        
+        displayTime = displayTime.replace(/['"]/g, "").trim();
+
+        return {
+            sekolah: r[1],
+            status: r[9], 
+            waktu: displayTime.substring(0, 16) 
+        };
     });
 
     return stats;
 
-  } catch (e) {
-    return { error: "Error Backend: " + e.message };
-  }
-}
-
-function parseDateRobust(dateStr) {
-  if (!dateStr) return null;
-  var datePart = dateStr.split(' ')[0]; 
-  var parts = datePart.split('/');
-  if (parts.length === 3) {
-    var day = parseInt(parts[0], 10);
-    var month = parseInt(parts[1], 10) - 1; 
-    var year = parseInt(parts[2], 10);
-    var d = new Date(year, month, day);
-    if (!isNaN(d.getTime())) return d;
-  }
-  var d2 = new Date(dateStr);
-  if (!isNaN(d2.getTime())) return d2;
-  return null; 
-}
-
-/* ================================================================== */
-/* ==================== FUNGSI DATA SK (REVISI V3) ================== */
-/* ================================================================== */
-
-function getSKData() {
-  try {
-    var ssId = "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4"; 
-    var ss = SpreadsheetApp.openById(ssId);
-    var sheet = ss.getSheetByName("Unggah_SK");
-    
-    var isAdmin = true; // Ganti logic ini dengan session check sesungguhnya nanti
-
-    var data = sheet.getDataRange().getDisplayValues();
-    if (data.length <= 1) return { rows: [], isAdmin: isAdmin };
-
-    var headers = data[0];
-    var rows = data.slice(1);
-    
-    // --- HELPER PENCARI KOLOM ---
-    function findCol(candidates) {
-      for (var i = 0; i < candidates.length; i++) {
-        var target = candidates[i].toLowerCase();
-        for (var j = 0; j < headers.length; j++) {
-           if (headers[j].toString().toLowerCase().trim() === target) return j;
-        }
-      }
-      return -1; 
-    }
-
-    // --- MAPPING INDEX KOLOM ---
-    var idx = {
-      noSK: findCol(["Nomor SK", "No SK"]),
-      namaSD: findCol(["Nama Sekolah", "Nama SD", "Sekolah"]),
-      tahun: findCol(["Tahun Ajaran", "Tahun"]),
-      sem: findCol(["Semester"]),
-      tglSK: findCol(["Tanggal SK", "Tgl SK"]),
-      kriteria: findCol(["Kriteria SK", "Jenis SK"]),
-      dok: findCol(["Link File", "Dokumen", "File SK"]),
-      status: findCol(["Status"]),
-      tglUpload: findCol(["Timestamp", "Waktu Input", "Tanggal Input", "Tanggal Unggah"]),
-      userInput: findCol(["User Input", "Operator"]),
-      update: findCol(["Update", "Terakhir Update", "Tanggal Edit"]),
-      userUpdate: findCol(["User Update"]),
-      verval: findCol(["Verval", "Tanggal Verifikasi"]),
-      verifikator: findCol(["Verifikator", "Admin Verif"]),
-      ket: findCol(["Keterangan", "Catatan"])
-    };
-
-    var result = rows.map(function(row, i) {
-      var v = function(colIdx) { return (colIdx > -1 && row[colIdx]) ? row[colIdx] : '-'; };
-
-      // 1. Ambil String Tanggal Mentah
-      var rawTglUpload = v(idx.tglUpload);
-      var rawUpdate = v(idx.update);
-      var rawVerval = v(idx.verval);
-
-      // 2. Bersihkan Tampilan (Display Only)
-      var cleanTglUpload = (rawTglUpload !== '-') ? rawTglUpload.split(' ')[0] : '-';
-      var cleanUpdate = (rawUpdate !== '-') ? rawUpdate.split(' ')[0] : '-';
-      var cleanVerval = (rawVerval !== '-') ? rawVerval.split(' ')[0] : '-';
-
-      // 3. Konversi ke Timestamp untuk Sorting (Logic Aktivitas Terakhir)
-      var time1 = parseDateSort(rawTglUpload);
-      var time2 = parseDateSort(rawUpdate);
-      var time3 = parseDateSort(rawVerval);
-      
-      // Ambil waktu paling maksimal (terbaru) dari ketiga kolom tersebut
-      var maxActivityTime = Math.max(time1, time2, time3);
-
-      return {
-        rowIndex: i + 1, // Penting: Jangan ubah logika ini (tetap urut index asli + 1)
-        noSK: v(idx.noSK),
-        namaSD: v(idx.namaSD),
-        tahun: v(idx.tahun),
-        sem: v(idx.sem),
-        tglSK: v(idx.tglSK),
-        kriteria: v(idx.kriteria),
-        dok: v(idx.dok) === '-' ? '#' : v(idx.dok),
-        status: (idx.status > -1 && row[idx.status]) ? row[idx.status] : 'Diproses',
-        
-        // Data Tampilan
-        tglUpload: cleanTglUpload,
-        userInput: v(idx.userInput),
-        update: cleanUpdate,
-        userUpdate: v(idx.userUpdate),
-        verval: cleanVerval,
-        verifikator: v(idx.verifikator),
-        ket: v(idx.ket),
-        
-        // Key Tersembunyi untuk Sorting
-        _sortKey: maxActivityTime
-      };
-    });
-
-    // --- SORTING: LOGIKA 3 KOLOM (DESCENDING) ---
-    // Mengurutkan berdasarkan aktivitas terakhir (siapa yang paling baru, dia di atas)
-    result.sort(function(a, b) {
-      return b._sortKey - a._sortKey;
-    });
-
-    return { rows: result, isAdmin: isAdmin }; 
-
-  } catch (e) {
-    return { error: "Error Backend: " + e.message };
-  }
-}
-
-// --- HELPER PARSING TANGGAL UTK SORTING ---
-// Mengubah string tanggal (dd/mm/yyyy) menjadi angka timestamp (ms)
-function parseDateSort(dateStr) {
-  if (!dateStr || dateStr === '-') return 0; // Jika kosong, anggap waktu 0 (paling lama)
-
-  try {
-    // 1. Coba split dd/mm/yyyy (Format Indonesia/Sheet umumnya)
-    // Ambil bagian tanggal saja, buang jam
-    var datePart = dateStr.toString().split(' ')[0]; 
-    var parts = datePart.split('/');
-
-    if (parts.length === 3) {
-      // new Date(year, monthIndex, day)
-      // Ingat: monthIndex di JS mulai dari 0 (Januari = 0)
-      var d = new Date(parts[2], parts[1] - 1, parts[0]);
-      return d.getTime();
-    }
-
-    // 2. Fallback: Coba parse standar (yyyy-mm-dd atau format default)
-    var d2 = new Date(dateStr);
-    return isNaN(d2.getTime()) ? 0 : d2.getTime();
-
-  } catch (e) {
-    return 0;
-  }
-}
-
-// 2. PROSES EDIT SK (REVISI: OVERWRITE/GANTI FILE)
-function processEditSK(form) {
-  try {
-    var ssId = "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4";
-    var ss = SpreadsheetApp.openById(ssId);
-    var sheet = ss.getSheetByName("Unggah_SK");
-    
-    // --- KONFIGURASI FOLDER ---
-    // Pastikan ID ini SAMA dengan ID Folder di halaman Unggah SK
-    var folderId = "1OB2Mxa_zvpYl7Vru9NEddYmBlU5SfYHL"; 
-    
-    var rowIdx = parseInt(form.rowIndex) + 1; 
-    
-    // 1. LOGIKA STATUS (Tetap)
-    var oldStatus = sheet.getRange(rowIdx, getColIdx(sheet, "Status")).getValue();
-    var newStatus = oldStatus; 
-    if (oldStatus == 'Revisi') newStatus = 'Diproses';
-    else if (oldStatus == 'Ditolak') newStatus = 'Revisi'; 
-
-    // 2. LOGIKA GANTI FILE (FILE BARU MASUK -> FILE LAMA HAPUS)
-    if (form.fileData && form.fileData.data) {
-       // A. AMBIL URL FILE LAMA DULU (Sebelum ditimpa)
-       var colFileIdx = getColIdx(sheet, "Link File");
-       var oldUrl = sheet.getRange(rowIdx, colFileIdx).getValue();
-       
-       // B. UPLOAD FILE BARU
-       var blob = Utilities.newBlob(Utilities.base64Decode(form.fileData.data), form.fileData.mimeType, form.fileData.name);
-       var folder = DriveApp.getFolderById(folderId);
-       var newFile = folder.createFile(blob);
-       newFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-       
-       // C. UPDATE SHEET DENGAN URL BARU
-       sheet.getRange(rowIdx, colFileIdx).setValue(newFile.getUrl());
-       
-       // D. HAPUS FILE LAMA (OVERWRITE LOGIC)
-       if (oldUrl && oldUrl !== '#' && oldUrl !== '-') {
-         try {
-           var oldFileId = oldUrl.match(/[-\w]{25,}/);
-           if (oldFileId) {
-             DriveApp.getFileById(oldFileId[0]).setTrashed(true); // Pindah ke Trash
-           }
-         } catch(e) {
-           // Abaikan jika file lama tidak ketemu/sudah terhapus, update tetap jalan
-           Logger.log("Gagal menghapus file lama: " + e.message);
-         }
-       }
-    }
-
-    // 3. UPDATE DATA TEKS
-    sheet.getRange(rowIdx, getColIdx(sheet, "Nomor SK")).setValue(form.nomorSK);
-    
-    // Format Tanggal (yyyy-mm-dd -> dd/MM/yyyy)
-    if(form.tanggalSK) {
-       var tglParts = form.tanggalSK.split('-'); 
-       if(tglParts.length === 3) {
-           var tglFormatted = tglParts[2] + '/' + tglParts[1] + '/' + tglParts[0]; 
-           sheet.getRange(rowIdx, getColIdx(sheet, "Tanggal SK")).setValue(tglFormatted);
-       }
-    }
-
-    sheet.getRange(rowIdx, getColIdx(sheet, "Status")).setValue(newStatus);
-    
-    // 4. TRACKING UPDATE
-    sheet.getRange(rowIdx, getColIdx(sheet, "Update")).setValue(new Date());
-    sheet.getRange(rowIdx, getColIdx(sheet, "User Update")).setValue(form.userUpdate);
-
-    return "Data berhasil diperbarui.";
-
-  } catch(e) { 
-    return "Error: " + e.message; 
-  }
-}
-
-// 3. PROSES HAPUS (SOFT DELETE)
-function processDeleteSK(form) {
-  try {
-    var ssId = "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4";
-    var ss = SpreadsheetApp.openById(ssId);
-    var sheetSource = ss.getSheetByName("Unggah_SK");
-    var sheetTrash = ss.getSheetByName("Trash_SK");
-    
-    // Folder Sampah
-    var trashFolderId = "1OB2Mxa_zvpYl7Vru9NEddYmBlU5SfYHL";
-    
-    var rowIdx = parseInt(form.rowIndex) + 1;
-    var rowData = sheetSource.getRange(rowIdx, 1, 1, sheetSource.getLastColumn()).getValues()[0];
-    
-    // 1. Pindahkan File
-    var docUrl = rowData[getColIdx(sheetSource, "Link File") - 1] || ""; // -1 karena array 0-based
-    if (docUrl) {
-      try {
-        var fileId = docUrl.match(/[-\w]{25,}/);
-        if (fileId) {
-          var file = DriveApp.getFileById(fileId[0]);
-          var trashFolder = DriveApp.getFolderById(trashFolderId);
-          file.moveTo(trashFolder);
-        }
-      } catch(e) { /* Abaikan jika file tidak ketemu */ }
-    }
-
-    // 2. Siapkan Data Trash (Tambah Info Hapus di Keterangan)
-    var deleteInfo = "Dihapus oleh " + form.userDelete + " pada " + new Date() + " karena " + form.alasan;
-    var colKetIdx = getColIdx(sheetSource, "Keterangan") - 1;
-    rowData[colKetIdx] = deleteInfo; // Timpa/Isi kolom keterangan
-
-    // 3. Tulis ke Trash & Hapus dari Source
-    sheetTrash.appendRow(rowData);
-    sheetSource.deleteRow(rowIdx);
-
-    return "Data berhasil dihapus (Soft Delete).";
-  } catch(e) { return "Error: " + e.message; }
-}
-
-// 4. PROSES VERIFIKASI (ADMIN)
-function processVerifySK(form) {
-  try {
-    var ssId = "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4";
-    var ss = SpreadsheetApp.openById(ssId);
-    var sheet = ss.getSheetByName("Unggah_SK");
-    var rowIdx = parseInt(form.rowIndex) + 1;
-
-    sheet.getRange(rowIdx, getColIdx(sheet, "Status")).setValue(form.statusVerif);
-    sheet.getRange(rowIdx, getColIdx(sheet, "Keterangan")).setValue(form.keterangan);
-    
-    // Tracking Verval
-    sheet.getRange(rowIdx, getColIdx(sheet, "Verval")).setValue(new Date());
-    sheet.getRange(rowIdx, getColIdx(sheet, "Verifikator")).setValue(form.verifikator);
-
-    return "Verifikasi berhasil disimpan.";
-  } catch(e) { return "Error: " + e.message; }
-}
-
-// Helper Cari Index Kolom (1-based untuk getRange)
-function getColIdx(sheet, name) {
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  var idx = headers.indexOf(name);
-  // Coba nama lain jika tidak ketemu
-  if (idx < 0 && name == "Nama Sekolah") idx = headers.indexOf("Nama SD");
-  if (idx < 0 && name == "Link File") idx = headers.indexOf("Dokumen");
-  return idx + 1;
+  } catch (e) { return { error: e.toString() }; }
 }

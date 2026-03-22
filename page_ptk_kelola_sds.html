@@ -1,0 +1,818 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-user-tie text-maroon mr-2"></i>Data PTK SD Swasta
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12"> 
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#ptksds_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="ptksds_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Halaman ini khusus untuk mengelola data PTK <b>SD Swasta</b>.</li>
+                  <li class="mb-1">Apabila ada data yang tidak sesuai, perbaiki melalui tombol <strong><i class="fas fa-pencil-alt text-warning"></i> Edit</strong> di kolom Aksi.</li>
+                  <li>Klik tombol <strong>+ Tambah Data</strong> untuk menambahkan PTK baru.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="ptksds_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <select id="ptksds_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="SEMUA">- Semua Status -</option>
+                </select>
+                
+                <select id="ptksds_filterJabatan" class="form-control form-control-sultan input-auto-width">
+                    <option value="SEMUA">- Semua Jabatan -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="ptksds_btnSync" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="ptksds_btnTambah" class="btn btn-maroon text-white font-weight-bold shadow-sm" disabled>
+                    <i class="fas fa-plus mr-1"></i> Tambah Data
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+          <div class="card-body p-3">
+            
+            <div id="ptksds_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold" id="ptksds_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ptksds_tableState" style="display: none;">
+                <table id="ptksds_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact w-100 text-nowrap">
+                   <thead class="bg-light">
+                      <tr>
+                         <th class="col-sticky-left bg-white border-right align-middle text-center" style="min-width: 170px; z-index: 5;">Aksi</th>
+                         <th class="text-left align-middle" style="min-width: 250px;">Nama ASN</th>
+                         <th class="text-left align-middle">Tempat, Tgl Lahir</th>
+                         <th class="text-left align-middle">NIK</th>
+                         <th class="text-left align-middle" style="min-width: 200px;">Pendidikan Terakhir</th>
+                         <th class="text-left align-middle">Status Pegawai</th>
+                         <th class="text-left align-middle">Jabatan</th>
+                         <th class="text-left align-middle" style="min-width: 150px;">Gol. Inpassing</th>
+                         <th class="text-left align-middle">NUPTK</th>
+                         <th class="text-left align-middle">Serdik</th>
+                         <th class="text-left align-middle">Dapodik</th>
+                         <th class="text-left align-middle">Tugas Tambahan</th>
+                         <th class="text-left align-middle" style="min-width: 150px;">Email</th>
+                         <th class="text-left align-middle">Diinput</th>
+                         <th class="text-left align-middle">Diedit</th>
+                      </tr>
+                   </thead>
+                   <tbody></tbody>
+                </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="ptksds_modalForm" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-maroon text-white" id="ptksds_headerModalForm">
+                <h5 class="modal-title font-weight-bold" id="ptksds_judulModalForm" style="color: #fff;"><i class="fas fa-user-plus mr-2"></i>Tambah Data PTK SDS</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="ptksds_formUtama" novalidate>
+                <div class="modal-body bg-light">
+                    <input type="hidden" id="ptksds_inputIdData" name="id">
+                    <input type="hidden" id="ptksds_inputMode" name="mode">
+                    <input type="hidden" id="ptksds_inputUserLogin" name="user_login">
+
+                    <div class="alert alert-light border-left-primary shadow-sm mb-3">
+                        <div class="form-group mb-0">
+                            <label class="form-label-sultan small font-weight-bold text-primary text-uppercase">PENEMPATAN / UNIT KERJA <span class="text-danger">*</span></label>
+                            <select id="ptksds_inputUnit" class="form-control form-control-sultan font-weight-bold text-dark" required>
+                                <option value="">- Memuat Data -</option>
+                            </select>
+                            <small id="ptksds_hintMutasiAdmin" class="text-muted mt-2 d-none">
+                                <i class="fas fa-info-circle text-info mr-1"></i> <b>Mode Admin:</b> Ubah sekolah untuk melakukan mutasi PTK SDS.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-white py-2"><h6 class="m-0 font-weight-bold text-maroon">I. IDENTITAS DIRI</h6></div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Gelar Depan</label>
+                                    <input type="text" name="gelar_depan" class="form-control form-control-sultan" placeholder="-">
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Nama Lengkap (Tanpa Gelar) <span class="text-danger">*</span></label>
+                                    <input type="text" id="ptksds_inputNama" name="nama_lengkap" class="form-control form-control-sultan" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Gelar Belakang</label>
+                                    <input type="text" name="gelar_belakang" class="form-control form-control-sultan" placeholder="-">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">NIY (Nomor Induk Yayasan)</label>
+                                    <input type="text" name="niy" class="form-control form-control-sultan" placeholder="(Opsional)">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">NIK (16 Digit) <span class="text-danger">*</span></label>
+                                    <input type="text" id="ptksds_inputNik" name="nik" class="form-control form-control-sultan" maxlength="16" minlength="16" pattern="\d*" title="Wajib 16 angka" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tempat Lahir <span class="text-danger">*</span></label>
+                                    <input type="text" name="tmp_lahir" class="form-control form-control-sultan" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tanggal Lahir <span class="text-danger">*</span></label>
+                                    <input type="date" name="tgl_lahir" class="form-control form-control-sultan" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">L/P <span class="text-danger">*</span></label>
+                                    <select name="lp" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option><option value="L">L</option><option value="P">P</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Agama <span class="text-danger">*</span></label>
+                                    <select name="agama" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option>
+                                        <option value="Islam">Islam</option><option value="Kristen">Kristen</option>
+                                        <option value="Katolik">Katolik</option><option value="Hindu">Hindu</option>
+                                        <option value="Buddha">Buddha</option><option value="Konghucu">Konghucu</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Alamat Lengkap <span class="text-danger">*</span></label>
+                                    <textarea name="alamat" class="form-control form-control-sultan" rows="2" placeholder="Jalan, RT/RW, Desa, Kecamatan..." style="resize:none;" required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Pendidikan Terakhir <span class="text-danger">*</span></label>
+                                    <select name="pendidikan" id="ptksds_selPendidikan" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option>
+                                        <option value="SD/MI Sederajat">SD/MI Sederajat</option><option value="SMP/MTs Sederajat">SMP/MTs Sederajat</option>
+                                        <option value="SMA/SMK Sederajat">SMA/SMK Sederajat</option>
+                                        <option value="D1">D1</option><option value="D2">D2</option><option value="D3">D3</option><option value="D4">D4</option>
+                                        <option value="S1">S1</option><option value="S2">S2</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-7 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Jurusan <span class="text-danger">*</span></label>
+                                    <input type="text" name="jurusan" id="ptksds_inputJurusan" class="form-control form-control-sultan" required>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">LULUS <span class="text-danger">*</span></label>
+                                    <input type="text" name="thn_lulus" class="form-control form-control-sultan" maxlength="4" pattern="^(19|20)\d{2}$" title="Dimulai 19xx atau 20xx" placeholder="Thn Lulus" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">NUPTK (16 Digit / - )</label>
+                                    <input type="text" name="nuptk" class="form-control form-control-sultan" placeholder="-">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">No. HP / WA <span class="text-danger">*</span></label>
+                                    <input type="text" name="hp" class="form-control form-control-sultan" required>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Alamat Email <span class="text-danger">*</span></label>
+                                    <input type="email" name="email" class="form-control form-control-sultan" placeholder="email@gmail.com" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm mb-3">
+                        <div class="card-header bg-white py-2"><h6 class="m-0 font-weight-bold text-maroon">II. KEPEGAWAIAN</h6></div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Status Pegawai <span class="text-danger">*</span></label>
+                                    <select name="status_peg" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option>
+                                        <option value="GTY">GTY (Guru Tetap Yayasan)</option>
+                                        <option value="PTY">PTY (Pegawai Tetap Yayasan)</option>
+                                        <option value="GTT">GTT (Guru Tidak Tetap)</option>
+                                        <option value="PTT">PTT (Pegawai Tidak Tetap)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Jabatan <span class="text-danger">*</span></label>
+                                    <select name="jabatan" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option>
+                                        <option value="Kepala Sekolah">Kepala Sekolah</option>
+                                        <option value="Guru Kelas">Guru Kelas</option>
+                                        <option value="Guru PJOK">Guru PJOK</option>
+                                        <option value="Guru PAI">Guru PAI</option>
+                                        <option value="Guru Bahasa Inggris">Guru Bahasa Inggris</option>
+                                        <option value="Guru Mapel Lainnya">Guru Mapel Lainnya</option>
+                                        <option value="Penjaga Sekolah">Penjaga Sekolah</option>
+                                        <option value="Tenaga Administrasi">Tenaga Administrasi</option>
+                                        <option value="Tenaga Perpustakaan">Tenaga Perpustakaan</option>
+                                        <option value="Tendik Lainnya">Tendik Lainnya</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">TMT Jabatan <span class="text-danger">*</span></label>
+                                    <input type="date" name="tmt_jabatan" class="form-control form-control-sultan" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Golongan Inpassing</label>
+                                    <select name="inpassing" class="form-control form-control-sultan">
+                                        <option value="">-Tidak Ada-</option>
+                                        <option value="III/a">III/a</option><option value="III/b">III/b</option>
+                                        <option value="III/c">III/c</option><option value="III/d">III/d</option>
+                                        <option value="IV/a">IV/a</option><option value="IV/b">IV/b</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">TMT Inpassing</label>
+                                    <input type="date" name="tmt_inpassing" class="form-control form-control-sultan">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm mb-0">
+                        <div class="card-header bg-white py-2"><h6 class="m-0 font-weight-bold text-maroon">III. DATA TAMBAHAN</h6></div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Status Serdik <span class="text-danger">*</span></label>
+                                    <select name="serdik" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option>
+                                        <option value="Sudah">Sudah</option>
+                                        <option value="Belum">Belum</option>
+                                        <option value="Sedang PPG">Sedang PPG</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Status Dapodik <span class="text-danger">*</span></label>
+                                    <select name="dapodik" class="form-control form-control-sultan" required>
+                                        <option value="">-Pilih-</option>
+                                        <option value="Sudah">Sudah</option>
+                                        <option value="Belum">Belum</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tugas Tambahan</label>
+                                    <input type="text" name="tugtam" class="form-control form-control-sultan" placeholder="-">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-white justify-content-between p-3">
+                    <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+                    <button type="submit" id="ptksds_btnSimpanForm" class="btn btn-maroon shadow-sm font-weight-bold px-4"><i class="fas fa-save mr-1"></i> Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ptksds_modalHapus" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Konfirmasi Hapus</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            
+            <form id="ptksds_formHapus" novalidate>
+                <div class="modal-body bg-white p-4">
+                    <input type="hidden" id="ptksds_hapusIdData">
+                    
+                    <div class="alert alert-warning text-dark border-warning shadow-sm mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-exclamation-triangle mt-1 mr-3 fa-lg"></i>
+                            <div>
+                                <strong>Peringatan!</strong><br>
+                                Anda akan menghapus data PTK SDS atas nama:<br>
+                                <span id="ptksds_hapusNamaView" class="font-weight-bold text-uppercase" style="font-size: 1.1em; color: #000;">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label-sultan small font-weight-bold text-uppercase text-muted">Alasan Penghapusan <span class="text-danger">*</span></label>
+                        <textarea id="ptksds_hapusAlasan" class="form-control form-control-sultan" rows="3" placeholder="Contoh: Resign, Pindah yayasan, dll..." style="resize:none;" required></textarea>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label class="form-label-sultan small font-weight-bold text-uppercase text-muted">Kode Keamanan <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0"><i class="fas fa-key text-danger"></i></span>
+                            </div>
+                            <input type="password" id="ptksds_hapusInputKode" class="form-control form-control-sultan border-left-0 text-center font-weight-bold letter-spacing-1" placeholder="Kode hapus..." required autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer bg-light justify-content-between p-3">
+                    <button type="button" class="btn btn-default border shadow-sm px-4 font-weight-bold" data-dismiss="modal">Batal</button>
+                    <button type="submit" id="ptksds_btnEksekusiHapus" class="btn btn-danger shadow-sm px-4 font-weight-bold"><i class="fas fa-trash mr-1"></i> HAPUS DATA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ======================================================================
+// BAB I: ISOLASI VARIABEL GLOBAL & DELEGASI EVENT JQUERY
+// ======================================================================
+var PTKSDS_DATA_MASTER = {}; 
+var PTKSDS_CACHE_DATA = []; 
+var PTKSDS_TABEL_INSTANCE = null; 
+
+var PTKSDS_USER_AKTIF = "";
+var PTKSDS_IS_ADMIN = false;
+var PTKSDS_UNIT_TERKUNCI = ""; 
+var PTKSDS_USER_NPSN = "";
+var PTKSDS_MAP_UNIT_NPSN = {}; 
+
+$(document).ready(function() {
+    try {
+        var user = getSesiUser() || {};
+        PTKSDS_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        PTKSDS_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        PTKSDS_USER_NPSN = user.npsn || user.username || ""; 
+        $('#ptksds_inputUserLogin').val(PTKSDS_USER_AKTIF);
+    } catch(e) { PTKSDS_USER_NPSN = ""; PTKSDS_IS_ADMIN = false; }
+
+    ptksds_initDataTables(true);
+    ptksds_validasiAksesUser(); 
+
+    // VAKSIN DELEGASI EVENT JQUERY (Pengganti onchange/onclick HTML)
+    $(document).on('click', '#ptksds_btnSync', ptksds_tarikDataServer);
+    $(document).on('click', '#ptksds_btnTambah', ptksds_bukaModalTambah);
+    
+    $(document).on('change', '#ptksds_filterUnit, #ptksds_filterStatus, #ptksds_filterJabatan', ptksds_terapkanFilterLokal);
+    $(document).on('change', '#ptksds_selPendidikan', ptksds_cekJurusan);
+    
+    $(document).on('input', '#ptksds_inputNama', function() { this.value = this.value.toUpperCase(); });
+    $(document).on('input', '#ptksds_inputNik', function() { this.value = this.value.replace(/[^0-9]/g, ''); });
+
+    $(document).on('submit', '#ptksds_formUtama', ptksds_submitFormUtama);
+    $(document).on('submit', '#ptksds_formHapus', ptksds_submitHapusPermanen);
+});
+
+// =================================================================
+// 2. RENDERING AWAL TABEL (BAB VII)
+// =================================================================
+function ptksds_updateTabelKosong(htmlContent) {
+    if(PTKSDS_TABEL_INSTANCE) {
+        $('#ptksds_tableState').show();
+        $('#ptksds_loadingState').hide();
+        PTKSDS_TABEL_INSTANCE.clear().draw();
+        var emptyRow = $('#ptksds_tabelUtama tbody tr td.dataTables_empty');
+        if (emptyRow.length > 0) { emptyRow.html(htmlContent); }
+    }
+}
+
+function ptksds_initDataTables(isEmpty = false) {
+    var msg = isEmpty ? '<div class="p-4 text-center text-muted font-weight-bold"><i class="fas fa-spinner fa-spin mr-2 text-maroon"></i>Mempersiapkan Akses...</div>' : '<div class="p-4 text-center text-muted"><i class="fas fa-inbox fa-3x mb-3 opacity-50"></i><br>Silakan klik tombol <i class="fas fa-sync-alt"></i> untuk memuat data.</div>';
+    
+    if ($.fn.DataTable.isDataTable('#ptksds_tabelUtama')) { $('#ptksds_tabelUtama').DataTable().clear().destroy(); }
+
+    PTKSDS_TABEL_INSTANCE = $('#ptksds_tabelUtama').DataTable({
+        "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+        "deferRender": true, 
+        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        "columnDefs": [ 
+            { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-center" }, 
+            { "targets": [1,2,3,4,5,6,7,8,9,10,11,12,13,14], "className": "text-left align-middle" } 
+        ],
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": msg }
+    });
+}
+
+// =================================================================
+// 3. GATEKEEPER & FETCH
+// =================================================================
+function ptksds_validasiAksesUser() {
+    if (PTKSDS_IS_ADMIN) {
+        $('#ptksds_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#ptksds_btnSync, #ptksds_btnTambah').prop('disabled', false);
+        ptksds_tarikDataServer(); 
+    } else {
+        if (!PTKSDS_USER_NPSN) {
+            $('#ptksds_filterUnit').empty().append('<option value="">AKSES DITOLAK (NPSN KOSONG)</option>');
+            ptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-ban fa-2x mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</div>');
+            return;
+        }
+        google.script.run.withSuccessHandler(function(resUnit) {
+            var dataUnit = JSON.parse(resUnit);
+            if (dataUnit.error) {
+                $('#ptksds_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                ptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>' + ptksds_escapeHtml(dataUnit.error) + '</div>');
+                return;
+            }
+            PTKSDS_UNIT_TERKUNCI = dataUnit.unitKerja;
+            $('#ptksds_filterUnit').empty().append('<option value="' + ptksds_escapeHtml(PTKSDS_UNIT_TERKUNCI) + '">' + ptksds_escapeHtml(PTKSDS_UNIT_TERKUNCI) + '</option>').prop('disabled', true);
+            $('#ptksds_btnSync, #ptksds_btnTambah').prop('disabled', false);
+            ptksds_tarikDataServer();
+        }).withFailureHandler(function(err) {
+            $('#ptksds_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+            ptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-wifi fa-2x mb-2"></i><br>Koneksi Terputus: ' + ptksds_escapeHtml(err.message) + '</div>');
+        }).getUnitKerjaByNpsnPTK(PTKSDS_USER_NPSN); 
+    }
+}
+
+function ptksds_tarikDataServer() {
+    PTKSDS_CACHE_DATA = []; 
+    var btn = $('#ptksds_btnSync');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    $('#ptksds_tableState').hide();
+    $('#ptksds_loadingText').html('Mengambil data SDS dari server...');
+    $('#ptksds_loadingState').show();
+
+    google.script.run.withSuccessHandler(function(jsonStr) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        try {
+            var res = JSON.parse(jsonStr);
+            if (res.error) { ptksds_updateTabelKosong('<div class="text-danger font-weight-bold py-3"><i class="fas fa-exclamation-triangle fa-2x mb-3"></i><br>' + ptksds_escapeHtml(res.error) + '</div>'); return; }
+            PTKSDS_CACHE_DATA = res;
+            ptksds_populateFilterOptions(); 
+            ptksds_terapkanFilterLokal(); 
+            
+            $('#ptksds_loadingState').hide();
+            $('#ptksds_tableState').show();
+        } catch(e) { ptksds_updateTabelKosong('<div class="text-danger">Format JSON gagal diparsing.</div>'); }
+    }).withFailureHandler(function(e){
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-danger"></i>');
+        ptksds_updateTabelKosong('<div class="p-4 text-center text-danger font-weight-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Koneksi Server Terputus.</div>');
+    }).getDataPTKSDS(); 
+}
+
+// =================================================================
+// 4. VAKSIN FILTER DROPDOWN & LOGIKA PENCARIAN MUTLAK
+// =================================================================
+function ptksds_populateFilterOptions() {
+    var uniqueUnits = new Set();
+    var uniqueStatus = new Set();
+    var uniqueJabatan = new Set();
+    PTKSDS_MAP_UNIT_NPSN = {}; 
+    
+    PTKSDS_CACHE_DATA.forEach(function(row) {
+        var u = String(row.unit || "").trim();
+        var s = String(row.status_peg || "").trim();
+        var j = String(row.jabatan || "").trim();
+        var n = String(row.npsn || "").trim();
+        
+        if(u) { uniqueUnits.add(u); if(n) PTKSDS_MAP_UNIT_NPSN[u] = n; }
+        if(s) uniqueStatus.add(s);
+        if(j) uniqueJabatan.add(j);
+    });
+
+    if (PTKSDS_IS_ADMIN) {
+        var curUnit = $('#ptksds_filterUnit').val();
+        var $selUnit = $('#ptksds_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+        Array.from(uniqueUnits).sort().forEach(function(u) { $selUnit.append($('<option>', {value: u, text: u})); });
+        if(curUnit && uniqueUnits.has(curUnit)) $selUnit.val(curUnit);
+    }
+
+    var curStat = $('#ptksds_filterStatus').val();
+    var $selStatus = $('#ptksds_filterStatus').empty().append('<option value="SEMUA">- Semua Status -</option>');
+    Array.from(uniqueStatus).sort().forEach(function(s) { $selStatus.append($('<option>', {value: s, text: s})); });
+    if(curStat && uniqueStatus.has(curStat)) $selStatus.val(curStat);
+
+    var curJab = $('#ptksds_filterJabatan').val();
+    var $selJabatan = $('#ptksds_filterJabatan').empty().append('<option value="SEMUA">- Semua Jabatan -</option>');
+    Array.from(uniqueJabatan).sort().forEach(function(j) { $selJabatan.append($('<option>', {value: j, text: j})); });
+    if(curJab && uniqueJabatan.has(curJab)) $selJabatan.val(curJab);
+}
+
+function ptksds_terapkanFilterLokal() {
+    var fStatus = $('#ptksds_filterStatus').val() || "SEMUA";
+    var fJabatan = $('#ptksds_filterJabatan').val() || "SEMUA";
+    var tAdminUnit = PTKSDS_IS_ADMIN ? ($('#ptksds_filterUnit').val() || "SEMUA").toUpperCase() : "";
+    var tUnitUser  = String(PTKSDS_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var clStatus = ptksds_cleanString(fStatus);
+    var clJabatan = ptksds_cleanString(fJabatan);
+
+    var hasil = PTKSDS_CACHE_DATA.filter(function(row) {
+        var rUnit = ptksds_cleanString(row.unit);
+        var rStatus = ptksds_cleanString(row.status_peg);
+        var rJabatan = ptksds_cleanString(row.jabatan);
+
+        var passUnit = false;
+        if (PTKSDS_IS_ADMIN) { passUnit = (tAdminUnit === "SEMUA" || rUnit === tAdminUnit); } 
+        else { passUnit = (rUnit === tUnitUser); }
+
+        var passStatus = (clStatus === "SEMUA") || (rStatus === clStatus);
+        var passJabatan = (clJabatan === "SEMUA") || (rJabatan === clJabatan);
+        
+        return passUnit && passStatus && passJabatan;
+    });
+
+    ptksds_renderTabel(hasil);
+}
+
+function ptksds_renderTabel(data) {
+    var dtArray = []; PTKSDS_DATA_MASTER = {}; 
+
+    if (!data || data.length === 0) {
+        ptksds_updateTabelKosong("<div class='py-5 text-muted'><i class='fas fa-clipboard-list fa-3x mb-3 text-light opacity-50'></i><br>Tidak ditemukan data PTK SDS untuk filter tersebut.</div>");
+        return;
+    }
+
+    data.sort(function(a, b) { var nameA = (a.nama_lengkap || "").toUpperCase(); var nameB = (b.nama_lengkap || "").toUpperCase(); return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0; });
+
+    data.forEach(function(row) {
+        PTKSDS_DATA_MASTER[row.id] = row; 
+        
+        var tglLahirIndo = ptksds_formatTanggalIndo(row.tgl_lahir);
+        var ttl = '<span class="font-weight-bold text-dark">' + (row.tmp_lahir || '-') + '</span><br><small class="text-muted">' + tglLahirIndo + '</small>';
+        var nikRaw = String(row.nik || "-"); var nikMask = nikRaw.length > 6 ? nikRaw.substring(0, nikRaw.length - 6) + "******" : nikRaw;
+        
+        var pend = '<span class="font-weight-bold text-dark">' + (row.pendidikan || '-') + '</span>';
+        if(row.jurusan) pend += '<br>' + ptksds_escapeHtml(row.jurusan); 
+        if(row.thn_lulus) pend += '<br><small class="text-muted">Lulus: ' + ptksds_escapeHtml(row.thn_lulus) + '</small>';
+        
+        var jab = (row.jabatan || '-'); if(row.tmt_jabatan) jab += '<br><small class="text-muted">TMT: ' + ptksds_formatTanggalIndo(row.tmt_jabatan) + '</small>';
+        var inpass = (row.inpassing || '-'); if(row.tmt_inpassing) inpass += '<br><small class="text-muted">TMT: ' + ptksds_formatTanggalIndo(row.tmt_inpassing) + '</small>';
+
+        // BAB III: Tombol Aksi Mutlak (Teks lengkap + Icon)
+        var titleEdit = PTKSDS_IS_ADMIN ? "Edit / Mutasi" : "Edit Data";
+        var btnEdit = '<button type="button" class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm" onclick="ptksds_bukaModalEdit(\'' + row.id + '\')" title="' + titleEdit + '"><i class="fas fa-pencil-alt mr-1"></i> Edit</button>';
+        var btnHapus = '<button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm" onclick="ptksds_bukaModalHapus(\'' + row.id + '\', \'' + ptksds_escapeJs(row.nama_lengkap) + '\')" title="Hapus Data"><i class="fas fa-trash-alt mr-1"></i> Hapus</button>';
+        var btnAksi = '<div class="d-flex flex-wrap justify-content-center" style="gap:5px;">' + btnEdit + ' ' + btnHapus + '</div>';
+
+        var uiNama = '<div class="font-weight-bold text-dark text-nowrap">' + ptksds_escapeHtml(row.nama_lengkap) + '</div><div class="small text-muted text-nowrap">' + (ptksds_escapeHtml(row.niy) || '-') + '</div>';
+        if(PTKSDS_IS_ADMIN) uiNama += '<div class="small text-danger font-weight-bold mt-1">' + (ptksds_escapeHtml(row.unit) || '-') + '</div>';
+
+        var metaInput = '<div style="line-height:1.2; font-size:11px;" class="text-left"><span class="d-block font-weight-bold">' + (row.diinput||'-') + '</span><span class="text-muted">' + (row.user_input||'-') + '</span></div>';
+        var metaEdit  = '<div style="line-height:1.2; font-size:11px;" class="text-left"><span class="d-block font-weight-bold">' + (row.diedit||'-') + '</span><span class="text-muted">' + (row.user_edit||'-') + '</span></div>';
+        var uiEmail = '<div class="text-wrap small text-left text-primary font-weight-bold">' + (ptksds_escapeHtml(row.email) || '-') + '</div>';
+
+        // PUSH 15 KOLOM (Tepat sesuai Header Table SDS)
+        dtArray.push([
+            btnAksi, uiNama, ttl, '<span title="NIK Disensor" class="text-muted text-left">' + nikMask + '</span>', 
+            '<div class="small text-left">' + pend + '</div>', (row.status_peg || '-'), 
+            '<div class="small text-left">' + jab + '</div>', '<div class="small text-left">' + inpass + '</div>',
+            (row.nuptk || '-'), (row.serdik || '-'), (row.dapodik || '-'), (row.tugtam || '-'), uiEmail, metaInput, metaEdit
+        ]);
+    });
+
+    if (PTKSDS_TABEL_INSTANCE) {
+        PTKSDS_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        setTimeout(function(){ PTKSDS_TABEL_INSTANCE.columns.adjust(); }, 300);
+    }
+}
+
+// =================================================================
+// 5. HELPER LOKAL (KEBAL BUG)
+// =================================================================
+function ptksds_cekJurusan() {
+    var pend = $('#ptksds_selPendidikan').val();
+    var inputJur = $('#ptksds_inputJurusan');
+    if (pend === 'SD/MI Sederajat' || pend === 'SMP/MTs Sederajat') {
+        inputJur.val('-').prop('readonly', true).addClass('bg-light');
+    } else {
+        inputJur.prop('readonly', false).removeClass('bg-light');
+        if(inputJur.val() === '-') inputJur.val('');
+    }
+}
+
+function ptksds_cleanString(str) { if (!str) return ""; return String(str).toUpperCase().replace(/\s+/g, ' ').trim(); }
+function ptksds_escapeHtml(text){if(!text)return"";return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function ptksds_escapeJs(str) { if (!str) return ""; return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, " "); }
+
+function ptksds_formatTanggalIndo(strDate) {
+    if (!strDate || strDate === '-' || strDate === '') return '-';
+    var dateObj;
+    if (strDate instanceof Date) { dateObj = strDate; } 
+    else {
+        var cleanStr = String(strDate).trim().replace(/'/g, ''); 
+        var parts = cleanStr.match(/^(\d{4})[\-\/](\d{1,2})[\-\/](\d{1,2})$/); 
+        if (parts) { dateObj = new Date(parts[1], parts[2] - 1, parts[3]); } 
+        else {
+            parts = cleanStr.match(/^(\d{1,2})[\-\/](\d{1,2})[\-\/](\d{4})$/);
+            if (parts) { dateObj = new Date(parts[3], parts[2] - 1, parts[1]); } 
+            else { dateObj = new Date(cleanStr); }
+        }
+    }
+    if (isNaN(dateObj.getTime())) return strDate; 
+    var months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    return dateObj.getDate() + ' ' + months[dateObj.getMonth()] + ' ' + dateObj.getFullYear();
+}
+
+// =================================================================
+// 6. CRUD: TAMBAH, EDIT & MUTASI, HAPUS (MODAL BAB V)
+// =================================================================
+function ptksds_bukaModalTambah() {
+    $('#ptksds_formUtama')[0].reset();
+    $('#ptksds_formUtama').removeClass('was-validated');
+    $('#ptksds_inputMode').val('insert'); $('#ptksds_inputIdData').val('');
+    
+    // Kepatuhan Warna Modal BAB V
+    $('#ptksds_headerModalForm').removeClass('bg-warning').addClass('bg-maroon');
+    $('#ptksds_judulModalForm').removeClass('text-dark').addClass('text-white').html('<i class="fas fa-user-plus mr-2"></i>Tambah Data PTK SDS');
+    $('#ptksds_btnSimpanForm').removeClass('btn-warning text-dark').addClass('btn-maroon text-white').html('<i class="fas fa-save mr-1"></i> Simpan');
+    
+    if (PTKSDS_IS_ADMIN) {
+        var $selUnit = $('#ptksds_inputUnit').empty().append('<option value="">- Pilih Unit Kerja -</option>');
+        Object.keys(PTKSDS_MAP_UNIT_NPSN).sort().forEach(function(u) { $selUnit.append($('<option>', {value: u, text: u})); });
+        $selUnit.prop('disabled', false);
+        $('#ptksds_hintMutasiAdmin').removeClass('d-none');
+    } else {
+        $('#ptksds_inputUnit').html('<option value="' + ptksds_escapeHtml(PTKSDS_UNIT_TERKUNCI) + '">' + ptksds_escapeHtml(PTKSDS_UNIT_TERKUNCI) + '</option>').prop('disabled', true);
+        $('#ptksds_hintMutasiAdmin').addClass('d-none');
+    }
+
+    ptksds_cekJurusan(); 
+    $('#ptksds_modalForm').modal('show');
+}
+
+function ptksds_bukaModalEdit(id) {
+    var row = PTKSDS_DATA_MASTER[id]; if(!row) return;
+    $('#ptksds_formUtama')[0].reset();
+    $('#ptksds_formUtama').removeClass('was-validated');
+    $('#ptksds_inputMode').val('update'); $('#ptksds_inputIdData').val(row.id);
+    
+    // Kepatuhan Warna Modal Edit BAB V
+    $('#ptksds_headerModalForm').removeClass('bg-maroon').addClass('bg-warning');
+    var labelJudul = PTKSDS_IS_ADMIN ? '<i class="fas fa-exchange-alt mr-2"></i>Edit / Mutasi PTK SDS' : '<i class="fas fa-user-edit mr-2"></i>Edit Data PTK SDS';
+    $('#ptksds_judulModalForm').removeClass('text-white').addClass('text-dark').html(labelJudul);
+    $('#ptksds_btnSimpanForm').removeClass('btn-maroon text-white').addClass('btn-warning text-dark').html('<i class="fas fa-save mr-1"></i> Update Data');
+
+    if (PTKSDS_IS_ADMIN) {
+        var $selUnit = $('#ptksds_inputUnit').empty().append('<option value="">- Pilih Unit Kerja -</option>');
+        Object.keys(PTKSDS_MAP_UNIT_NPSN).sort().forEach(function(u) { $selUnit.append($('<option>', {value: u, text: u})); });
+        $selUnit.prop('disabled', false).val(row.unit);
+        $('#ptksds_hintMutasiAdmin').removeClass('d-none');
+    } else {
+        $('#ptksds_inputUnit').html('<option value="' + ptksds_escapeHtml(row.unit) + '">' + ptksds_escapeHtml(row.unit) + '</option>').prop('disabled', true);
+        $('#ptksds_hintMutasiAdmin').addClass('d-none');
+    }
+
+    $('[name="gelar_depan"]').val(row.gelar_depan);
+    $('[name="nama_lengkap"]').val(row.nama_no_gelar);
+    $('[name="gelar_belakang"]').val(row.gelar_belakang);
+    $('[name="niy"]').val(row.niy);
+    $('[name="nik"]').val(row.nik);
+    $('[name="tmp_lahir"]').val(row.tmp_lahir);
+    $('[name="tgl_lahir"]').val(row.tgl_lahir); 
+    $('[name="lp"]').val(row.lp);
+    $('[name="agama"]').val(row.agama);
+    $('[name="alamat"]').val(row.alamat);
+    $('[name="pendidikan"]').val(row.pendidikan);
+    $('[name="jurusan"]').val(row.jurusan);
+    $('[name="thn_lulus"]').val(row.thn_lulus);
+    $('[name="nuptk"]').val(row.nuptk);
+    $('[name="hp"]').val(row.hp);
+    
+    if(row.email && row.email !== '-') $('[name="email"]').val(row.email); 
+    else $('[name="email"]').val('');
+    
+    $('[name="status_peg"]').val(row.status_peg);
+    $('[name="jabatan"]').val(row.jabatan);
+    $('[name="tmt_jabatan"]').val(row.tmt_jabatan);
+    $('[name="inpassing"]').val(row.inpassing);
+    $('[name="tmt_inpassing"]').val(row.tmt_inpassing);
+    $('[name="serdik"]').val(row.serdik);
+    $('[name="dapodik"]').val(row.dapodik);
+    $('[name="tugtam"]').val(row.tugtam);
+    
+    ptksds_cekJurusan(); 
+    $('#ptksds_modalForm').modal('show');
+}
+
+function ptksds_submitFormUtama(e) {
+    e.preventDefault();
+    var formAktif = $('#ptksds_formUtama');
+    if (!formAktif[0].checkValidity()) {
+        formAktif.addClass('was-validated');
+        Sultan.alert('warning', 'Perhatian', 'Harap lengkapi semua isian wajib!');
+        return;
+    }
+
+    var btn = $('#ptksds_btnSimpanForm'); var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Proses...');
+    
+    var formData = {};
+    $.each(formAktif.serializeArray(), function(_, kv) { formData[kv.name] = kv.value; });
+    
+    var selUnit = $('#ptksds_inputUnit').val();
+    formData['unit_kerja'] = selUnit; 
+    
+    if (PTKSDS_IS_ADMIN) { formData['npsn_baru'] = PTKSDS_MAP_UNIT_NPSN[selUnit] || PTKSDS_USER_NPSN; } 
+    else { formData['npsn_baru'] = PTKSDS_USER_NPSN; }
+
+    var mode = $('#ptksds_inputMode').val();
+
+    var cbSuccess = function(res){
+        btn.prop('disabled', false).html(txt);
+        if(res === 'Sukses') {
+            $('#ptksds_modalForm').modal('hide');
+            Sultan.notif.sukses('Data PTK berhasil disimpan.');
+            ptksds_tarikDataServer(); 
+        } else { Sultan.alert('error', 'Gagal', res); }
+    };
+    var cbFail = function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Koneksi Terputus', err.message); };
+
+    if (mode === 'insert') { google.script.run.withSuccessHandler(cbSuccess).withFailureHandler(cbFail).insertDataPTKSDS(formData); } 
+    else { google.script.run.withSuccessHandler(cbSuccess).withFailureHandler(cbFail).updateDataPTKSDS(formData); } 
+}
+
+function ptksds_bukaModalHapus(id, nama) {
+    $('#ptksds_hapusIdData').val(id); $('#ptksds_hapusNamaView').text(nama);
+    $('#ptksds_hapusAlasan').val(''); $('#ptksds_hapusInputKode').val('');
+    $('#ptksds_formHapus').removeClass('was-validated');
+    $('#ptksds_modalHapus').modal('show');
+}
+
+function ptksds_submitHapusPermanen(e) {
+    e.preventDefault();
+    var formHapus = $('#ptksds_formHapus');
+    if (!formHapus[0].checkValidity()) {
+        formHapus.addClass('was-validated');
+        return;
+    }
+
+    var id = $('#ptksds_hapusIdData').val(); var alasan = $('#ptksds_hapusAlasan').val(); var kode = $('#ptksds_hapusInputKode').val();
+    
+    var today = new Date(); var dd = String(today.getDate()).padStart(2, '0'); var mm = String(today.getMonth() + 1).padStart(2, '0'); var yyyy = today.getFullYear();
+    var correctCode = yyyy + mm + dd;
+
+    if (kode !== correctCode) { Sultan.alert('error', 'Gagal', 'Kode Keamanan salah!'); return; }
+
+    var btn = $('#ptksds_btnEksekusiHapus'); var oldText = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menghapus...');
+
+    google.script.run
+        .withSuccessHandler(function(res){
+            btn.prop('disabled', false).html(oldText);
+            if(res === 'Sukses') {
+                $('#ptksds_modalHapus').modal('hide');
+                Sultan.notif.sukses('Data berhasil dipindah ke arsip non-aktif.');
+                ptksds_tarikDataServer(); 
+            } else { Sultan.alert('error', 'Gagal Hapus', res); }
+        })
+        .withFailureHandler(function(err){ btn.prop('disabled', false).html(oldText); Sultan.alert('error', 'Error Server', err.message); })
+        .deleteDataPTKSDS(id, alasan, PTKSDS_USER_AKTIF); 
+}
+</script>

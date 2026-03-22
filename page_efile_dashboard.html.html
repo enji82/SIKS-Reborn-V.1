@@ -1,0 +1,446 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-chart-pie text-maroon mr-2"></i>Dashboard E-File
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan p-3 mb-4 shadow-sm border-0">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="efiledash_filterKategori" class="form-control form-control-sultan input-auto-width min-w-200 border-primary font-weight-bold text-primary">
+                    <option value="">- Memuat Kategori... -</option>
+                </select>
+
+                <select id="efiledash_filterTahun" class="form-control form-control-sultan input-auto-width min-w-150 border-maroon">
+                    <option value="SEMUA">- Semua Tahun -</option>
+                </select>
+
+                <div id="efiledash_filterContainer" style="display: none;" class="d-flex align-items-center">
+                    <select id="efiledash_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                        <option value="">- Memvalidasi Akses... -</option>
+                    </select>
+                </div>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="efiledash_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data Kategori Ini">
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="efiledash_loadingState">
+            <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 40vh;">
+                <div class="sultan-loading-container text-center">
+                    <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                    <h6 class="text-muted font-weight-bold mt-3" id="efiledash_loadingText">Mempersiapkan Engine Dasbor...</h6>
+                </div>
+            </div>
+        </div>
+
+        <div id="efiledash_dashboardState" style="display: none;">
+            
+            <div class="row mb-3">
+                <div class="col-md-4 col-sm-12 mb-3 mb-md-0">
+                    <div class="card-sultan h-100 bg-info text-white shadow-sm border-0 position-relative overflow-hidden p-3">
+                        <div class="position-absolute" style="right: -10px; top: -10px; opacity: 0.2; transform: rotate(-15deg);">
+                            <i class="fas fa-users fa-5x"></i>
+                        </div>
+                        <h6 class="font-weight-bold text-uppercase mb-1" style="letter-spacing: 1px; font-size: 13px;">Target Sasaran Pegawai</h6>
+                        <h2 class="font-weight-bold mb-0" id="efiledash_cardTotalAsn">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12 mb-3 mb-md-0">
+                    <div class="card-sultan h-100 bg-success text-white shadow-sm border-0 position-relative overflow-hidden p-3">
+                        <div class="position-absolute" style="right: -10px; top: -10px; opacity: 0.2; transform: rotate(-15deg);">
+                            <i class="fas fa-check-circle fa-5x"></i>
+                        </div>
+                        <h6 class="font-weight-bold text-uppercase mb-1" style="letter-spacing: 1px; font-size: 13px;">Sudah Unggah Berkas</h6>
+                        <h2 class="font-weight-bold mb-0" id="efiledash_cardSudah">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="card-sultan h-100 bg-danger text-white shadow-sm border-0 position-relative overflow-hidden p-3">
+                        <div class="position-absolute" style="right: -10px; top: -10px; opacity: 0.2; transform: rotate(-15deg);">
+                            <i class="fas fa-times-circle fa-5x"></i>
+                        </div>
+                        <h6 class="font-weight-bold text-uppercase mb-1" style="letter-spacing: 1px; font-size: 13px;">Belum Unggah Berkas</h6>
+                        <h2 class="font-weight-bold mb-0" id="efiledash_cardBelum">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card-sultan h-100 d-flex flex-column">
+                        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-maroon"><i class="fas fa-building mr-2"></i>Rekapitulasi per Unit Kerja</h6>
+                            <span class="badge badge-primary px-3 py-1" id="efiledash_lblTableKategori">Loading...</span>
+                        </div>
+                        <div class="card-body p-3 flex-grow-1">
+                            <table id="efiledash_tabelRekap" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="col-sticky-left border-right align-middle text-left" style="z-index: 5; min-width: 200px;">Unit Kerja</th>
+                                        <th class="align-middle text-center">Jml Pegawai</th>
+                                        <th class="align-middle text-center">Sudah Unggah</th>
+                                        <th class="align-middle text-center text-danger">Belum Unggah</th>
+                                        <th class="align-middle text-center">Capaian (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card-sultan h-100 d-flex flex-column border-danger" style="border-width: 2px;">
+                        <div class="card-header bg-danger text-white py-2 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold" style="font-size: 14px;"><i class="fas fa-user-times mr-2"></i>Daftar Belum Unggah</h6>
+                            <button type="button" id="efiledash_btnSalinWa" class="btn btn-xs btn-light text-danger font-weight-bold shadow-sm rounded-pill px-3" title="Salin Daftar ke WhatsApp">
+                                <i class="fas fa-copy mr-1"></i> Salin (WA)
+                            </button>
+                        </div>
+                        <div class="p-2 bg-light border-bottom">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend"><span class="input-group-text bg-white border-right-0"><i class="fas fa-search text-muted"></i></span></div>
+                                <input type="text" id="efiledash_inputCariBelum" class="form-control border-left-0" placeholder="Ketik nama / instansi...">
+                            </div>
+                        </div>
+                        <div class="card-body p-0" style="height: 400px; overflow-y: auto;">
+                            <ul class="list-group list-group-flush" id="efiledash_listBelum">
+                                <li class="list-group-item text-center text-muted py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat daftar...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8)
+// ======================================================================
+var EFILEDASH_CACHE_REKAP = [];
+var EFILEDASH_CACHE_BELUM = [];
+var EFILEDASH_KATEGORI_MAP = []; // Menyimpan A:Rekap, B:Lapor
+var EFILEDASH_TABEL_INSTANCE = null;
+var EFILEDASH_PENDING_REQ = 0; 
+
+var EFILEDASH_USER_AKTIF = "";
+var EFILEDASH_IS_ADMIN = false;
+var EFILEDASH_UNIT_TERKUNCI = ""; 
+var EFILEDASH_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & DELEGATION
+// =================================================================
+$(document).ready(function() {
+    EFILEDASH_TABEL_INSTANCE = null;
+    $('#efiledash_dashboardState').hide();
+    $('#efiledash_loadingState').show();
+    $('#efiledash_filterContainer').hide();
+
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        EFILEDASH_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        var rStr = String(user.role || "").toLowerCase();
+        EFILEDASH_IS_ADMIN = (typeof checkUserRoleIsAdmin==='function' && checkUserRoleIsAdmin()) || rStr.includes("admin") || rStr.includes("verifikator");
+        EFILEDASH_USER_NPSN = user.npsn || user.unit || user.username || ""; 
+    } catch(e) { EFILEDASH_USER_NPSN = ""; EFILEDASH_IS_ADMIN = false; }
+    
+    $(document).off('click', '#efiledash_btnRefresh').on('click', '#efiledash_btnRefresh', function() {
+        var k = $('#efiledash_filterKategori').val(); if(k) efiledash_loadDataKategori(k);
+    }); 
+    
+    $(document).off('change', '#efiledash_filterKategori').on('change', '#efiledash_filterKategori', function() {
+        var k = $(this).val(); if(k) efiledash_loadDataKategori(k);
+    });
+
+    $(document).off('change', '#efiledash_filterUnit, #efiledash_filterTahun').on('change', '#efiledash_filterUnit, #efiledash_filterTahun', efiledash_terapkanFilterLokal);
+    $(document).off('click', '#efiledash_btnSalinWa').on('click', '#efiledash_btnSalinWa', efiledash_salinKeWA);
+
+    $(document).off('keyup', '#efiledash_inputCariBelum').on('keyup', '#efiledash_inputCariBelum', function() {
+        var val = $(this).val().toLowerCase();
+        $('.efiledash-item-belum').filter(function() { $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1); });
+    });
+
+    efiledash_initMasterAccess();
+});
+
+// =================================================================
+// 2. GATEKEEPER & INITIAL SETUP
+// =================================================================
+function efiledash_initMasterAccess() {
+    var targetNpsn = EFILEDASH_IS_ADMIN ? "" : EFILEDASH_USER_NPSN;
+
+    if (EFILEDASH_IS_ADMIN) {
+        $('#efiledash_filterContainer').show();
+        $('#efiledash_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    } else if (!EFILEDASH_USER_NPSN) {
+        $('#efiledash_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>'); return;
+    }
+
+    google.script.run.withSuccessHandler(function(json) {
+        var res = JSON.parse(json);
+        if(!res.success) { $('#efiledash_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + efiledash_escapeHtml(res.message) + '</span>'); return; }
+        
+        EFILEDASH_KATEGORI_MAP = res.kategori || [];
+        if (!EFILEDASH_IS_ADMIN && res.myUnit) {
+            EFILEDASH_UNIT_TERKUNCI = res.myUnit;
+            $('#efiledash_filterContainer').show();
+            $('#efiledash_filterUnit').empty().append($('<option>', {value: EFILEDASH_USER_NPSN, text: EFILEDASH_UNIT_TERKUNCI})).prop('disabled', true);
+        }
+
+        if(EFILEDASH_KATEGORI_MAP.length === 0) {
+            $('#efiledash_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Belum ada Master Kategori di Sheet Dashboard.</span>'); return;
+        }
+
+        var selectKat = $('#efiledash_filterKategori');
+        selectKat.empty();
+        EFILEDASH_KATEGORI_MAP.forEach(function(k, idx) {
+            selectKat.append($('<option>', { value: idx, text: k.namaKategori }));
+        });
+
+        // Trigger muat data untuk kategori pertama
+        efiledash_loadDataKategori(0);
+
+    }).withFailureHandler(function(err){
+        $('#efiledash_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + efiledash_escapeHtml(err.message) + '</span>');
+    }).getEfileDashboardInit(targetNpsn);
+}
+
+// =================================================================
+// 3. FETCH DATA SPESIFIK KATEGORI
+// =================================================================
+function efiledash_loadDataKategori(indexMap) {
+    if (EFILEDASH_PENDING_REQ > 0) return; 
+    EFILEDASH_PENDING_REQ = 1;
+
+    var mapData = EFILEDASH_KATEGORI_MAP[indexMap];
+    if(!mapData) return;
+
+    var btn = $('#efiledash_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    $('#efiledash_filterKategori, #efiledash_filterTahun, #efiledash_filterUnit').prop('disabled', true);
+
+    $('#efiledash_lblTableKategori').text(mapData.namaKategori);
+
+    if (!$.fn.DataTable.isDataTable('#efiledash_tabelRekap')) {
+        $('#efiledash_dashboardState').hide();
+        $('#efiledash_loadingText').html('Menyinkronkan data dasbor ' + mapData.namaKategori + '...');
+        $('#efiledash_loadingState').show();
+    }
+
+    google.script.run.withSuccessHandler(function(jsonStr) {
+        EFILEDASH_PENDING_REQ = 0;
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#efiledash_filterKategori, #efiledash_filterTahun').prop('disabled', false);
+        if(EFILEDASH_IS_ADMIN) $('#efiledash_filterUnit').prop('disabled', false);
+        
+        var data = JSON.parse(jsonStr);
+        if (!data.success) { 
+            $('#efiledash_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + efiledash_escapeHtml(data.message) + '</span>'); return; 
+        }
+        
+        EFILEDASH_CACHE_REKAP = data.rekap || [];
+        EFILEDASH_CACHE_BELUM = data.belum || [];
+        
+        if (EFILEDASH_IS_ADMIN) efiledash_initDropdownUnit();
+        efiledash_initDropdownTahun();
+
+        if (!$.fn.DataTable.isDataTable('#efiledash_tabelRekap')) {
+            EFILEDASH_TABEL_INSTANCE = $('#efiledash_tabelRekap').DataTable({
+                "destroy": true, "ordering": true, "pageLength": 10, "autoWidth": false, "deferRender": true, 
+                "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                       "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "columnDefs": [ 
+                    { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle border-right text-left font-weight-bold text-nowrap" }, 
+                    { "targets": [1,2,3,4], "width": "1%", "className": "text-center align-middle text-nowrap" }
+                ],
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada data pada kategori ini." }
+            });
+        }
+
+        efiledash_terapkanFilterLokal();
+
+        $('#efiledash_loadingState').hide();
+        $('#efiledash_dashboardState').show();
+        if(EFILEDASH_TABEL_INSTANCE) { setTimeout(function() { EFILEDASH_TABEL_INSTANCE.columns.adjust(); }, 150); }
+
+    }).withFailureHandler(function(err) {
+        EFILEDASH_PENDING_REQ = 0; btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#efiledash_filterKategori').prop('disabled', false);
+        $('#efiledash_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + efiledash_escapeHtml(err.message) + '</span>');
+    }).getEfileDashboardData(mapData.sheetRekap, mapData.sheetLapor); 
+}
+
+function efiledash_initDropdownUnit() {
+    var unique = new Set();
+    EFILEDASH_CACHE_REKAP.forEach(function(r) { var unit = String(r.unit || "").trim(); if(unit) unique.add(unit); });
+    var sorted = Array.from(unique).sort();
+    var select = $('#efiledash_filterUnit'); var curVal = select.val();
+    select.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    sorted.forEach(function(u) { select.append(`<option value="${efiledash_escapeHtml(u)}">${efiledash_escapeHtml(u)}</option>`); });
+    if(curVal && unique.has(curVal)) { select.val(curVal); }
+}
+
+function efiledash_initDropdownTahun() {
+    var unique = new Set();
+    EFILEDASH_CACHE_REKAP.forEach(function(r) { var thn = String(r.tahun || "").trim(); if(thn) unique.add(thn); });
+    var sorted = Array.from(unique).sort().reverse(); // Terbaru di atas
+    var select = $('#efiledash_filterTahun'); var curVal = select.val();
+    select.empty().append('<option value="SEMUA">- Semua Tahun -</option>');
+    sorted.forEach(function(t) { select.append(`<option value="${efiledash_escapeHtml(t)}">${efiledash_escapeHtml(t)}</option>`); });
+    if(curVal && unique.has(curVal)) { select.val(curVal); }
+}
+
+// =================================================================
+// 4. ZERO-BLINK FILTERING
+// =================================================================
+function efiledash_terapkanFilterLokal() {
+    var fUnit = EFILEDASH_IS_ADMIN ? String($('#efiledash_filterUnit').val() || "").trim().toUpperCase() : String(EFILEDASH_UNIT_TERKUNCI).trim().toUpperCase();
+    var fTahun = String($('#efiledash_filterTahun').val() || "").trim().toUpperCase();
+    
+    var filterRekap = EFILEDASH_CACHE_REKAP.filter(function(r) {
+        if (fUnit !== "SEMUA" && fUnit !== "" && String(r.unit || "").trim().toUpperCase() !== fUnit) return false;
+        if (fTahun !== "SEMUA" && fTahun !== "" && String(r.tahun || "").trim().toUpperCase() !== fTahun) return false;
+        return true;
+    });
+
+    var filterBelum = EFILEDASH_CACHE_BELUM.filter(function(r) {
+        if (fUnit !== "SEMUA" && fUnit !== "" && String(r.unit || "").trim().toUpperCase() !== fUnit) return false;
+        if (fTahun !== "SEMUA" && fTahun !== "" && String(r.tahun || "").trim().toUpperCase() !== fTahun) return false;
+        return true;
+    });
+
+    efiledash_renderDashboard(filterRekap, filterBelum);
+}
+
+function efiledash_renderDashboard(dataRekap, dataBelum) {
+    var totAsn = 0, totSudah = 0, totBelum = 0;
+    var dtArray = [];
+
+    dataRekap.forEach(function(r) {
+        var cAsn = parseInt(r.jml) || 0;
+        var cSudah = parseInt(r.sudah) || 0;
+        var cBelum = parseInt(r.belum) || 0;
+        
+        totAsn += cAsn; totSudah += cSudah; totBelum += cBelum;
+
+        var persen = cAsn === 0 ? 0 : Math.round((cSudah / cAsn) * 100);
+        var bgProgress = persen >= 80 ? 'bg-success' : (persen >= 50 ? 'bg-warning' : 'bg-danger');
+        
+        var uiPersen = `
+            <div class="d-flex align-items-center justify-content-center">
+                <span class="mr-2 font-weight-bold">${persen}%</span>
+                <div class="progress" style="width: 50px; height: 8px; border-radius: 4px;">
+                    <div class="progress-bar ${bgProgress}" role="progressbar" style="width: ${persen}%" aria-valuenow="${persen}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>`;
+        
+        var txtUnit = EFILEDASH_IS_ADMIN ? `<div class="font-weight-bold text-dark text-wrap">${efiledash_escapeHtml(r.unit)}</div><div class="small text-muted">Tahun ${r.tahun}</div>` : `<div class="font-weight-bold text-dark text-wrap">${efiledash_escapeHtml(r.unit)}</div>`;
+
+        dtArray.push([
+            txtUnit,
+            `<span class="badge badge-sultan badge-sultan-light-info px-2">${cAsn}</span>`,
+            `<span class="badge badge-sultan badge-sultan-light-success px-2">${cSudah}</span>`,
+            `<span class="badge badge-sultan badge-sultan-light-danger px-2">${cBelum}</span>`,
+            uiPersen
+        ]);
+    });
+
+    $('#efiledash_cardTotalAsn').text(totAsn.toLocaleString('id-ID'));
+    $('#efiledash_cardSudah').text(totSudah.toLocaleString('id-ID'));
+    $('#efiledash_cardBelum').text(totBelum.toLocaleString('id-ID'));
+
+    if (EFILEDASH_TABEL_INSTANCE) { EFILEDASH_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false); }
+
+    var uiList = "";
+    if (dataBelum.length === 0) {
+        uiList = `<li class="list-group-item text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3 opacity-50"></i><br>
+                    <h6 class="font-weight-bold text-dark">Luar Biasa!</h6>
+                    <small class="text-muted">Tidak ada pegawai yang belum unggah untuk filter ini.</small>
+                  </li>`;
+    } else {
+        dataBelum.forEach(function(b) {
+            uiList += `
+            <li class="list-group-item efiledash-item-belum py-2 px-3 hover-sultan" data-unit="${efiledash_escapeHtml(b.unit)}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="nama-asn font-weight-bold text-dark text-uppercase mb-0" style="font-size:14px; line-height: 1.2;">${efiledash_escapeHtml(b.nama)}</div>
+                        <small class="text-muted">${efiledash_escapeHtml(b.nip)}</small>
+                        <div class="unit-asn small text-danger font-weight-bold mt-1 text-uppercase" style="font-size: 10px;">${efiledash_escapeHtml(b.unit)} <span class="text-muted">(${b.tahun})</span></div>
+                    </div>
+                    <span class="badge badge-danger ml-2 px-2 py-1"><i class="fas fa-exclamation-circle"></i></span>
+                </div>
+            </li>`;
+        });
+    }
+    $('#efiledash_listBelum').html(uiList); $('#efiledash_inputCariBelum').val(""); 
+}
+
+// =================================================================
+// 5. API SALIN KE WHATSAPP (GROUPING CERDAS)
+// =================================================================
+function efiledash_salinKeWA() {
+    var listEl = $('.efiledash-item-belum:visible');
+    if (listEl.length === 0) { Sultan.notif.info('Tidak ada data pada daftar untuk disalin.'); return; }
+    
+    var selNamaKat = $('#efiledash_filterKategori option:selected').text();
+    var selTahun = $('#efiledash_filterTahun').val() === "SEMUA" ? "Semua Tahun" : $('#efiledash_filterTahun').val();
+    var selUnitFilter = EFILEDASH_IS_ADMIN ? $('#efiledash_filterUnit').val() : EFILEDASH_UNIT_TERKUNCI;
+    var namaUnitDisplay = (selUnitFilter === "SEMUA" || selUnitFilter === "") ? "Seluruh Unit" : selUnitFilter;
+    
+    var teks = `🚨 *DAFTAR BELUM UNGGAH E-FILE* 🚨\n`;
+    teks += `Kategori: ${selNamaKat}\n`;
+    teks += `Tahun: ${selTahun}\n`;
+    teks += `Filter Unit: ${namaUnitDisplay}\n`;
+    teks += `Total Belum Unggah: ${listEl.length} Orang\n\n`;
+
+    var mapUnit = {};
+    listEl.each(function() {
+        var nama = $(this).find('.nama-asn').text().trim();
+        var unitRaw = $(this).attr('data-unit') || $(this).find('.unit-asn').text().split('(')[0].trim();
+        if(!mapUnit[unitRaw]) { mapUnit[unitRaw] = []; }
+        mapUnit[unitRaw].push(nama);
+    });
+
+    var sortedUnits = Object.keys(mapUnit).sort();
+    sortedUnits.forEach(function(unitName) {
+        teks += `🏢 *${unitName}*\n`; 
+        var sortedNames = mapUnit[unitName].sort();
+        sortedNames.forEach(function(namaASN, idx) { teks += `  ${idx + 1}. ${namaASN}\n`; });
+        teks += `\n`; 
+    });
+
+    teks += `Mohon segera mengunggah dokumen elektronik Anda melalui sistem SIKS. Terima kasih. 🙏`;
+
+    navigator.clipboard.writeText(teks).then(function() {
+        Sultan.notif.sukses('Daftar berhasil disalin ke Clipboard (Siap Paste di WhatsApp).');
+    }).catch(function() { Sultan.alert('error', 'Gagal Menyalin', 'Browser Anda tidak mendukung Clipboard API.'); });
+}
+
+function efiledash_escapeHtml(text) { return text ? String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : ""; }
+</script>

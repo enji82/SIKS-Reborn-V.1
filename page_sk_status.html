@@ -1,229 +1,401 @@
-<?!= include('css'); ?>
-
-<style>
-/* MENYAMAKAN UI DENGAN RIWAYAT + AUTO FIT COLUMN */
-
-/* 1. CONTAINER & TABLE */
-.table-view-container {
-  background: rgba(255, 255, 255, 0.02); 
-  border-radius: 8px; 
-  padding: 10px;
-}
-.table-container {
-    overflow: auto;
-    height: 100%;
-    max-height: 75vh;
-}
-
-/* AUTO FIT: Width auto agar tabel menyusut/melebar sesuai konten */
-.data-table {
-    width: auto; 
-    min-width: 100%; 
-    border-collapse: collapse; 
-}
-
-/* 2. HEADER */
-.data-table thead th {
-    position: sticky; 
-    top: 0; 
-    z-index: 10; 
-    background: #1a252f;
-    color: #fff;
-    padding: 15px 20px; /* Padding lega */
-    font-weight: bold;
-    text-align: center;
-    border-bottom: 2px solid #2c3e50;
-    white-space: nowrap; 
-}
-
-/* 3. BODY */
-.data-table tbody td {
-    padding: 12px 20px; 
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: #ddd;
-    white-space: nowrap; /* Teks dilarang turun baris */
-    vertical-align: middle;
-}
-
-/* 4. KOLOM SPESIFIK (AUTO FIT) */
-/* Kolom No */
-.col-no { text-align: center; color: #aaa; width: 1%; }
-
-/* Kolom Nama Sekolah */
-.col-nama { text-align: left; font-weight: 500; color: #fff; }
-
-/* Kolom Data: width 1% memaksa kolom menyusut pas dengan teks */
-.col-data { text-align: center; width: 1%; }
-
-/* Hover Effect */
-.data-table tbody tr:hover {
-    background: rgba(255,255,255,0.05);
-}
-</style>
-
-<div class="main-wrapper" style="animation: fadeIn 0.4s ease-in-out; height: 100%; display: flex; flex-direction: column;">
-  
-  <div class="page-title-container" style="margin-bottom: 20px;">
-    <h2 class="page-title" style="border-left: 5px solid #f39c12; padding-left: 15px;">Status Pengiriman SK</h2>
-  </div>
-
-  <div class="filter-container items-bottom">
-      <div class="filter-group filter-group-vertical">
-        <label>Cari Sekolah</label>
-        <select id="ftFilterSekolah" class="custom-select" style="min-width: 250px;"></select>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-paper-plane text-maroon mr-2"></i>Status Pengiriman SK
+        </h5>
+        <hr class="style-sultan-solid">
       </div>
-      
-      <button onclick="refreshFlatData()" class="btn-refresh-glass" title="Refresh Data">
-        <i class="fas fa-sync-alt"></i>
-      </button>
-
-      <div style="margin-left:auto; display:flex; gap:5px; align-items:center;">
-         <span class="status-badge status-ok" style="min-width:auto; font-size:10px;">OK</span>
-         <span class="status-badge status-revisi" style="min-width:auto; font-size:10px;">Revisi</span>
-         <span class="status-badge status-ditolak" style="min-width:auto; font-size:10px;">Ditolak</span>
-      </div>
+    </div>
   </div>
-
-  <main class="table-view-container" style="flex:1; display:flex; flex-direction:column; min-height:0; overflow: hidden;">
-
-    <div id="ftLoading" style="display:none; flex-direction:column; justify-content:center; align-items:center; height: 100%;">
-        <div class="spinner-container" style="display:flex; gap:6px;">
-            <div class="spinner-bar" style="background:#f39c12; width:4px; height:20px; animation: bounce 1s infinite;"></div>
-            <div class="spinner-bar" style="background:#f39c12; width:4px; height:20px; animation: bounce 1s infinite 0.2s;"></div>
-            <div class="spinner-bar" style="background:#f39c12; width:4px; height:20px; animation: bounce 1s infinite 0.4s;"></div>
-        </div>
-        <p style="color: #bbb; margin-top: 15px; font-size: 12px; letter-spacing: 1px;">MEMUAT DATA...</p>
-    </div>
-
-    <div id="ftTableWrapper" style="display:flex; flex-direction:column; height:100%;">
-        <div class="table-container">
-            <table id="flatTable" class="data-table">
-                <thead></thead>
-                <tbody style="font-size: 13px;"></tbody> 
-            </table>
-        </div>
-        <div style="padding: 10px; color: #7f8c8d; font-size: 12px; text-align: right; border-top: 1px solid #2c3e50;">
-            Total Sekolah: <strong id="ftTotalData" style="color: #fff;">0</strong>
-        </div>
-    </div>
-    
-  </main>
 </div>
 
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#statussk_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="statussk_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3 text-dark mt-2" style="font-size: 14px; line-height: 1.6;">
+                    <li>Halaman ini menampilkan progres pengiriman SK Pembagian Tugas.</li>
+                    <li>Jika ikon berbentuk <span class="badge badge-danger"><i class="fas fa-times"></i></span> atau <span class="badge badge-warning"><i class="fas fa-sync-alt"></i></span> bisa diklik, silakan klik untuk melihat catatan revisi dari admin.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="statussk_wadahFilter" class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="statussk_filterSekolah" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="statussk_btnCari" class="btn bg-white border shadow-sm text-secondary" title="Terapkan Filter / Tarik Data" disabled>
+                    <i class="fas fa-search text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+                <button type="button" class="btn btn-primary font-weight-bold shadow-sm d-none">Spacer</button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="statussk_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="statussk_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="statussk_tableState" style="display: none;">
+                  <table id="statussk_tabelUtama" class="table table-bordered table-hover table-premium table-header-compact mb-0 w-100 text-nowrap">
+                      <thead class="bg-light">
+                          <tr>
+                              <th rowspan="2" class="th-main col-sticky-left border-right align-middle text-left bg-white" style="z-index: 5;">Nama Sekolah</th>
+                              <th colspan="2" class="th-main text-center">2021/2022</th>
+                              <th colspan="2" class="th-main text-center">2022/2023</th>
+                              <th colspan="2" class="th-main text-center">2023/2024</th>
+                              <th colspan="2" class="th-main text-center">2024/2025</th>
+                              <th colspan="2" class="th-main text-center">2025/2026</th>
+                              <th colspan="2" class="th-main text-center border-right-0">2026/2027</th>
+                          </tr>
+                          <tr>
+                              <th class="th-sub text-center">Sem 1</th><th class="th-sub text-center border-right">Sem 2</th>
+                              <th class="th-sub text-center">Sem 1</th><th class="th-sub text-center border-right">Sem 2</th>
+                              <th class="th-sub text-center">Sem 1</th><th class="th-sub text-center border-right">Sem 2</th>
+                              <th class="th-sub text-center">Sem 1</th><th class="th-sub text-center border-right">Sem 2</th>
+                              <th class="th-sub text-center">Sem 1</th><th class="th-sub text-center border-right">Sem 2</th>
+                              <th class="th-sub text-center">Sem 1</th><th class="th-sub text-center border-right-0">Sem 2</th>
+                          </tr>
+                      </thead>
+                      <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
 <script>
-  var flatCache = { headers: [], rows: [] };
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - DYNAMIC READ ONLY)
+// BAB I: Prefix Mutlak statussk_
+// ======================================================================
+var STATUSSK_CACHE_DATA = []; 
+var STATUSSK_TABEL_INSTANCE = null;
 
-  // 1. INIT
-  window.initSkStatusPage = function() {
-      $('#ftLoading').css('display', 'flex'); 
-      $('#ftTableWrapper').hide();
-      
-      google.script.run
-        .withSuccessHandler(renderFlatTable)
-        .withFailureHandler(function(err) {
-           $('#ftLoading').hide();
-           Swal.fire('Error', 'Gagal: ' + err.message, 'error');
-        })
-        .getSKStatusData(); 
-  };
+var STATUSSK_USER_AKTIF = "";
+var STATUSSK_IS_ADMIN = false;
+var STATUSSK_USER_NPSN = "";
+var STATUSSK_UNIT_TERKUNCI = "";
 
-  // 2. REFRESH
-  window.refreshFlatData = function() {
-      $('#ftFilterSekolah').val('Semua');
-      window.initSkStatusPage();
-  }
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE
+// =================================================================
+$(document).ready(function() {
+    STATUSSK_TABEL_INSTANCE = null;
+    $('#statussk_tableState').hide();
+    $('#statussk_loadingState').show();
 
-  // 3. RENDER TABEL
-  function renderFlatTable(data) {
-    flatCache = data;
-    var headers = data.headers || [];
-    var rows = data.rows || [];
+    // VAKSIN EVENT: Pemusnahan event inline
+    $(document).off('click', '#statussk_btnCari').on('click', '#statussk_btnCari', statussk_prosesCariData);
+    $(document).off('change', '#statussk_filterSekolah').on('change', '#statussk_filterSekolah', statussk_terapkanFilterLokal);
 
-    var $thead = $('#flatTable thead').empty();
+    // Cek Sesi Login
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        STATUSSK_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        STATUSSK_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        STATUSSK_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { STATUSSK_USER_NPSN = ""; STATUSSK_IS_ADMIN = false; }
     
-    // BUILD HEADER
-    var tr = '<tr>';
-    tr += '<th style="width:50px;">No</th>'; 
-    
-    headers.forEach(function(h, idx) {
-        if(h.toLowerCase() === 'no') return; 
+    statussk_validasiAksesUser(); 
+});
 
-        // Kolom Nama (Index 0) Rata Kiri, Sisanya Tengah
-        var align = (idx === 0) ? 'text-align:left;' : 'text-align:center;';
-        tr += `<th style="${align}">${h}</th>`;
-    });
-    tr += '</tr>';
-    $thead.append(tr);
-
-    // FILTER DROPDOWN
-    var nameColIndex = 0; 
-    if($('#ftFilterSekolah').children().length === 0) {
-        var names = rows.map(r => r[nameColIndex]).filter(v=>v).sort();
-        var uniqueNames = [...new Set(names)];
-        var $sel = $('#ftFilterSekolah');
-        $sel.empty().append('<option value="Semua">Semua</option>');
-        uniqueNames.forEach(function(n){ $sel.append(`<option value="${n}">${n}</option>`) });
-    }
-
-    applyFlatFilter(nameColIndex);
-    $('#ftLoading').hide();
-    $('#ftTableWrapper').fadeIn(300);
-  }
-
-  // 4. FILTER & BODY
-  function applyFlatFilter(nameColIndex) {
-    nameColIndex = nameColIndex || 0;
-    var fSekolah = $('#ftFilterSekolah').val() || 'Semua';
-    var rows = flatCache.rows;
-    var headers = flatCache.headers;
-
-    var filtered = rows.filter(function(r) {
-        return fSekolah === 'Semua' || r[nameColIndex] === fSekolah;
-    });
-
-    var $tbody = $('#flatTable tbody').empty();
-
-    if (filtered.length === 0) {
-        $tbody.append(`<tr><td colspan="${headers.length + 1}" style="text-align:center; padding:30px; color:#7f8c8d;">Data tidak ditemukan.</td></tr>`);
+// =================================================================
+// 2. GATEKEEPER MUTLAK
+// =================================================================
+function statussk_validasiAksesUser() {
+    if (STATUSSK_IS_ADMIN) {
+        $('#statussk_wadahFilter').show(); // Admin butuh filter
+        $('#statussk_loadingText').html('Mempersiapkan Database Admin...');
+        $('#statussk_filterSekolah').empty().append('<option value="SEMUA">- Memuat Database... -</option>').prop('disabled', true).removeClass('bg-light text-maroon font-weight-bold');
+        statussk_tarikDataServer(); 
     } else {
-        filtered.forEach(function(r, i) {
-            var tr = `<tr>`;
+        // VAKSIN UX: Sembunyikan blok filter untuk User (Space Saver)
+        $('#statussk_wadahFilter').hide(); 
+
+        if (!STATUSSK_USER_NPSN) {
+            $('#statussk_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+        
+        google.script.run.withSuccessHandler(function(resUnit) {
+            var dataUnit = JSON.parse(resUnit);
+            if (dataUnit.error) {
+                $('#statussk_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + statussk_escapeHtml(dataUnit.error) + '</span>');
+                return;
+            }
+            STATUSSK_UNIT_TERKUNCI = dataUnit.unitKerja;
             
-            // Kolom No
-            tr += `<td class="col-no">${i+1}</td>`;
-
-            // Loop Data
-            r.forEach(function(cellData, colIdx) {
-                if(headers[colIdx].toLowerCase() === 'no') return;
-
-                var content = cellData || '-';
-                
-                // Status Badge Logic
-                if(content.length < 25 && (content.match(/tolak|revisi|ok|terima|sudah|proses/i))) {
-                    var sClass = 'status-diproses'; 
-                    if(content.match(/tolak/i)) sClass = 'status-ditolak';
-                    else if(content.match(/revisi/i)) sClass = 'status-revisi';
-                    else if(content.match(/ok|terima|sudah/i)) sClass = 'status-ok';
-                    content = `<span class="status-badge ${sClass}" style="min-width:60px; font-size:10px; padding:4px 8px;">${content}</span>`;
-                }
-
-                if (colIdx === 0) {
-                     // Kolom Nama
-                     tr += `<td class="col-nama">${content}</td>`;
-                } else {
-                     // Kolom Data
-                     tr += `<td class="col-data">${content}</td>`;
-                }
-            });
-
-            tr += `</tr>`;
-            $tbody.append(tr);
-        });
+            // Filter tidak perlu di-set karena kontainernya sudah disembunyikan
+            statussk_tarikDataServer();
+        }).withFailureHandler(function(err) {
+            $('#statussk_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + statussk_escapeHtml(err.message) + '</span>');
+        }).getUnitKerjaByNpsnPTK(STATUSSK_USER_NPSN); 
     }
-    $('#ftTotalData').text(filtered.length);
-  }
+}
 
-  $('#ftFilterSekolah').off('change').on('change', function(){ applyFlatFilter(); });
+// =================================================================
+// 3. FETCH DATA & FILTER MANUAL TRIGGER
+// =================================================================
+function statussk_prosesCariData() {
+    if (STATUSSK_CACHE_DATA.length > 0) {
+        statussk_tarikDataServer(); // Bypass Cache (Memaksa Refresh)
+    } else {
+        statussk_tarikDataServer();
+    }
+}
 
-  window.initSkStatusPage();
+function statussk_tarikDataServer() {
+    var btn = $('#statussk_btnCari');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    // MUNCULKAN RUANG A JIKA TABEL BELUM PERNAH DIBUAT
+    if (!$.fn.DataTable.isDataTable('#statussk_tabelUtama')) {
+        $('#statussk_tableState').hide();
+        $('#statussk_loadingText').html('Menyinkronkan data status SK...');
+        $('#statussk_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            btn.prop('disabled', false).html('<i class="fas fa-search text-maroon"></i>');
+            
+            if (res.error) {
+                $('#statussk_tableState').hide();
+                $('#statussk_loadingState').show();
+                $('#statussk_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + statussk_escapeHtml(res.error) + '</span>');
+                return;
+            }
+
+            try {
+                STATUSSK_CACHE_DATA = res.rows || [];
+                statussk_populateDropdown(res.schools || []);
+                
+                // Render Tabel otomatis menghandle Injeksi, & One-Shot Render
+                statussk_terapkanFilterLokal();
+
+            } catch (e) {
+                console.error("Table Error:", e);
+                $('#statussk_tableState').hide();
+                $('#statussk_loadingState').show();
+                $('#statussk_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + statussk_escapeHtml(e.message) + '</span>');
+            }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-search text-maroon"></i>');
+            $('#statussk_tableState').hide();
+            $('#statussk_loadingState').show();
+            $('#statussk_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + statussk_escapeHtml(err.message) + '</span>');
+        })
+        .getSiabaStatusData();
+}
+
+function statussk_populateDropdown(schools) {
+    if (STATUSSK_IS_ADMIN) {
+        var el = $('#statussk_filterSekolah');
+        var currentVal = el.val();
+        
+        var h = '<option value="SEMUA">- Semua Instansi -</option>';
+        for(var i=0; i<schools.length; i++) { 
+            var safeS = statussk_escapeHtml(schools[i]);
+            h += '<option value="' + safeS + '">' + safeS + '</option>'; 
+        }
+        
+        el.html(h).prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#statussk_btnCari').prop('disabled', false);
+        if(currentVal && schools.includes(currentVal)) el.val(currentVal);
+    }
+    // Jika bukan Admin, dropdown diabaikan (karena wadahnya di-hide)
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK (BAB VII)
+// =================================================================
+function statussk_terapkanFilterLokal() {
+    var tAdminUnit = STATUSSK_IS_ADMIN ? String($('#statussk_filterSekolah').val() || "").toUpperCase() : "";
+    var tUnitUser  = String(STATUSSK_UNIT_TERKUNCI || "").trim().toUpperCase();
+
+    var rowsToShow = STATUSSK_CACHE_DATA.filter(function(r) {
+        var rUnit = String(r[0] || "").trim().toUpperCase();
+        if (STATUSSK_IS_ADMIN) {
+            return (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit);
+        } else {
+            return (rUnit === tUnitUser); 
+        }
+    });
+    
+    statussk_renderTabel(rowsToShow);
+}
+
+function statussk_renderTabel(rows) {
+    var isFirstLoad = !$.fn.DataTable.isDataTable('#statussk_tabelUtama');
+    var dtArray = [];
+
+    for(var j=0; j<rows.length; j++) {
+        var row = rows[j];
+        var rowData = [];
+        
+        // Kolom 1 (Index 0): Nama Instansi
+        rowData.push(`<div class="font-weight-bold text-dark text-nowrap text-left px-2">${statussk_escapeHtml(row[0])}</div>`); 
+        
+        // Kolom 2 sampai 13 (Adopsi Kode Icon Sultan Baru)
+        for (var i = 1; i <= 12; i++) {
+            var val = (row[i] !== undefined) ? row[i] : "";
+            rowData.push(statussk_buildBadgeSultan(val)); 
+        }
+        dtArray.push(rowData);
+    }
+
+    // --- C. INISIALISASI / SUNTIK DATA (ONE-SHOT RENDER - BAB VII) ---
+    if (isFirstLoad) {
+        STATUSSK_TABEL_INSTANCE = $('#statussk_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, 
+            "ordering": false, 
+            "pageLength": 10, 
+            "autoWidth": false, 
+            "deferRender": true, // Performa Turbo
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "search": "", "searchPlaceholder": "Cari Instansi...",
+                "emptyTable": '<div class="py-4 text-center text-muted"><i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3" style="opacity: 0.6;"></i><br><h6 class="font-weight-bold text-dark mb-1">Belum Ada Data</h6><p class="small mb-0">Tidak ada data pengiriman SK untuk instansi ini.</p></div>' 
+            }, 
+            "columnDefs": [ 
+                // VAKSIN LEBAR KOLOM: "width: auto" agar memeluk teks terpanjang
+                { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle font-weight-bold border-right text-dark text-left" },
+                { "targets": "_all", "className": "text-center align-middle" }
+            ],
+            "createdRow": function(row, data, dataIndex) {
+                $(row).children('td').eq(0).attr('style', 'position: sticky; left: 0; z-index: 2; background-color: #ffffff;');
+            }
+        }); 
+
+        // BAB VII: BUKA RUANG B SEKALI SAJA SECARA INSTAN
+        $('#statussk_loadingState').hide();
+        $('#statussk_tableState').show();
+        
+        // VAKSIN LEBAR KOLOM: Beri browser waktu me-render sebelum adjust kolom
+        setTimeout(function(){ STATUSSK_TABEL_INSTANCE.columns.adjust(); }, 100);
+        
+    } else {
+        // Zero Blink Injeksi
+        STATUSSK_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#statussk_tableState').is(':hidden')) {
+            $('#statussk_loadingState').hide();
+            $('#statussk_tableState').show();
+        }
+        
+        // VAKSIN LEBAR KOLOM (Re-draw update)
+        setTimeout(function(){ STATUSSK_TABEL_INSTANCE.columns.adjust(); }, 50);
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: PEMBERSIH XSS & SWEET ALERT
+// =================================================================
+function statussk_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+
+function statussk_escapeJs(str) {
+    if (!str) return "";
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>");
+}
+
+function statussk_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Admin',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+// =================================================================
+// 6. RENDER ICON ONLY BADGE (ADOPSI DARI HALAMAN LAPORAN BULAN)
+// =================================================================
+function statussk_buildBadgeSultan(statusString) {
+    if (!statusString || statusString === "-" || statusString === "") {
+        return '<i class="fas fa-minus text-black-50 small" style="opacity:0.2"></i>';
+    }
+    
+    // Status format dari server: "STATUS | Keterangan"
+    var parts = String(statusString).split('|');
+    var rawStatus = String(parts[0]).trim();
+    var ket = parts.length > 1 ? String(parts[1]).trim() : "";
+
+    var stLower = rawStatus.toLowerCase();
+    var baseClass = "btn btn-sm shadow-sm font-weight-bold"; 
+    var iconHtml = "";
+
+    // HUKUM KE-6: Gunakan tombol klik untuk catatan (Anti Hover Tooltip)
+    if (stLower.includes('revisi') || stLower.includes('perbaiki')) {
+        if (ket.length > 2) {
+            var safeKet = statussk_escapeJs(ket);
+            iconHtml = `<button type="button" class="${baseClass} btn-warning text-dark" onclick="statussk_lihatCatatanSultan('${safeKet}')"><i class="fas fa-sync-alt"></i></button>`;
+        } else {
+            iconHtml = `<span class="badge badge-sultan badge-sultan-light-warning p-2"><i class="fas fa-sync-alt"></i></span>`;
+        }
+    }
+    else if (stLower.includes('tolak') || stLower.includes('x') || stLower.includes('salah')) {
+        if (ket.length > 2) {
+            var safeKet = statussk_escapeJs(ket);
+            iconHtml = `<button type="button" class="${baseClass} btn-danger" onclick="statussk_lihatCatatanSultan('${safeKet}')"><i class="fas fa-times"></i></button>`;
+        } else {
+            iconHtml = `<span class="badge badge-sultan badge-sultan-light-danger p-2"><i class="fas fa-times"></i></span>`;
+        }
+    }
+    else if (stLower.includes('verif') || stLower.includes('setuju') || stLower.includes('ok') || stLower.includes('valid')) {
+        iconHtml = `<span class="badge badge-sultan badge-sultan-light-success p-2"><i class="fas fa-check"></i></span>`;
+    }
+    else if (stLower.includes('proses') || stLower.includes('tunggu') || rawStatus.length > 5) {
+        iconHtml = `<span class="badge badge-sultan badge-sultan-light-info p-2"><i class="fas fa-clock"></i></span>`;
+    }
+    else {
+        return `<span class="text-dark font-weight-bold">${statussk_escapeHtml(rawStatus)}</span>`;
+    }
+
+    return iconHtml;
+}
 </script>

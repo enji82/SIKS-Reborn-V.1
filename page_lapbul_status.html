@@ -1,40 +1,504 @@
-<header>
-  <h2>DAFTAR PENGIRIMAN LAPORAN BULAN</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterTahun">Tahun:</label>
-    <select id="filterTahun"></select>
-  </div>
-  <div class="filter-group">
-    <label for="filterJenjang">Jenjang:</label>
-    <select id="filterJenjang"></select>
-  </div>
-  <div class="filter-group">
-    <label for="filterNamaSekolah">Nama Sekolah:</label>
-    <select id="filterNamaSekolah"></select>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-chart-bar text-maroon mr-2"></i>Status Pengiriman Laporan Bulan
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  <div id="loadingStatus" class="loading-container">
-      <div class="spinner-container">
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-    </div>
-    <p>Memuat data, mohon tunggu...</p>
-</div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
 
-<div id="tableWrapper" style="display:none;">
-    <div class="table-container">
-      <table id="lapbulStatusTable" class="data-table freeze-pane-table">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" 
+                 data-toggle="collapse" data-target="#lapbulstatus_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="lapbulstatus_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3 text-dark mt-2" style="font-size: 14px; line-height: 1.6;">
+                    <li>Halaman ini merupakan ceklist pengiriman laporan bulan.</li>
+                    <li>Klik ikon <span class="badge badge-warning"><i class="fas fa-sync-alt"></i></span> atau <span class="badge badge-danger"><i class="fas fa-times"></i></span> untuk membaca catatan revisi/penolakan dari Admin.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="lapbulstatus_filterTahun" class="form-control form-control-sultan input-auto-width min-w-100" disabled></select>
+                
+                <select id="lapbulstatus_filterJenjang" class="form-control form-control-sultan input-auto-width min-w-150 d-none" disabled>
+                    <option value="SEMUA">- Semua Jenjang -</option>
+                    <option value="SD">SD</option>
+                    <option value="TK">TK</option>
+                    <option value="KB">KB</option>
+                    <option value="SPS">SPS</option>
+                    <option value="TPA">TPA</option>
+                </select>
+
+                <select id="lapbulstatus_filterSekolah" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div id="lapbulstatus_divider" class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="lapbulstatus_btnCari" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+                <button type="button" class="btn btn-primary font-weight-bold shadow-sm d-none">Spacer</button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+                
+              <div id="lapbulstatus_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="lapbulstatus_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="lapbulstatus_tableState" style="display: none;">
+                  <table id="lapbulstatus_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+                      <thead class="bg-light">
+                          <tr>
+                              <th class="col-sticky-left border-right text-left px-3 align-middle bg-white" style="z-index: 5;">Nama Sekolah</th>
+                              <th class="text-center align-middle px-3">Jenjang</th>
+                              <th class="text-center align-middle">Jan</th>
+                              <th class="text-center align-middle">Feb</th>
+                              <th class="text-center align-middle">Mar</th>
+                              <th class="text-center align-middle">Apr</th>
+                              <th class="text-center align-middle">Mei</th>
+                              <th class="text-center align-middle">Jun</th>
+                              <th class="text-center align-middle">Jul</th>
+                              <th class="text-center align-middle">Agu</th>
+                              <th class="text-center align-middle">Sep</th>
+                              <th class="text-center align-middle">Okt</th>
+                              <th class="text-center align-middle">Nov</th>
+                              <th class="text-center align-middle">Des</th>
+                          </tr>
+                      </thead>
+                      <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
     </div>
-    <div id="pagination-container" class="pagination-container"></div>
   </div>
-</main>
+</section>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - DYNAMIC READ ONLY)
+// BAB I: Prefix Mutlak lapbulstatus_
+// ======================================================================
+var LAPBULSTATUS_CACHE_DATA = [];
+var LAPBULSTATUS_CACHE_TAHUN = "";
+var LAPBULSTATUS_TABEL_INSTANCE = null;
+
+var LAPBULSTATUS_USER_AKTIF = "";
+var LAPBULSTATUS_IS_ADMIN = false;
+var LAPBULSTATUS_USER_NPSN = "";
+var LAPBULSTATUS_UNIT_TERKUNCI = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE (Hukum Ke-1)
+// =================================================================
+$(document).ready(function() {
+    LAPBULSTATUS_TABEL_INSTANCE = null;
+    $('#lapbulstatus_tableState').hide();
+    $('#lapbulstatus_loadingState').show();
+
+    // Cek Sesi Login & Role
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        LAPBULSTATUS_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        LAPBULSTATUS_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        LAPBULSTATUS_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { LAPBULSTATUS_USER_NPSN = ""; LAPBULSTATUS_IS_ADMIN = false; }
+
+    // VAKSIN EVENT SPA (Mencegah Memory Leak)
+    $(document).off('change', '#lapbulstatus_filterJenjang').on('change', '#lapbulstatus_filterJenjang', function() { 
+        lapbulstatus_updateDropdownSekolah(); 
+        lapbulstatus_terapkanFilterLokal(); 
+    });
+    $(document).off('change', '#lapbulstatus_filterSekolah').on('change', '#lapbulstatus_filterSekolah', lapbulstatus_terapkanFilterLokal);
+    
+    // Perubahan Tahun memaksa tarik data dari server
+    $(document).off('change', '#lapbulstatus_filterTahun').on('change', '#lapbulstatus_filterTahun', lapbulstatus_prosesCariData);
+    
+    // Tombol Refresh/Cari (Bypass Cache)
+    $(document).off('click', '#lapbulstatus_btnCari').on('click', '#lapbulstatus_btnCari', lapbulstatus_tarikDataServer);
+    
+    // VAKSIN EVENT INLINE: Aksi klik Catatan
+    $(document).off('click', '.btn-baca-catatan').on('click', '.btn-baca-catatan', function() { 
+        lapbulstatus_lihatCatatanSultan($(this).data('pesan')); 
+    });
+
+    lapbulstatus_initFilters();
+});
+
+// =================================================================
+// 2. CHAINED INITIALIZATION: FILTERS -> GATEKEEPER -> FETCH
+// =================================================================
+function lapbulstatus_initFilters() {
+    var thn = new Date().getFullYear();
+    var $sel = $('#lapbulstatus_filterTahun').empty();
+    for(var i = thn - 5; i <= thn + 1; i++){ 
+        var selected = (i === thn) ? 'selected' : '';
+        $sel.append(`<option value="${i}" ${selected}>${i}</option>`); 
+    }
+    
+    $('#lapbulstatus_filterTahun').prop('disabled', false);
+    lapbulstatus_validasiAksesUser(); 
+}
+
+function lapbulstatus_validasiAksesUser() {
+    $('#lapbulstatus_loadingText').html('Mempersiapkan Akses...');
+
+    if (LAPBULSTATUS_IS_ADMIN) {
+        // ADMIN: Buka Dropdown Jenjang & Sekolah
+        $('#lapbulstatus_filterJenjang').removeClass('d-none').prop('disabled', false);
+        $('#lapbulstatus_filterSekolah').empty().append('<option value="SEMUA">- Memuat Database... -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#lapbulstatus_btnCari').prop('disabled', false).removeClass('d-none');
+        $('#lapbulstatus_divider').removeClass('d-none');
+        
+        lapbulstatus_tarikDataServer(); 
+    } else {
+        // USER: Sembunyikan Jenjang, Sembunyikan Tombol Cari, Kunci Sekolah Mutlak (UX VACCINE)
+        $('#lapbulstatus_filterJenjang').addClass('d-none');
+        $('#lapbulstatus_btnCari, #lapbulstatus_divider').addClass('d-none'); // Tombol Refresh disembunyikan
+        
+        if (!LAPBULSTATUS_USER_NPSN) {
+            $('#lapbulstatus_filterSekolah').empty().append('<option value="">AKSES DITOLAK (NPSN KOSONG)</option>');
+            $('#lapbulstatus_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#lapbulstatus_filterSekolah').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#lapbulstatus_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${lapbulstatus_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                LAPBULSTATUS_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#lapbulstatus_filterSekolah').empty().append($('<option>', {value: LAPBULSTATUS_UNIT_TERKUNCI, text: LAPBULSTATUS_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                lapbulstatus_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#lapbulstatus_filterSekolah').empty().append('<option value="">ERROR SERVER</option>');
+                $('#lapbulstatus_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${lapbulstatus_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNpsnPTK(LAPBULSTATUS_USER_NPSN); 
+    }
+}
+
+// Cascading Dropdown Khusus Admin
+function lapbulstatus_updateDropdownSekolah() {
+    if (!LAPBULSTATUS_IS_ADMIN) return;
+
+    var selectedJenjang = String($('#lapbulstatus_filterJenjang').val() || "").trim().toUpperCase();
+    var unique = new Set();
+    
+    // Ambil daftar sekolah unik dari Cache berdasarkan Jenjang terpilih
+    LAPBULSTATUS_CACHE_DATA.forEach(function(row) {
+        var unit = String(row[0] || "").trim();
+        var jenjang = String(row[2] || "").trim().toUpperCase();
+        
+        if (unit) {
+            if (selectedJenjang === "SEMUA" || selectedJenjang === "" || jenjang === selectedJenjang) {
+                unique.add(unit);
+            }
+        }
+    });
+    
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#lapbulstatus_filterSekolah');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Sekolah -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${lapbulstatus_escapeHtml(u)}">${lapbulstatus_escapeHtml(u)}</option>`); });
+    
+    if(currentVal && unique.has(currentVal)) { 
+        select.val(currentVal); 
+    } else {
+        select.val("SEMUA");
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA DARI SERVER (Hukum Ke-8)
+// =================================================================
+function lapbulstatus_prosesCariData() {
+    var valTahun = $('#lapbulstatus_filterTahun').val();
+    if (!valTahun) { Sultan.notif.info('Pilih Tahun terlebih dahulu.'); return; }
+    
+    if (valTahun === LAPBULSTATUS_CACHE_TAHUN && LAPBULSTATUS_CACHE_DATA.length > 0) { 
+        lapbulstatus_terapkanFilterLokal(); 
+    } else { 
+        lapbulstatus_tarikDataServer(); 
+    }
+}
+
+function lapbulstatus_tarikDataServer() {
+    var valTahun = $('#lapbulstatus_filterTahun').val();
+    if(!valTahun) return;
+
+    var btn = $('#lapbulstatus_btnCari');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    // MUNCULKAN RUANG A JIKA TABEL BELUM PERNAH DIBUAT (Cegah Blink/Double Load)
+    if (!$.fn.DataTable.isDataTable('#lapbulstatus_tabelUtama')) {
+        $('#lapbulstatus_tableState').hide();
+        $('#lapbulstatus_loadingText').html('Menyinkronkan data server...');
+        $('#lapbulstatus_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            
+            if (res.error) {
+                $('#lapbulstatus_tableState').hide();
+                $('#lapbulstatus_loadingState').show();
+                $('#lapbulstatus_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${lapbulstatus_escapeHtml(res.error)}</span>`);
+                return;
+            }
+
+            try {
+                LAPBULSTATUS_CACHE_DATA = res.rows || [];
+                LAPBULSTATUS_CACHE_TAHUN = valTahun; 
+                
+                // Jika Admin, perbarui list sekolah sesuai data yg masuk
+                if (LAPBULSTATUS_IS_ADMIN) lapbulstatus_updateDropdownSekolah();
+                
+                // Render One-Shot (Blink dibunuh di sini)
+                lapbulstatus_terapkanFilterLokal(); 
+
+            } catch(e) { 
+                console.error("Table Error:", e);
+                $('#lapbulstatus_tableState').hide();
+                $('#lapbulstatus_loadingState').show();
+                $('#lapbulstatus_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + lapbulstatus_escapeHtml(e.message) + '</span>'); 
+            }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            $('#lapbulstatus_tableState').hide();
+            $('#lapbulstatus_loadingState').show();
+            $('#lapbulstatus_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${lapbulstatus_escapeHtml(err.message)}</span>`);
+        })
+        .getRekapLapbulStatus(valTahun); 
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK (BAB VII)
+// =================================================================
+function lapbulstatus_terapkanFilterLokal() {
+    var reqTahun = String($('#lapbulstatus_filterTahun').val() || "").trim();
+    var reqJenjang = LAPBULSTATUS_IS_ADMIN ? String($('#lapbulstatus_filterJenjang').val() || "").trim().toUpperCase() : "";
+    var tAdminUnit = LAPBULSTATUS_IS_ADMIN ? String($('#lapbulstatus_filterSekolah').val() || "").toUpperCase() : "";
+    var tUnitUser  = String(LAPBULSTATUS_UNIT_TERKUNCI || "").trim().toUpperCase();
+
+    var hasil = LAPBULSTATUS_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase(); 
+        var rJenjang = String(row[2] || "").trim().toUpperCase();
+        var rTahun = String(row[3] || "").trim();
+        
+        // 1. Filter Sekolah (Gatekeeper Mutlak)
+        var passUnit = false;
+        if (LAPBULSTATUS_IS_ADMIN) {
+            passUnit = (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit);
+        } else {
+            passUnit = (rUnit === tUnitUser);
+        }
+        if (!passUnit) return false;
+
+        // 2. Filter Tahun
+        if (reqTahun && rTahun !== reqTahun) return false;
+
+        // 3. Filter Jenjang
+        if (reqJenjang && reqJenjang !== "SEMUA" && rJenjang !== reqJenjang) return false;
+
+        return true;
+    });
+
+    lapbulstatus_renderTabel(hasil);
+}
+
+function lapbulstatus_renderTabel(rows) {
+    var isFirstLoad = !$.fn.DataTable.isDataTable('#lapbulstatus_tabelUtama');
+    var dtArray = [];
+    
+    if (rows && rows.length > 0) {
+        dtArray = rows.map(function(row) {
+            var newRow = [];
+            
+            // VAKSIN LEBAR KOLOM: .text-nowrap memaksa browser menyesuaikan lebar div
+            var safeNama = lapbulstatus_escapeHtml(row[0]);
+            var safeNpsn = lapbulstatus_escapeHtml(row[1] || "-");
+            newRow.push(`<div class="font-weight-bold text-dark text-nowrap">${safeNama}</div><div class="small text-muted text-nowrap">${safeNpsn}</div>`);
+            
+            // Index 1: Jenjang
+            var j = String(row[2] || "").trim().toUpperCase();
+            var badgeClass = 'badge-sultan-light-secondary';
+            if (j === 'SD') badgeClass = 'badge-sultan-light-info';
+            else if (j === 'TK') badgeClass = 'badge-sultan-light-warning';
+            else if (j === 'KB') badgeClass = 'badge-sultan-light-success';
+            else if (j === 'SPS') badgeClass = 'badge-sultan-light-primary';
+            else if (j === 'TPA') badgeClass = 'badge-sultan-light-danger';
+            
+            newRow.push(`<span class="badge badge-sultan ${badgeClass} px-3 py-1" style="font-size: 13px;">${j}</span>`);
+            
+            // Index 2 - 13: Status Bulan Jan s.d Des (Data dari Server Index 4 s.d 15)
+            for (var i = 4; i <= 15; i++) {
+                newRow.push(lapbulstatus_buildBadgeSultan(row[i]));
+            }
+            
+            return newRow;
+        });
+    }
+
+    // --- INISIALISASI / SUNTIK DATA ---
+    $('#lapbulstatus_loadingState').hide();
+    $('#lapbulstatus_tableState').show(); // BAB VII: Tampilkan wadah DULU sebelum inisiasi
+
+    if (isFirstLoad) {
+        LAPBULSTATUS_TABEL_INSTANCE = $('#lapbulstatus_tabelUtama').DataTable({
+            "data": dtArray,       
+            "ordering": false, 
+            "pageLength": 10, 
+            "autoWidth": false, 
+            "destroy": true,
+            "deferRender": true, // BAB VII: Performa Turbo Seamless
+            // BAB VII & BAB IX: Tidak pakai scrollX di config DataTables agar border aman
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" + 
+                   "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "search": "", "searchPlaceholder": "Cari Data...",
+                "emptyTable": '<div class="py-5 text-center text-muted"><div class="mb-3"><i class="fas fa-clipboard-list fa-3x text-gray-300" style="opacity: 0.6;"></i></div><h6 class="font-weight-bold text-dark mb-1">Belum Ada Laporan</h6><p class="small mb-0">Tidak ada pengiriman laporan bulan untuk filter tersebut.</p></div>' 
+            }, 
+            "columnDefs": [ 
+                // VAKSIN LEBAR KOLOM: width: auto
+                { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle border-right text-left" },
+                { "targets": "_all", "className": "text-center align-middle" }
+            ],
+            // BAB VII: Hapus animasi createdRow, hanya pasang z-index untuk sticky column
+            "createdRow": function(row, data, dataIndex) {
+                $(row).children('td').eq(0).attr('style', 'position: sticky; left: 0; z-index: 2; background-color: #ffffff;');
+            }
+        }); 
+        
+        // VAKSIN MICRO-BLINK: Adjust kolom setelah tabel terlukis di DOM
+        setTimeout(function() {
+            LAPBULSTATUS_TABEL_INSTANCE.columns.adjust();
+        }, 100);
+        
+    } else {
+        // Jika tabel sudah hidup, injeksi array baru (Zero Blink)
+        LAPBULSTATUS_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        setTimeout(function() {
+            LAPBULSTATUS_TABEL_INSTANCE.columns.adjust();
+        }, 50);
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: PEMBERSIH XSS (Hukum Ke-5 & 6)
+// =================================================================
+function lapbulstatus_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+
+function lapbulstatus_escapeJs(str) { 
+    if (!str) return ""; 
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>"); 
+}
+
+function lapbulstatus_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Admin',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+// =================================================================
+// 6. RENDER ICON SULTAN (BAB VI - ANTI HOVER)
+// =================================================================
+function lapbulstatus_buildBadgeSultan(statusString) {
+    if (!statusString || statusString === "-" || statusString === "") {
+        return '<i class="fas fa-minus text-black-50 small" style="opacity:0.2"></i>';
+    }
+    
+    // Status format dari server: "STATUS | Keterangan"
+    var parts = String(statusString).split('|');
+    var rawStatus = String(parts[0]).trim();
+    var ket = parts.length > 1 ? String(parts[1]).trim() : "";
+
+    var stLower = rawStatus.toLowerCase();
+    var baseClass = "btn btn-sm shadow-sm font-weight-bold"; 
+    var iconHtml = "";
+
+    // VAKSIN EVENT: Tombol menggunakan class untuk delegation, bukan onclick
+    if (stLower.includes('revisi') || stLower.includes('perbaiki')) {
+        if (ket.length > 2) {
+            var safeKet = lapbulstatus_escapeJs(ket);
+            iconHtml = `<button type="button" class="${baseClass} btn-warning text-dark btn-baca-catatan" data-pesan="${safeKet}"><i class="fas fa-sync-alt"></i></button>`;
+        } else {
+            iconHtml = `<span class="badge badge-sultan badge-sultan-light-warning p-2"><i class="fas fa-sync-alt"></i></span>`;
+        }
+    }
+    else if (stLower.includes('tolak') || stLower.includes('x') || stLower.includes('salah')) {
+        if (ket.length > 2) {
+            var safeKet = lapbulstatus_escapeJs(ket);
+            iconHtml = `<button type="button" class="${baseClass} btn-danger btn-baca-catatan" data-pesan="${safeKet}"><i class="fas fa-times"></i></button>`;
+        } else {
+            iconHtml = `<span class="badge badge-sultan badge-sultan-light-danger p-2"><i class="fas fa-times"></i></span>`;
+        }
+    }
+    else if (stLower.includes('verif') || stLower.includes('setuju') || stLower.includes('ok') || stLower.includes('valid')) {
+        iconHtml = `<span class="badge badge-sultan badge-sultan-light-success p-2"><i class="fas fa-check"></i></span>`;
+    }
+    else if (stLower.includes('proses') || stLower.includes('tunggu') || rawStatus.length > 5) {
+        iconHtml = `<span class="badge badge-sultan badge-sultan-light-info p-2"><i class="fas fa-clock"></i></span>`;
+    }
+    else {
+        return `<span class="text-dark font-weight-bold">${lapbulstatus_escapeHtml(rawStatus)}</span>`;
+    }
+
+    return iconHtml;
+}
+</script>

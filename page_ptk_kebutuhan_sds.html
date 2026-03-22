@@ -1,0 +1,440 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-chalkboard-teacher text-maroon mr-2"></i>Kebutuhan Guru SD Swasta
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#kebutuhanptksds_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="kebutuhanptksds_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Halaman ini bersifat <b>Read-Only (Hanya Tampil)</b>.</li>
+                  <li class="mb-1">Data bersumber dari analisis otomatis <i>Sheet</i> "Kebutuhan Guru SDS".</li>
+                  <li class="mb-1">Jumlah rombel dan jumlah murid bersumber dari laporan bulan yang terakhir dikirim.</li>
+                  <li class="mb-1">Kolom <b>+/-</b> berwarna <span class="text-danger font-weight-bold">Merah</span> jika Kekurangan Guru, dan <span class="text-primary font-weight-bold">Biru</span> jika Kelebihan Guru.</li>
+                  <li>Scroll ke samping untuk melihat seluruh data guru mata pelajaran.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center">
+
+                <select id="kebutuhanptksds_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="SEMUA">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical"></div>
+
+                <button type="button" id="kebutuhanptksds_btnSync" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            
+            <div id="kebutuhanptksds_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold" id="kebutuhanptksds_loadingText">Mengambil Analisis Kebutuhan Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="kebutuhanptksds_tableState" style="display:none;">
+              <table id="kebutuhanptksds_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact table-header-compact text-nowrap mb-0 w-100" style="font-size: 0.85rem; border: none !important;">
+                
+                <thead class="font-weight-bold text-dark bg-light">
+                  <tr>
+                    <th rowspan="2" class="th-main align-middle bg-white text-maroon text-left px-3 py-1 col-sticky-left" style="z-index:50; border-right: 2px solid #dee2e6; border-bottom: 2px solid #800000; min-width:250px;">Unit Kerja</th>
+                    
+                    <th rowspan="2" class="th-main align-middle text-center px-2 py-1" style="border-bottom: 2px solid #800000;">Jml<br>Rombel</th>
+                    <th rowspan="2" class="th-main align-middle text-center px-2 py-1" style="border-bottom: 2px solid #800000;">Jml<br>Murid</th>
+
+                    <th colspan="5" class="th-main align-middle text-center px-2 py-1" style="background-color: #e3f2fd; border-bottom: 1px solid #90caf9;">Kepala Sekolah</th>
+                    <th colspan="6" class="th-main align-middle text-center px-2 py-1" style="background-color: #e8f5e9; border-bottom: 1px solid #a5d6a7;">Guru Kelas</th>
+                    <th colspan="6" class="th-main align-middle text-center px-2 py-1" style="background-color: #fff3e0; border-bottom: 1px solid #ffcc80;">Guru PJOK</th>
+                    <th colspan="6" class="th-main align-middle text-center px-2 py-1" style="background-color: #f3e5f5; border-bottom: 1px solid #ce93d8;">Guru PAI</th>
+                  </tr>
+
+                  <tr class="small text-center">
+                    <th class="th-sub px-2 py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">Keb.</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">GTY</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">+/-</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">Pens 26</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">Pens 27</th>
+
+                    <th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">Keb.</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">GTY</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">+/-</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">Pens 26</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">Pens 27</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">GTT</th>
+
+                    <th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">Keb.</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">GTY</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">+/-</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">Pens 26</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">Pens 27</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">GTT</th>
+
+                    <th class="th-sub px-2 py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">Keb.</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">GTY</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">+/-</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">Pens 26</th>
+                    <th class="th-sub px-2 py-1 text-danger" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">Pens 27</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000;">GTT</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+
+                <tfoot class="bg-light font-weight-bold" style="border-top: 3px solid #800000;">
+                    <tr>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                        <th></th><th></th><th></th><th></th><th></th><th></th>
+                    </tr>
+                </tfoot>
+
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// =================================================================
+// BAB I: ISOLASI VARIABEL GLOBAL & PENGAMAN SINTAKSIS
+// =================================================================
+var KEBUTUHANPTKSDS_CACHE_DATA = [];
+var KEBUTUHANPTKSDS_TABEL_INSTANCE = null;
+
+var KEBUTUHANPTKSDS_USER_AKTIF = "";
+var KEBUTUHANPTKSDS_IS_ADMIN = false;
+var KEBUTUHANPTKSDS_UNIT_TERKUNCI = ""; 
+var KEBUTUHANPTKSDS_USER_NPSN = "";
+
+$(document).ready(function() {
+    KEBUTUHANPTKSDS_TABEL_INSTANCE = null;
+    $('#kebutuhanptksds_tableState').hide();
+    $('#kebutuhanptksds_loadingState').show();
+
+    // Verifikasi Sesi Kepatuhan Sultan
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        KEBUTUHANPTKSDS_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        KEBUTUHANPTKSDS_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        KEBUTUHANPTKSDS_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { KEBUTUHANPTKSDS_USER_NPSN = ""; KEBUTUHANPTKSDS_IS_ADMIN = false; }
+
+    // VAKSIN DELEGASI EVENT JQUERY 
+    $(document).on('change', '#kebutuhanptksds_filterUnit', kebutuhanptksds_terapkanFilterLokal);
+    $(document).on('click', '#kebutuhanptksds_btnSync', kebutuhanptksds_tarikDataServer);
+
+    kebutuhanptksds_validasiAksesUser(); 
+});
+
+function kebutuhanptksds_updateTabelKosong(htmlContent) {
+    if(KEBUTUHANPTKSDS_TABEL_INSTANCE) {
+        $('#kebutuhanptksds_tableState').show();
+        $('#kebutuhanptksds_loadingState').hide();
+        KEBUTUHANPTKSDS_TABEL_INSTANCE.clear().draw();
+        var emptyRow = $('#kebutuhanptksds_tabelUtama tbody tr td.dataTables_empty');
+        if (emptyRow.length > 0) { emptyRow.html(htmlContent); }
+    }
+}
+
+// =================================================================
+// 2. GATEKEEPER & FETCH SERVER (BAB VIII)
+// =================================================================
+function kebutuhanptksds_validasiAksesUser() {
+    $('#kebutuhanptksds_loadingText').html('Mempersiapkan Akses...');
+
+    if (KEBUTUHANPTKSDS_IS_ADMIN) {
+        $('#kebutuhanptksds_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#kebutuhanptksds_btnSync').prop('disabled', false);
+        kebutuhanptksds_tarikDataServer(); 
+    } else {
+        if (!KEBUTUHANPTKSDS_USER_NPSN) {
+            $('#kebutuhanptksds_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            kebutuhanptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-ban fa-2x mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</div>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#kebutuhanptksds_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    kebutuhanptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br>' + kebutuhanptksds_escapeHtml(dataUnit.error) + '</div>');
+                    return;
+                }
+
+                KEBUTUHANPTKSDS_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#kebutuhanptksds_filterUnit').empty().append('<option value="' + kebutuhanptksds_escapeHtml(KEBUTUHANPTKSDS_UNIT_TERKUNCI) + '">' + kebutuhanptksds_escapeHtml(KEBUTUHANPTKSDS_UNIT_TERKUNCI) + '</option>').prop('disabled', true);
+                $('#kebutuhanptksds_btnSync').prop('disabled', false);
+                kebutuhanptksds_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#kebutuhanptksds_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                kebutuhanptksds_updateTabelKosong('<div class="text-danger"><i class="fas fa-wifi fa-2x mb-2"></i><br>Koneksi Terputus: ' + kebutuhanptksds_escapeHtml(err.message) + '</div>');
+            })
+            .getUnitKerjaByNpsnPTK(KEBUTUHANPTKSDS_USER_NPSN);
+    }
+}
+
+function kebutuhanptksds_tarikDataServer() {
+    KEBUTUHANPTKSDS_CACHE_DATA = [];
+    
+    var btn = $('#kebutuhanptksds_btnSync');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    if (KEBUTUHANPTKSDS_IS_ADMIN) $('#kebutuhanptksds_filterUnit').prop('disabled', true);
+    
+    $('#kebutuhanptksds_tableState').hide();
+    $('#kebutuhanptksds_loadingText').html('Mengambil Analisis Kebutuhan Server...');
+    $('#kebutuhanptksds_loadingState').show();
+
+    google.script.run
+        .withSuccessHandler(function(data) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            if (KEBUTUHANPTKSDS_IS_ADMIN) $('#kebutuhanptksds_filterUnit').prop('disabled', false);
+            
+            KEBUTUHANPTKSDS_CACHE_DATA = data || [];
+            if (KEBUTUHANPTKSDS_IS_ADMIN) kebutuhanptksds_populateFilterUnit();
+            
+            kebutuhanptksds_terapkanFilterLokal();
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-danger"></i>');
+            $('#kebutuhanptksds_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + kebutuhanptksds_escapeHtml(err.message) + '</span>');
+            Sultan.alert('error', 'Koneksi Terputus', err.message);
+        })
+        .getDataKebutuhanGuruSDS(); 
+}
+
+function kebutuhanptksds_populateFilterUnit() {
+    var uniqueUnit = new Set();
+    KEBUTUHANPTKSDS_CACHE_DATA.forEach(function(row) {
+        var rUnit = String(row[0] || "").trim();
+        if(rUnit) uniqueUnit.add(rUnit);
+    });
+    
+    var currentUnit = $('#kebutuhanptksds_filterUnit').val();
+    var $selUnit = $('#kebutuhanptksds_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    
+    Array.from(uniqueUnit).sort().forEach(function(u) {
+        $selUnit.append($('<option>', {value: u, text: u}));
+    });
+    
+    if (currentUnit && uniqueUnit.has(currentUnit)) $selUnit.val(currentUnit);
+}
+
+function kebutuhanptksds_terapkanFilterLokal() {
+    var tAdminUnit = KEBUTUHANPTKSDS_IS_ADMIN ? ($('#kebutuhanptksds_filterUnit').val() || "SEMUA").toUpperCase() : "";
+    var tUnitUser  = String(KEBUTUHANPTKSDS_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var filteredData = KEBUTUHANPTKSDS_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase();
+        
+        if (KEBUTUHANPTKSDS_IS_ADMIN) {
+            return (tAdminUnit === "SEMUA" || rUnit === tAdminUnit);
+        } else {
+            return (rUnit === tUnitUser);
+        }
+    });
+
+    kebutuhanptksds_renderTabel(filteredData);
+}
+
+// =================================================================
+// 3. RENDER ENGINE MATRIKS: EXCEL SOLID COLOR (BAB VII)
+// =================================================================
+function kebutuhanptksds_getColumnColor(index) {
+    // Referensi Warna Matriks SDS (Backend Index: 4 s/d 26)
+    if (index >= 4 && index <= 8) return "#e3f2fd";   // KS
+    if (index >= 9 && index <= 14) return "#e8f5e9";  // G.Kelas
+    if (index >= 15 && index <= 20) return "#fff3e0"; // PJOK
+    if (index >= 21 && index <= 26) return "#f3e5f5"; // PAI
+    return "#ffffff"; 
+}
+
+function kebutuhanptksds_escapeHtml(text) {
+    if (!text) return "";
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function kebutuhanptksds_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+
+        // Kolom 1 (Index 0 di DT): Hanya Unit Kerja (NPSN Dihapus Mutlak)
+        var uiUnit = '<div class="font-weight-bold text-dark text-left text-wrap" style="min-width: 250px;">' + (kebutuhanptksds_escapeHtml(row[0]) || '-') + '</div>';
+        arrRow.push(uiUnit);
+
+        // Kolom 2 & 3 (Index 1 & 2 di DT): Jml Rombel & Murid
+        arrRow.push(row[2] || '0');
+        arrRow.push(row[3] || '0');
+
+        // Kolom Data Numerik (Index 3 s/d 25 di DT, Backend Index 4 s/d 26)
+        // KALIBRASI MUTLAK: Looping 23 kolom (4 s/d 26)
+        for (var c = 4; c <= 26; c++) {
+            var val = parseInt(row[c]) || 0;
+            if (val === 0) {
+                arrRow.push('<span class="text-muted opacity-50">-</span>');
+            } else {
+                arrRow.push('<span class="font-weight-bold">' + val + '</span>');
+            }
+        }
+        dtArray.push(arrRow);
+    });
+
+    if (!$.fn.DataTable.isDataTable('#kebutuhanptksds_tabelUtama')) {
+        KEBUTUHANPTKSDS_TABEL_INSTANCE = $('#kebutuhanptksds_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, 
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            "columnDefs": [
+                { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-left px-3 py-1" },
+                { "targets": "_all", "className": "text-center align-middle p-0" } 
+            ],
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "emptyTable": '<div class="py-4 text-center text-muted"><i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3" style="opacity: 0.6;"></i><br><h6 class="font-weight-bold text-dark mb-1">Belum Ada Data</h6><p class="small mb-0">Tidak ada analisis kebutuhan PTK untuk filter terpilih.</p></div>' 
+            },
+            "createdRow": function(row, data, dataIndex) {
+                // Background Putih untuk Rombel (1) dan Murid (2)
+                $('td', row).eq(1).css('background-color', '#ffffff').addClass('text-dark py-1');
+                $('td', row).eq(2).css('background-color', '#ffffff').addClass('text-dark py-1');
+
+                // VAKSIN EXCEL: Mewarnai tag dasar <td> 
+                // DT Index 3 s/d 25 -> Konversi ke Backend 4 s/d 26
+                for (var i = 3; i <= 25; i++) {
+                    var colIndexBackend = i + 1; 
+                    var td = $('td', row).eq(i);
+                    var valStr = String(data[i]).replace(/<[^>]*>?/gm, '').trim();
+                    var val = parseInt(valStr) || 0;
+                    
+                    var bgColor = kebutuhanptksds_getColumnColor(colIndexBackend);
+
+                    // LOGIKA PERINGATAN +/- (Indeks backend SDS: 6, 11, 17, 23)
+                    if ([6, 11, 17, 23].includes(colIndexBackend)) {
+                        if (val < 0) {
+                            bgColor = "#dc3545"; // Merah (Kurang)
+                            td.addClass('text-white');
+                        } else if (val > 0) {
+                            bgColor = "#007bff"; // Biru (Lebih)
+                            td.addClass('text-white');
+                        } else {
+                            td.addClass('text-dark');
+                        }
+                    } else {
+                        // Jika ada data pensiun (Indeks backend SDS: 7, 8, 12, 13, 18, 19, 24, 25)
+                        if ([7, 8, 12, 13, 18, 19, 24, 25].includes(colIndexBackend) && val > 0) {
+                            td.addClass('text-danger');
+                        } else {
+                            td.addClass('text-dark');
+                        }
+                    }
+                    
+                    td.css('background-color', bgColor).addClass('py-1');
+                }
+            },
+            "footerCallback": function (row, data, start, end, display) {
+                var api = this.api();
+                
+                // KALIBRASI MUTLAK LOOPING: Index 1 s/d 25 -> 25 elemen total (Rombel, Murid, 23 Matriks Guru)
+                var totalArr = new Array(25).fill(0); 
+
+                // Kalkulasi hanya pada baris yang tampil (ter-filter)
+                api.rows({ search: 'applied' }).data().each(function(rowData) {
+                    for (var i = 1; i <= 25; i++) {
+                        var rawStr = String(rowData[i]);
+                        var val = parseInt(rawStr.replace(/<[^>]*>?/gm, '').replace(/,/g, '')) || 0;
+                        totalArr[i-1] += val;
+                    }
+                });
+
+                var footHtml = '<td class="bg-light text-maroon text-left font-weight-bold px-3 py-1 align-middle col-sticky-left" style="z-index:40; border-right: 2px solid #dee2e6;">TOTAL JUMLAH</td>';
+                
+                // Rombel & Murid (DT col 1, 2 => totalArr 0, 1)
+                footHtml += '<td class="text-center px-2 py-1 font-weight-bold text-maroon bg-white align-middle" style="height: 35px;">' + totalArr[0] + '</td>';
+                footHtml += '<td class="text-center px-2 py-1 font-weight-bold text-maroon bg-white align-middle" style="height: 35px;">' + totalArr[1] + '</td>';
+
+                // Rekap Metrik Guru (DT col 3-25 => totalArr index 2-24)
+                for (var i = 2; i <= 24; i++) {
+                    var colIndexBackend = i + 2; // Mapping totalArr[2] -> backend 4
+                    var val = totalArr[i];
+                    var bgColor = kebutuhanptksds_getColumnColor(colIndexBackend); 
+                    var txtColor = "text-maroon";
+
+                    // Footer diwarnai merah/biru jika kolom tersebut adalah kolom +/-
+                    if ([6, 11, 17, 23].includes(colIndexBackend)) {
+                        if (val < 0) {
+                            bgColor = "#dc3545";
+                            txtColor = "text-white";
+                        } else if (val > 0) {
+                            bgColor = "#007bff";
+                            txtColor = "text-white";
+                        }
+                    } else if ([7, 8, 12, 13, 18, 19, 24, 25].includes(colIndexBackend) && val > 0) {
+                        txtColor = "text-danger"; // Total Pensiun merah
+                    }
+                    
+                    var style = 'background-color: ' + bgColor + ' !important; vertical-align: middle; height: 35px;';
+                    footHtml += '<td class="text-center px-2 py-1 font-weight-bold ' + txtColor + '" style="' + style + '">' + val + '</td>';
+                }
+
+                // Injeksi mutlak ke tag pancingan <tr> di dalam <tfoot>
+                $(api.table().footer()).find('tr').html(footHtml);
+            }
+        });
+
+        $('#kebutuhanptksds_loadingState').hide();
+        $('#kebutuhanptksds_tableState').show();
+        KEBUTUHANPTKSDS_TABEL_INSTANCE.columns.adjust();
+    } 
+    else {
+        KEBUTUHANPTKSDS_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#kebutuhanptksds_tableState').is(':hidden')) {
+            $('#kebutuhanptksds_loadingState').hide();
+            $('#kebutuhanptksds_tableState').show();
+            KEBUTUHANPTKSDS_TABEL_INSTANCE.columns.adjust();
+        }
+    }
+}
+</script>

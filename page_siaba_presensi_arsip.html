@@ -1,0 +1,335 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-archive text-maroon mr-2"></i>Arsip Presensi Siaba
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        
+        <div class="card-sultan p-3 mb-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center">
+            
+            <div class="d-flex align-items-center flex-wrap gap-10">
+              
+              <button type="button" id="arsipsiaba_btnHome" class="btn border-tegas shadow-sm bg-white" title="Folder Utama">
+                <i class="fas fa-home text-maroon"></i>
+              </button>
+
+              <button type="button" id="arsipsiaba_btnBack" class="btn border-tegas shadow-sm bg-white" title="Kembali" style="display:none;">
+                <i class="fas fa-level-up-alt text-dark font-weight-bold"></i>
+              </button>
+
+              <button type="button" id="arsipsiaba_btnRefresh" class="btn border-tegas shadow-sm bg-white" title="Refresh Folder Ini">
+                <i class="fas fa-sync-alt text-blue-sultan"></i>
+              </button>
+
+              <div class="divider-vertical"></div>
+
+              <div class="d-flex align-items-center bg-abu-terang px-3 py-2 rounded border-tegas" style="min-width: 200px;">
+                  <i class="fas fa-folder-open text-gold-sultan mr-2"></i>
+                  <span id="arsipsiaba_folderNameLabel" class="font-weight-bold text-dark small text-uppercase">MEMUAT...</span>
+              </div>
+            </div>
+
+            <div class="mt-2 mt-xl-0 text-muted small font-weight-bold">
+               Total Item: <span id="arsipsiaba_totalItemCount" class="text-maroon">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan">
+          <div class="card-body p-3">
+              
+              <div id="arsipsiaba_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 40vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="arsipsiaba_loadingText">Menghubungkan ke Arsip Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="arsipsiaba_tableState" style="display: none;">
+                  <table id="arsipsiaba_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+                    <thead class="bg-light">
+                      <tr>
+                        <th class="text-center align-middle px-2" style="width: 1%; white-space: nowrap;">No</th>
+                        <th class="text-left align-middle px-3" style="width: auto; white-space: nowrap;">Nama File / Folder</th>
+                        <th class="text-center align-middle px-2" style="width: 1%; white-space: nowrap;">Ukuran</th>
+                        <th class="text-center align-middle px-2" style="width: 1%; white-space: nowrap;">Tanggal</th>
+                        <th class="text-center align-middle px-2 col-sticky-right" style="width: 1%; white-space: nowrap;">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="arsipsiaba_modalPreview" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-full" role="document"> 
+    <div class="modal-content modal-content-full-height border-0 shadow-lg modal-content-sultan"> 
+      
+      <div class="modal-header bg-maroon py-2">
+        <h6 class="modal-title font-weight-bold text-white">
+            <i class="fas fa-file-alt mr-2"></i> Preview Dokumen Arsip
+        </h6>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      
+      <div class="modal-body modal-body-full bg-dark position-relative p-0" style="height: calc(100vh - 55px);">
+          <iframe id="arsipsiaba_framePreview" class="iframe-full w-100 h-100 border-0 d-none" src=""></iframe>
+          <div id="arsipsiaba_loadingPreviewPDF" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100">
+              <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p></div>
+          </div>
+      </div>
+      
+      <div class="modal-footer justify-content-between bg-white py-2 border-top" style="flex-shrink: 0;">
+          <button type="button" class="btn border-tegas shadow-sm font-weight-bold px-4" data-dismiss="modal">Tutup</button>
+          
+          <a id="arsipsiaba_btnDownloadFinal" href="#" target="_blank" class="btn btn-success shadow-sm font-weight-bold px-4">
+              <i class="fas fa-download mr-2"></i> UNDUH FILE
+          </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // =================================================================
+  // ISOLASI VARIABEL GLOBAL (PREFIX ARSIPSIABA_ MUTLAK)
+  // =================================================================
+  var ARSIPSIABA_CURRENT_FOLDER = null; 
+  var ARSIPSIABA_PARENT_FOLDER = null;
+  var ARSIPSIABA_TABEL_INSTANCE = null;
+
+  // =================================================================
+  // 1. INITIALIZATION & VAKSIN SPA EVENT DELEGATION
+  // =================================================================
+  $(document).ready(function() {
+      
+      // VAKSIN EVENT: Menghubungkan fungsi klik dengan tombol (Anti-Memory Leak)
+      $(document).off('click', '#arsipsiaba_btnHome').on('click', '#arsipsiaba_btnHome', arsipsiaba_goHome);
+      $(document).off('click', '#arsipsiaba_btnBack').on('click', '#arsipsiaba_btnBack', arsipsiaba_navigateUp);
+      $(document).off('click', '#arsipsiaba_btnRefresh').on('click', '#arsipsiaba_btnRefresh', arsipsiaba_refreshFolder);
+      
+      // Event Aksi Tabel (Zero-Blink Action)
+      $(document).off('click', '.arsipsiaba-btn-folder').on('click', '.arsipsiaba-btn-folder', function(e) {
+          e.stopPropagation();
+          arsipsiaba_loadFolder($(this).data('id'));
+      });
+      $(document).off('click', '.arsipsiaba-btn-file').on('click', '.arsipsiaba-btn-file', function(e) {
+          e.stopPropagation();
+          arsipsiaba_openPreview($(this).data('id'), $(this).data('mime'));
+      });
+
+      // VAKSIN MEMORI IFRAME (BAB V)
+      $('#arsipsiaba_modalPreview').on('hidden.bs.modal', function () {
+          $('#arsipsiaba_framePreview').attr('src', '').addClass('d-none');
+          $('#arsipsiaba_loadingPreviewPDF').removeClass('d-none');
+      });
+
+      // SULTAN UX: Baris bisa diklik (Klik Baris = Klik Tombol Pertama)
+      $('#arsipsiaba_tabelUtama tbody').on('click', 'tr', function(e) {
+          if ($(e.target).is('button') || $(e.target).closest('button').length) return;
+          var btn = $(this).find('button.btn-aksi-sultan');
+          if(btn.length > 0) { btn[0].click(); }
+      });
+
+      // Mulai dengan meload Root Folder
+      arsipsiaba_goHome(); 
+  });
+
+  // =================================================================
+  // 2. LOGIKA LOAD FOLDER (ZERO-BLINK FETCH)
+  // =================================================================
+  function arsipsiaba_loadFolder(folderId) {
+      $('#arsipsiaba_folderNameLabel').html('<i class="fas fa-spinner fa-spin mr-2"></i> MEMUAT...');
+      
+      // VAKSIN BLINK: Jika tabel sudah ada, JANGAN SEMBUNYIKAN WADAHNYA.
+      if ($.fn.DataTable.isDataTable('#arsipsiaba_tabelUtama')) {
+          ARSIPSIABA_TABEL_INSTANCE.clear().draw(false);
+          $('.dataTables_empty').html('<div class="py-5 text-center text-muted font-weight-bold"><i class="fas fa-circle-notch fa-spin fa-2x mb-3 text-maroon"></i><br>Membaca folder dari Server...</div>');
+      } else {
+          // Hanya saat pertama kali load SPA, tunjukkan loading state besar
+          $('#arsipsiaba_tableState').hide();
+          $('#arsipsiaba_loadingState').show();
+      }
+      
+      google.script.run
+        .withSuccessHandler(arsipsiaba_renderArsipTable)
+        .withFailureHandler(function(err) {
+           if ($.fn.DataTable.isDataTable('#arsipsiaba_tabelUtama')) {
+               $('.dataTables_empty').html(`<div class="py-5 text-center text-danger font-weight-bold"><i class="fas fa-wifi fa-2x mb-3"></i><br>Gagal memuat folder:<br>${arsipsiaba_escapeHtml(err.message)}</div>`);
+           } else {
+               $('#arsipsiaba_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${arsipsiaba_escapeHtml(err.message)}</span>`);
+           }
+           $('#arsipsiaba_folderNameLabel').text('ERROR');
+        })
+        .getSiabaArsipData(folderId); // Memanggil Backend Baru
+  }
+
+  // =================================================================
+  // 3. RENDER ENGINE: PURE ARRAY PUSH (ANTI-GLITZ)
+  // =================================================================
+  function arsipsiaba_renderArsipTable(data) {
+      if (data.error) {
+          if ($.fn.DataTable.isDataTable('#arsipsiaba_tabelUtama')) {
+              $('.dataTables_empty').html(`<div class="py-5 text-center text-danger font-weight-bold"><i class="fas fa-exclamation-triangle fa-2x mb-3"></i><br>${arsipsiaba_escapeHtml(data.error)}</div>`);
+          } else {
+              $('#arsipsiaba_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${arsipsiaba_escapeHtml(data.error)}</span>`);
+          }
+          $('#arsipsiaba_folderNameLabel').text('ERROR AKSES');
+          return;
+      }
+
+      ARSIPSIABA_CURRENT_FOLDER = data.currentId;
+      ARSIPSIABA_PARENT_FOLDER = data.parentId;
+      
+      $('#arsipsiaba_folderNameLabel').text(data.currentName);
+      $('#arsipsiaba_totalItemCount').text(data.items ? data.items.length : 0);
+      
+      if (data.isRoot) $('#arsipsiaba_btnBack').hide();
+      else $('#arsipsiaba_btnBack').show();
+
+      var items = data.items || [];
+      var dtArray = [];
+
+      items.forEach(function(item, i) {
+          var arrRow = [];
+          var iconHtml = '';
+          var btnAction = '';
+          var nameHtml = '';
+
+          var safeName = arsipsiaba_escapeHtml(item.name);
+
+          // --- LOGIKA FOLDER ---
+          if (item.type === 'folder') {
+              iconHtml = '<i class="fas fa-folder text-gold-sultan mr-2 fa-lg"></i>';
+              nameHtml = `<span class="font-weight-bold text-dark text-nowrap">${safeName}</span>`;
+              btnAction = `<button type="button" class="btn btn-sm btn-outline-primary shadow-sm px-3 font-weight-bold btn-aksi-sultan arsipsiaba-btn-folder" data-id="${item.id}">Buka Folder</button>`;
+          } 
+          // --- LOGIKA FILE ---
+          else {
+              var mime = item.mimeType;
+              if (mime.includes('pdf')) iconHtml = '<i class="fas fa-file-pdf text-danger mr-2 fa-lg"></i>';
+              else if (mime.includes('image')) iconHtml = '<i class="fas fa-file-image text-purple-sultan mr-2 fa-lg"></i>';
+              else if (mime.includes('spreadsheet') || mime.includes('excel')) iconHtml = '<i class="fas fa-file-excel text-green-sultan mr-2 fa-lg"></i>';
+              else if (mime.includes('document') || mime.includes('word')) iconHtml = '<i class="fas fa-file-word text-blue-sultan mr-2 fa-lg"></i>';
+              else iconHtml = '<i class="fas fa-file text-secondary mr-2 fa-lg"></i>';
+
+              nameHtml = `<span class="text-dark text-nowrap">${safeName}</span>`;
+              btnAction = `<div class="d-flex flex-nowrap justify-content-center"><button type="button" class="btn btn-sm btn-success shadow-sm px-3 font-weight-bold btn-aksi-sultan arsipsiaba-btn-file" data-id="${item.id}" data-mime="${item.mimeType}"><i class="fas fa-eye mr-1"></i> Lihat & Unduh</button></div>`;
+          }
+
+          arrRow.push(i + 1);
+          arrRow.push(`<div class="d-flex align-items-center">${iconHtml} ${nameHtml}</div>`);
+          arrRow.push(`<span class="small font-weight-bold text-muted">${item.size}</span>`);
+          arrRow.push(`<span class="small font-weight-bold text-muted">${item.date}</span>`);
+          arrRow.push(btnAction);
+
+          dtArray.push(arrRow);
+      });
+
+      // VAKSIN INISIASI: Buat tabel hanya 1x seumur hidup
+      if (!$.fn.DataTable.isDataTable('#arsipsiaba_tabelUtama')) {
+          ARSIPSIABA_TABEL_INSTANCE = $('#arsipsiaba_tabelUtama').DataTable({
+              "data": dtArray,
+              "destroy": true,
+              "ordering": false, 
+              "pageLength": 10, 
+              "autoWidth": false, // VAKSIN: Matikan autowidth js, biarkan CSS tag <th> bekerja
+              "deferRender": true, 
+              "dom": "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+              "language": { 
+                  "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                  "search": "", "searchPlaceholder": "Cari Nama File/Folder...",
+                  "emptyTable": '<div class="py-5 text-center text-muted"><i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i><br>Folder arsip ini kosong.</div>' 
+              },
+              "columnDefs": [
+                  { "targets": 0, "className": "text-center align-middle px-2" },
+                  { "targets": 1, "className": "text-left align-middle px-3" },
+                  { "targets": [2,3,4], "className": "text-center align-middle px-2" }
+              ]
+          });
+          
+          // Buka blokir tirai secara instan
+          $('#arsipsiaba_loadingState').hide();
+          $('#arsipsiaba_tableState').show();
+          
+          // Cukup 1 kali adjust untuk merapikan tabel saat bangun dari kondisi `display: none`
+          setTimeout(function(){ ARSIPSIABA_TABEL_INSTANCE.columns.adjust(); }, 50);
+
+      } else {
+          // VAKSIN ANTI-GLITZ: Murni update data tanpa adjust columns berulang-ulang
+          ARSIPSIABA_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+          
+          // Timpa teks kosong jika benar-benar tidak ada data
+          if (dtArray.length === 0) {
+              $('.dataTables_empty').html('<div class="py-5 text-center text-muted"><i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i><br>Folder arsip ini kosong.</div>');
+          }
+      }
+  }
+
+  // =================================================================
+  // 4. KONTROL NAVIGASI
+  // =================================================================
+  function arsipsiaba_navigateUp() { if (ARSIPSIABA_PARENT_FOLDER) arsipsiaba_loadFolder(ARSIPSIABA_PARENT_FOLDER); }
+  function arsipsiaba_goHome() { arsipsiaba_loadFolder(null); }
+  function arsipsiaba_refreshFolder() { arsipsiaba_loadFolder(ARSIPSIABA_CURRENT_FOLDER); }
+
+  // =================================================================
+  // 5. PREVIEW & DOWNLOAD MODAL (VAKSIN BAB V)
+  // =================================================================
+  function arsipsiaba_openPreview(fileId, mimeType) {
+      if (mimeType === 'application/vnd.google-apps.folder') return;
+
+      var previewUrl = "https://drive.google.com/file/d/" + fileId + "/preview";
+      var downloadUrl = "https://drive.google.com/uc?export=download&id=" + fileId;
+
+      $('#arsipsiaba_loadingPreviewPDF').removeClass('d-none');
+      $('#arsipsiaba_framePreview').addClass('d-none').attr('src', previewUrl);
+      $('#arsipsiaba_btnDownloadFinal').attr('href', downloadUrl);
+
+      $('#arsipsiaba_modalPreview').modal('show');
+
+      // VAKSIN BAB V: Event iframe Load
+      $('#arsipsiaba_framePreview').off('load').on('load', function() {
+          $('#arsipsiaba_loadingPreviewPDF').addClass('d-none');
+          $(this).removeClass('d-none');
+      });
+
+      // Fallback 2.5 Detik
+      setTimeout(function() {
+          $('#arsipsiaba_loadingPreviewPDF').addClass('d-none');
+          $('#arsipsiaba_framePreview').removeClass('d-none');
+      }, 2500);
+  }
+
+  // =================================================================
+  // 6. HELPER UTILITY: XSS PREVENTION
+  // =================================================================
+  function arsipsiaba_escapeHtml(text) { 
+      if(!text) return ""; 
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+  }
+</script>

@@ -1,0 +1,633 @@
+<div class="content-header pb-0">
+  <div class="container-fluid"><div class="row mb-2"><div class="col-sm-12"><h5 class="m-0 font-weight-bold"><i class="fas fa-folder-open text-maroon mr-2"></i>Kelola E-File Pegawai</h5><hr class="style-sultan-solid"></div></div></div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                <select id="efilekelola_filterStatus" class="form-control form-control-sultan input-auto-width min-w-150 border-maroon"><option value="SEMUA">- Semua Status -</option><option value="diproses">Diproses</option><option value="disetujui">Disetujui</option><option value="revisi">Revisi</option><option value="ditolak">Ditolak</option></select>
+                <select id="efilekelola_filterKategori" class="form-control form-control-sultan input-auto-width min-w-150 border-info"><option value="SEMUA">- Semua Kategori -</option></select>
+                <div id="efilekelola_filterContainer" style="display: none;" class="d-flex align-items-center"><select id="efilekelola_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled><option value="">- Memvalidasi Akses... -</option></select></div>
+                <div class="divider-vertical d-none d-md-block"></div>
+                <button type="button" id="efilekelola_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data"><i class="fas fa-sync-alt text-maroon"></i></button>
+                <div class="ml-auto d-none d-md-block"></div>
+                <button type="button" id="efilekelola_btnTambah" class="btn btn-maroon text-white font-weight-bold shadow-sm" disabled><i class="fas fa-upload mr-1"></i> Unggah Berkas</button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            <div id="efilekelola_loadingState"><div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;"><div class="sultan-loading-container text-center"><i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i><h6 class="text-muted font-weight-bold mt-3" id="efilekelola_loadingText">Mempersiapkan Engine E-File...</h6></div></div></div>
+            <div id="efilekelola_tableState" style="display: none;">
+                <table id="efilekelola_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact text-nowrap mb-0 w-100">
+                    <thead class="bg-light">
+                      <tr>
+                        <th class="col-sticky-left border-right text-center align-middle" style="z-index: 5;">Aksi</th>
+                        <th class="text-left align-middle" style="min-width: 200px;">Identitas PTK</th>
+                        <th class="text-left align-middle">Kategori Berkas</th>
+                        <th class="text-center align-middle">Tahun</th>
+                        <th class="text-center align-middle">Periode/TMT</th>
+                        <th class="text-center align-middle">Dokumen</th>
+                        <th class="text-center align-middle">Status</th>
+                        <th class="text-left align-middle">Waktu Upload</th>
+                        <th class="text-left align-middle">Verifikasi</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="efilekelola_modalForm" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg modal-content-sultan bg-light">
+      <div class="modal-header bg-maroon text-white py-3"><h5 class="modal-title font-weight-bold"><i class="fas fa-cloud-upload-alt mr-2"></i>Unggah Arsip Baru</h5><button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button></div>
+      <form id="efilekelola_formUpload" novalidate>
+      <div class="modal-body p-4">
+        <div class="form-group mb-4 position-relative">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Pilih Pegawai <span class="text-danger">*</span></label>
+            <div class="input-group shadow-sm">
+                <div class="input-group-prepend"><span class="input-group-text bg-white border-maroon border-right-0"><i class="fas fa-search text-maroon"></i></span></div>
+                <input type="text" id="efilekelola_in_ptk_search" class="form-control form-control-sultan border-maroon border-left-0 font-weight-bold text-dark" placeholder="Ketik NIP, NIK, atau Nama Pegawai..." autocomplete="off">
+                <div class="input-group-append"><button type="button" class="btn btn-secondary font-weight-bold" id="efilekelola_btnResetPtk" style="display:none;"><i class="fas fa-times"></i> Batal</button></div>
+            </div>
+            <input type="hidden" id="efilekelola_in_ptk" required>
+            <div id="efilekelola_ptk_results" class="list-group position-absolute w-100 shadow-lg mt-1 text-left" style="display:none; z-index:9999; max-height:250px; overflow-y:auto; border-radius:8px;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+            <h6 class="font-weight-bold text-dark m-0"><i class="fas fa-layer-group mr-1 text-primary"></i> Daftar Berkas Baru</h6>
+            <button type="button" id="efilekelola_btnAddRow" class="btn btn-sm btn-outline-primary font-weight-bold rounded-pill px-3 shadow-sm" disabled><i class="fas fa-plus mr-1"></i> Tambah Berkas</button>
+        </div>
+        <div id="efilekelola_uploadContainer" class="mt-3"><div class="text-center text-muted p-3" id="efilekelola_msgPilihPtk"><i class="fas fa-info-circle mr-1"></i> Pilih pegawai terlebih dahulu.</div></div>
+      </div>
+      <div class="modal-footer justify-content-between bg-white border-top p-3">
+          <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Tutup</button>
+          <button type="submit" id="efilekelola_btnSimpan" class="btn btn-maroon text-white shadow-sm px-5 font-weight-bold" disabled><i class="fas fa-paper-plane mr-2"></i> UNGGAH SEMUA</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="efilekelola_modalPerbaiki" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg modal-content-sultan">
+      <div class="modal-header bg-warning text-dark py-3"><h5 class="modal-title font-weight-bold"><i class="fas fa-tools mr-2"></i>Perbaiki Berkas</h5><button type="button" class="close text-dark" data-dismiss="modal"><span>&times;</span></button></div>
+      <form id="efilekelola_formPerbaiki" novalidate>
+      <div class="modal-body bg-light p-4">
+        <input type="hidden" id="efilekelola_p_rowid"><input type="hidden" id="efilekelola_p_idptk">
+        <table class="table table-sm table-borderless text-sm mb-3">
+            <tr><td class="font-weight-bold text-muted w-25">Pegawai</td><td class="font-weight-bold text-dark text-uppercase" id="efilekelola_p_nama">-</td></tr>
+            <tr><td class="font-weight-bold text-muted">Kategori</td><td class="font-weight-bold text-primary" id="efilekelola_p_kategori">-</td></tr>
+            <tr><td class="font-weight-bold text-muted">Catatan Admin</td><td class="font-weight-bold text-danger bg-white p-2 rounded border border-danger" id="efilekelola_p_catatan">-</td></tr>
+        </table>
+        
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tahun <span class="text-danger">*</span></label>
+                <input type="number" id="efilekelola_p_tahun_input" class="form-control form-control-sultan border-warning" required>
+            </div>
+            <div class="col-md-6" id="efilekelola_p_periode_wrapper" style="display:none;">
+                <label class="form-label-sultan small font-weight-bold text-muted text-uppercase"><span id="efilekelola_p_periode_label">Periode</span> <span class="text-danger">*</span></label>
+                <input type="text" id="efilekelola_p_periode_input" class="form-control form-control-sultan border-warning">
+            </div>
+        </div>
+        
+        <div class="form-group mb-0 border p-3 bg-white rounded shadow-sm">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase"><i class="fas fa-file-upload text-danger mr-1" id="efilekelola_p_iconFormat"></i> <span id="efilekelola_p_lblFormat">Dokumen (Maks 1MB)</span></label> 
+            <div class="small text-muted mb-2 font-italic">Biarkan kosong jika tidak ingin mengubah file asli.</div>
+            <div class="custom-file"><input type="file" class="custom-file-input border-warning efilekelola-file-input" id="efilekelola_p_file"><label class="custom-file-label text-truncate">Pilih file baru...</label></div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between bg-white border-top p-3">
+          <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-warning text-dark shadow-sm px-4 font-weight-bold"><i class="fas fa-save mr-2"></i> Simpan Perbaikan</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="efilekelola_modalVerifikasi" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document"> 
+      <div class="modal-content border-0 shadow-lg d-flex flex-column modal-content-sultan-verif" style="height: 90vh;">
+        <div class="modal-header bg-primary text-white py-2 flex-shrink-0"><h5 class="modal-title font-weight-bold h6 mb-0"><i class="fas fa-clipboard-check mr-2"></i>Verifikasi E-File</h5><button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button></div>
+        <form id="efilekelola_formVerif" class="d-flex flex-column flex-grow-1 overflow-hidden m-0 p-0">
+            <div class="modal-body p-0 bg-light flex-grow-1 overflow-hidden">
+              <div class="row no-gutters h-100">
+                <div class="col-md-8 border-right d-flex flex-column bg-dark h-100 position-relative">
+                    <iframe id="efilekelola_frameVerif" class="d-none w-100 h-100 flex-grow-1 border-0" src=""></iframe>
+                    <div id="efilekelola_loadingVerif" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100" style="top:0; left:0; z-index:10; pointer-events:none;"><div class="text-center"><i class="fas fa-circle-notch fa-spin fa-4x mb-3"></i><p>Memuat Dokumen...</p></div></div>
+                </div>
+                <div class="col-md-4 d-flex flex-column bg-white h-100">
+                    <div class="p-4 flex-grow-1 overflow-auto">
+                        <input type="hidden" id="efilekelola_v_rowid">
+                        <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3"><i class="fas fa-info-circle mr-2"></i> Info Berkas</h6>
+                        <table class="table table-borderless text-sm mb-4">
+                            <tr><td class="text-muted font-weight-bold py-1" style="width: 35%;">Pegawai</td><td class="font-weight-bold text-dark py-1 text-uppercase" id="efilekelola_v_nama">-</td></tr>
+                            <tr><td class="text-muted font-weight-bold py-1">Kategori</td><td class="py-1 font-weight-bold text-primary" id="efilekelola_v_kategori">-</td></tr>
+                            <tr><td class="text-muted font-weight-bold py-1">Tahun</td><td class="font-weight-bold text-dark py-1"><span id="efilekelola_v_tahun"></span> <span id="efilekelola_v_periode" class="ml-2 badge badge-info"></span></td></tr>
+                        </table>
+                        <div class="card bg-light border-0 shadow-sm mb-0">
+                            <div class="card-body p-3">
+                                <div class="form-group mb-3"><label class="form-label-sultan font-weight-bold text-muted text-uppercase">Keputusan <span class="text-danger">*</span></label>
+                                    <select class="form-control form-control-sultan font-weight-bold text-dark border-primary" id="efilekelola_v_status" required><option value="">-- Status --</option><option value="Disetujui">✅ Disetujui</option><option value="Revisi">🔄 Revisi</option><option value="Ditolak">❌ Ditolak</option></select>
+                                </div>
+                                <div class="form-group mb-0"><label class="form-label-sultan font-weight-bold text-muted text-uppercase">Catatan <span id="efilekelola_reqCatatan" class="text-danger" style="display:none;">*</span></label>
+                                    <textarea class="form-control form-control-sultan border-primary" id="efilekelola_v_catatan" rows="3" placeholder="Alasan..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-white border-top shadow-lg d-flex justify-content-between flex-shrink-0 z-index-10">
+                        <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold shadow-sm px-4"><i class="fas fa-check-double mr-2"></i> Eksekusi</button>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="efilekelola_modalPreview" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-full" role="document">
+        <div class="modal-content modal-content-full-height border-0 shadow-lg bg-dark">
+            <div class="modal-header bg-dark text-white py-2 border-bottom-0"><h6 class="modal-title font-weight-bold"><i class="fas fa-eye text-info mr-2"></i>Pratinjau</h6><div class="ml-auto d-flex align-items-center"><a href="#" id="efilekelola_btnUnduhPdf" target="_blank" class="btn btn-xs btn-outline-light font-weight-bold shadow-sm mr-2 rounded-pill px-3"><i class="fas fa-external-link-alt mr-1"></i> Buka Tab Baru</a><button type="button" class="close text-white" data-dismiss="modal">&times;</button></div></div>
+            <div class="modal-body modal-body-full position-relative p-0 d-flex align-items-center justify-content-center bg-secondary" style="height:calc(100vh - 50px);">
+                <iframe id="efilekelola_framePreview" src="" class="iframe-full w-100 h-100 border-0 d-none"></iframe><div id="efilekelola_loadingPreview" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100" style="z-index: 10; pointer-events: none;"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="efilekelola_modalHapus" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger text-white py-2"><h6 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Hapus Berkas</h6><button type="button" class="close text-white" data-dismiss="modal">&times;</button></div>
+            <form id="efilekelola_formHapus">
+            <div class="modal-body bg-white p-4 text-center">
+                <input type="hidden" id="efilekelola_hapusRowId"><div class="mb-3"><div class="icon-circle bg-light-danger mx-auto text-danger" style="width:60px;height:60px;font-size:25px;line-height:60px;border-radius:50%;"><i class="fas fa-exclamation-triangle"></i></div></div><h6 class="font-weight-bold text-dark">Hapus File Ini?</h6><p class="text-muted small mb-3">Tindakan ini permanen.</p>
+                <div class="bg-light p-3 rounded border text-left"><label class="form-label-sultan small font-weight-bold text-secondary mb-1">Kode Keamanan:</label><input type="password" id="efilekelola_inputKodeHapus" class="form-control text-center font-weight-bold" required autocomplete="off"></div>
+            </div>
+            <div class="modal-footer justify-content-between bg-light p-3"><button type="button" class="btn btn-default border shadow-sm px-3 font-weight-bold" data-dismiss="modal">Batal</button><button type="submit" class="btn btn-danger px-4 font-weight-bold shadow-sm"><i class="fas fa-trash mr-1"></i> Hapus</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$('body > #efilekelola_modalForm, body > #efilekelola_modalPerbaiki, body > #efilekelola_modalVerifikasi, body > #efilekelola_modalPreview, body > #efilekelola_modalHapus').remove();
+
+var EFILEKELOLA_CACHE_DATA = [], EFILEKELOLA_MASTER_PTK = [], EFILEKELOLA_MASTER_KAT = [], EFILEKELOLA_TABEL_INSTANCE = null, EFILEKELOLA_ROW_COUNT = 0; 
+var EFILEKELOLA_USER_AKTIF = "", EFILEKELOLA_IS_ADMIN = false, EFILEKELOLA_UNIT_TERKUNCI = "", EFILEKELOLA_NPSN_TERKUNCI = "", EFILEKELOLA_SELECTED_PTK_FILES = [];
+
+$(document).ready(function() {
+    $('#efilekelola_tableState').hide(); $('#efilekelola_loadingState').show();
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {}; EFILEKELOLA_USER_AKTIF = user.nama_lengkap || user.username || "User Web";
+        var rStr = String(user.role || "").toLowerCase(); EFILEKELOLA_IS_ADMIN = (typeof checkUserRoleIsAdmin==='function' && checkUserRoleIsAdmin()) || rStr.includes("admin") || rStr.includes("verifikator");
+        EFILEKELOLA_NPSN_TERKUNCI = user.npsn || user.unit || user.username || ""; 
+    } catch(e) { EFILEKELOLA_NPSN_TERKUNCI = ""; EFILEKELOLA_IS_ADMIN = false; }
+
+    $(document).off('click', '#efilekelola_btnRefresh').on('click', '#efilekelola_btnRefresh', efilekelola_tarikDataServer);
+    $(document).off('click', '#efilekelola_btnTambah').on('click', '#efilekelola_btnTambah', efilekelola_bukaModalTambah);
+    $(document).off('change', '#efilekelola_filterStatus, #efilekelola_filterKategori').on('change', '#efilekelola_filterStatus, #efilekelola_filterKategori', efilekelola_terapkanFilterLokal);
+    if(EFILEKELOLA_IS_ADMIN) $(document).off('change', '#efilekelola_filterUnit').on('change', '#efilekelola_filterUnit', efilekelola_terapkanFilterLokal);
+
+    $(document).off('keyup input focus', '#efilekelola_in_ptk_search').on('keyup input focus', '#efilekelola_in_ptk_search', efilekelola_searchPtkLocal);
+    $(document).off('click', '.efilekelola-ptk-item').on('click', '.efilekelola-ptk-item', efilekelola_pilihPtk);
+    $(document).off('click', '#efilekelola_btnResetPtk').on('click', '#efilekelola_btnResetPtk', efilekelola_resetPtk);
+    $(document).off('click', '#efilekelola_btnAddRow').on('click', '#efilekelola_btnAddRow', efilekelola_createUploadRow);
+    $(document).off('click', '.efilekelola-btn-del-row').on('click', '.efilekelola-btn-del-row', function() { $(this).closest('.efilekelola-upload-row').slideUp(200, function(){ $(this).remove(); }); });
+
+    $(document).off('change', '.efilekelola-kategori-select').on('change', '.efilekelola-kategori-select', function() {
+        var val = String($(this).val() || "").trim(); var katData = EFILEKELOLA_MASTER_KAT.find(k => String(k.idKat).trim() === val);
+        var row = $(this).closest('.efilekelola-upload-row'); 
+        var fileIn = row.find('.efilekelola-file-input'); var fText = row.find('.efilekelola-format-text'); var fIcon = row.find('.efilekelola-format-icon');
+        var pWrap = row.find('.efilekelola-periode-wrapper'); var pLabel = row.find('.efilekelola-periode-label'); var pInput = row.find('.efilekelola-periode-input');
+        var katWrap = row.find('.efilekelola-kat-wrapper');
+
+        fileIn.val('').next('.custom-file-label').html('Pilih file...').removeClass('text-success font-weight-bold');
+
+        if (katData) {
+            var fmt = String(katData.format).toUpperCase();
+            if (fmt.includes('IMG') || fmt.includes('JPG') || fmt.includes('PNG') || fmt.includes('FOTO')) { fileIn.attr('accept', 'image/jpeg, image/png, image/jpg'); fText.text('JPG/PNG (Maks 1MB)'); fIcon.removeClass('fa-file-pdf fa-file-upload').addClass('fa-file-image'); } 
+            else if (fmt.includes('ALL') || fmt.includes('BEBAS') || fmt.includes('ANY')) { fileIn.attr('accept', 'application/pdf, image/jpeg, image/png, image/jpg'); fText.text('PDF/JPG/PNG (Maks 1MB)'); fIcon.removeClass('fa-file-pdf fa-file-image').addClass('fa-file-upload'); } 
+            else { fileIn.attr('accept', 'application/pdf'); fText.text('PDF (Maks 1MB)'); fIcon.removeClass('fa-file-image fa-file-upload').addClass('fa-file-pdf'); }
+            
+            var jPeriode = String(katData.jenisPeriode).toUpperCase();
+            if(jPeriode.includes("TMT")) { katWrap.removeClass('col-md-5').addClass('col-md-3'); pWrap.show(); pLabel.text("TMT"); pInput.attr("type", "date").attr("placeholder", "").prop("required", true).val(""); }
+            else if(jPeriode.includes("PERIODE")) { katWrap.removeClass('col-md-5').addClass('col-md-3'); pWrap.show(); pLabel.text("Periode"); pInput.attr("type", "text").attr("placeholder", "Bulan - Bulan").prop("required", true).val(""); }
+            else { katWrap.removeClass('col-md-3').addClass('col-md-5'); pWrap.hide(); pInput.prop("required", false).val("-"); }
+        }
+    });
+
+    $(document).off("change", ".efilekelola-file-input").on("change", ".efilekelola-file-input", function() {
+        var file = $(this)[0].files[0]; var lbl = $(this).next(".custom-file-label"); var acc = $(this).attr('accept') || "";
+        if(file) {
+            var val = false; var t = file.type.toLowerCase();
+            if (acc.includes('pdf') && t === "application/pdf") val = true;
+            if (acc.includes('image') && (t === "image/jpeg" || t === "image/png" || t === "image/jpg")) val = true;
+            if(!val) { Sultan.alert('warning','Ditolak', 'Format tidak sesuai kategori.'); $(this).val(''); lbl.html('Pilih file...').removeClass('text-success font-weight-bold'); return; }
+            if(file.size > 1024 * 1024) { Sultan.alert('warning','Terlalu Besar','Maksimal 1 MB.'); $(this).val(''); lbl.html('Pilih file...').removeClass('text-success font-weight-bold'); return; }
+            lbl.addClass("text-success font-weight-bold").html('<i class="fas fa-check mr-1"></i> ' + file.name);
+        } else { lbl.html('Pilih file...').removeClass('text-success font-weight-bold'); }
+    });
+
+    $(document).off('submit', '#efilekelola_formUpload').on('submit', '#efilekelola_formUpload', efilekelola_submitBatchUpload);
+    $(document).off('submit', '#efilekelola_formVerif').on('submit', '#efilekelola_formVerif', efilekelola_submitVerif);
+    $(document).off('submit', '#efilekelola_formHapus').on('submit', '#efilekelola_formHapus', efilekelola_submitHapus);
+    $(document).off('submit', '#efilekelola_formPerbaiki').on('submit', '#efilekelola_formPerbaiki', efilekelola_submitPerbaiki);
+    $(document).off('change', '#efilekelola_v_status').on('change', '#efilekelola_v_status', function() { var v = $(this).val(); if(v === 'Revisi' || v === 'Ditolak') { $('#efilekelola_reqCatatan').show(); $('#efilekelola_v_catatan').prop('required', true); } else { $('#efilekelola_reqCatatan').hide(); $('#efilekelola_v_catatan').prop('required', false); } });
+    $(document).off('click', '.efilekelola-btn-verif').on('click', '.efilekelola-btn-verif', function(){ efilekelola_bukaModalVerif($(this).attr('data-id')); });
+    $(document).off('click', '.efilekelola-btn-hapus').on('click', '.efilekelola-btn-hapus', function(){ efilekelola_bukaModalHapus($(this).attr('data-id')); });
+    $(document).off('click', '.efilekelola-btn-preview').on('click', '.efilekelola-btn-preview', function(){ efilekelola_bukaPreview($(this).attr('data-url')); });
+    $(document).off('click', '.efilekelola-btn-catatan').on('click', '.efilekelola-btn-catatan', function(){ efilekelola_lihatCatatan($(this).attr('data-pesan')); });
+    $(document).off('click', '.efilekelola-btn-perbaiki').on('click', '.efilekelola-btn-perbaiki', function(){ efilekelola_bukaModalPerbaiki($(this).attr('data-id')); });
+    $('#efilekelola_modalVerifikasi, #efilekelola_modalPreview').on('hidden.bs.modal', function () { $(this).find('iframe').addClass('d-none').attr('src', ''); $(this).find('.h-100.align-items-center').removeClass('d-none').addClass('d-flex'); });
+
+    efilekelola_initMasterData();
+});
+
+function efilekelola_initMasterData() {
+    if (EFILEKELOLA_IS_ADMIN) { $('#efilekelola_filterContainer').show(); $('#efilekelola_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold'); } 
+    else if (!EFILEKELOLA_NPSN_TERKUNCI) { $('#efilekelola_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak.</span>'); return; }
+
+    google.script.run.withSuccessHandler(function(json) {
+        var res = JSON.parse(json); if(!res.success) { $('#efilekelola_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + efilekelola_escapeHtml(res.message) + '</span>'); return; }
+        EFILEKELOLA_MASTER_KAT = res.kategori || []; EFILEKELOLA_MASTER_PTK = res.ptk || [];
+        if (!EFILEKELOLA_IS_ADMIN && EFILEKELOLA_MASTER_PTK.length > 0) { EFILEKELOLA_UNIT_TERKUNCI = EFILEKELOLA_MASTER_PTK[0].unit || "UNIT_ANDA"; $('#efilekelola_filterContainer').show(); $('#efilekelola_filterUnit').empty().append($('<option>', {value: EFILEKELOLA_NPSN_TERKUNCI, text: EFILEKELOLA_UNIT_TERKUNCI})).prop('disabled', true); }
+        var hk = '<option value="SEMUA">- Semua Kategori -</option>'; EFILEKELOLA_MASTER_KAT.forEach(function(k) { hk += `<option value="${k.idKat}">${k.namaKat}</option>`; }); $('#efilekelola_filterKategori').html(hk);
+        $('#efilekelola_btnTambah').prop('disabled', false); efilekelola_tarikDataServer();
+    }).withFailureHandler(function(){ $('#efilekelola_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus.</span>'); }).getEfileMasterData(EFILEKELOLA_IS_ADMIN ? "" : EFILEKELOLA_NPSN_TERKUNCI);
+}
+
+function efilekelola_tarikDataServer() {
+    var btn = $('#efilekelola_btnRefresh'); btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    if (!$.fn.DataTable.isDataTable('#efilekelola_tabelUtama')) { $('#efilekelola_tableState').hide(); $('#efilekelola_loadingState').show(); }
+
+    google.script.run.withSuccessHandler(function(json) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>'); var res = JSON.parse(json);
+        if (!res.success) { $('#efilekelola_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + efilekelola_escapeHtml(res.message) + '</span>'); return; }
+        EFILEKELOLA_CACHE_DATA = res.data || [];
+        if (EFILEKELOLA_IS_ADMIN) {
+            var un = {}; EFILEKELOLA_MASTER_PTK.forEach(function(p) { if(p.npsn) un[p.npsn] = p.unit; });
+            var su = $('#efilekelola_filterUnit'); var cu = su.val(); su.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+            Object.keys(un).forEach(function(n) { su.append($('<option>', {value: n, text: un[n]})); }); if(cu) su.val(cu);
+        }
+        if (!$.fn.DataTable.isDataTable('#efilekelola_tabelUtama')) efilekelola_initDataTables();
+        efilekelola_terapkanFilterLokal(); $('#efilekelola_loadingState').hide(); $('#efilekelola_tableState').show();
+        if(EFILEKELOLA_TABEL_INSTANCE) setTimeout(function() { EFILEKELOLA_TABEL_INSTANCE.columns.adjust(); }, 150);
+    }).withFailureHandler(function() { btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>'); $('#efilekelola_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus.</span>'); }).getEfileData(EFILEKELOLA_IS_ADMIN ? "" : EFILEKELOLA_NPSN_TERKUNCI);
+}
+
+function efilekelola_initDataTables() {
+    EFILEKELOLA_TABEL_INSTANCE = $('#efilekelola_tabelUtama').DataTable({
+        "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false, "deferRender": true,
+        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" + "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" + "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        "columnDefs": [
+            { "targets": 0, "width": "1%", "className": "col-sticky-left bg-white align-middle border-right text-center text-nowrap" },
+            { "targets": [1,2,5,7,8], "width": "auto", "className": "text-left align-middle" }, 
+            { "targets": [3,4,6], "width": "1%", "className": "text-center align-middle text-nowrap" }
+        ],
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Belum ada data E-File yang diunggah." }
+    });
+}
+
+function efilekelola_terapkanFilterLokal() {
+    if (!EFILEKELOLA_TABEL_INSTANCE) return;
+    var fS = $('#efilekelola_filterStatus').val().toLowerCase(); var fK = $('#efilekelola_filterKategori').val(); var fN = EFILEKELOLA_IS_ADMIN ? $('#efilekelola_filterUnit').val() : "";
+    var hasil = EFILEKELOLA_CACHE_DATA.filter(function(r) {
+        var st = String(r.status || "").toLowerCase(); var rn = String(r.npsn || "");
+        if (EFILEKELOLA_IS_ADMIN && fN !== "SEMUA" && fN !== "" && rn !== fN) return false;
+        if (fK !== "SEMUA" && fK !== "" && String(r.id_kategori) !== fK) return false;
+        if (fS !== "semua" && fS !== "") { var ns = "diproses"; if (st.includes('setuju') || st.includes('ok')) ns = "disetujui"; else if (st.includes('revisi')) ns = "revisi"; else if (st.includes('tolak')) ns = "ditolak"; if (ns !== fS) return false; }
+        return true;
+    }); efilekelola_renderTabel(hasil);
+}
+
+function efilekelola_renderTabel(dataRows) {
+    var dtArray = [];
+    dataRows.forEach(function(r) {
+        var id = r.rowId; var st = String(r.status || "").toLowerCase(); var isDisetujui = st.includes('setuju') || st.includes('ok');
+        var btnV = ""; if (EFILEKELOLA_IS_ADMIN) btnV = `<button type="button" class="btn btn-sm ${st.includes('proses') ? 'btn-primary' : 'btn-outline-primary'} font-weight-bold shadow-sm efilekelola-btn-verif" data-id="${id}"><i class="fas fa-clipboard-check mr-1"></i>${st.includes('proses') ? ' Verif' : ' Edit Verif'}</button>`;
+        var btnP = ""; if (st.includes('revisi') || st.includes('tolak')) btnP = `<button type="button" class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm efilekelola-btn-perbaiki" data-id="${id}" title="Perbaiki Berkas"><i class="fas fa-upload mr-1"></i> Perbaiki</button>`;
+        var btnH = `<button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm efilekelola-btn-hapus" data-id="${id}" ${isDisetujui ? 'disabled style="opacity:0.5;"' : ''} title="Hapus Berkas"><i class="fas fa-trash-alt"></i></button>`;
+        var aksi = `<div class="d-flex flex-nowrap justify-content-center" style="gap:5px;">${btnV}${btnP}${btnH}</div>`;
+
+        var ptk = EFILEKELOLA_MASTER_PTK.find(p => String(p.id_ptk).trim() === String(r.id_ptk).trim());
+        var unit = ptk ? ptk.unit : r.npsn; var nip = ptk && ptk.nip && String(ptk.nip).trim() !== "" ? ptk.nip : "-";
+        var txtPtk = `<div class="font-weight-bold text-dark text-uppercase text-wrap">${efilekelola_escapeHtml(r.nama)}</div><div class="small text-muted">NIP: ${efilekelola_escapeHtml(nip)}</div>`;
+        if (EFILEKELOLA_IS_ADMIN) txtPtk += `<div class="small text-danger font-weight-bold text-uppercase mt-1">${efilekelola_escapeHtml(unit)}</div>`;
+
+        var txtKat = `<div class="font-weight-bold text-primary text-wrap">${efilekelola_escapeHtml(r.nama_kategori)}</div>`;
+        
+        var fn = String(r.file_name || "").toLowerCase(); var fi = "fa-file-pdf text-danger"; if (fn.endsWith('.jpg') || fn.endsWith('.png') || fn.endsWith('.jpeg')) fi = "fa-file-image text-success";
+        var btnFile = `<button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm efilekelola-btn-preview" data-url="${r.url}"><i class="fas ${fi} mr-1"></i> Dokumen</button>`;
+
+        var badge = efilekelola_buildBadgeStatus(r.status, r.catatan);
+        var metaW = `<div style="line-height:1.2;font-size:11px;"><span class="d-block font-weight-bold text-dark">${r.tgl_upload}</span><span class="d-block text-muted">${efilekelola_escapeHtml(r.uploader)}</span></div>`;
+        var metaV = `<div style="line-height:1.2;font-size:11px;"><span class="d-block font-weight-bold text-dark">${r.tgl_verif}</span><span class="d-block text-muted text-uppercase">${efilekelola_escapeHtml(r.verifikator)}</span></div>`;
+
+        var teksPeriode = r.periode || "-";
+        if (teksPeriode.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            teksPeriode = Sultan.format.tanggal(teksPeriode);
+        }
+        dtArray.push([ aksi, txtPtk, txtKat, r.tahun, teksPeriode, btnFile, badge, metaW, metaV ]);
+    });
+    EFILEKELOLA_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+}
+
+function efilekelola_bukaModalTambah() {
+    var $m = $('#efilekelola_modalForm'); $m.find('form')[0].reset(); $m.find('form').removeClass('was-validated');
+    efilekelola_resetPtkContext($m); $m.modal('show'); setTimeout(function() { $m.find('#efilekelola_in_ptk_search').focus(); }, 400);
+}
+
+function efilekelola_searchPtkLocal() {
+    var $in = $(this); if ($in.attr('readonly')) return;
+    var k = $in.val().toLowerCase(); var $b = $in.closest('.form-group').find('.list-group');
+    if(k.length < 3) { $b.empty().hide(); return; }
+
+    var fU = ""; if (EFILEKELOLA_IS_ADMIN) { var val = $('#efilekelola_filterUnit').val(); fU = (val === "SEMUA" || !val) ? "" : String(val).toUpperCase(); }
+
+    var hasil = EFILEKELOLA_MASTER_PTK.filter(function(p) {
+        if (fU !== "") { if (String(p.npsn || "").toUpperCase() !== fU && String(p.unit || "").toUpperCase() !== fU) return false; }
+        var g = (String(p.nip || "") + " " + String(p.nama)).toLowerCase(); return g.includes(k);
+    });
+
+    $b.empty(); if(hasil.length === 0) { $b.append('<div class="p-2 text-center text-danger small font-weight-bold bg-white">Tidak ada kecocokan data.</div>').show(); return; }
+    var lim = hasil.length > 10 ? 10 : hasil.length;
+    for(var i=0; i<lim; i++) {
+        var p = hasil[i]; var vn = p.nip && String(p.nip).trim() !== "" ? p.nip : '-';
+        $b.append(`<a href="#" class="list-group-item list-group-item-action py-2 px-3 efilekelola-ptk-item" data-id="${p.id_ptk}" data-nama="${efilekelola_escapeHtml(p.nama)}" data-nip="${efilekelola_escapeHtml(vn)}"><div class="font-weight-bold text-dark text-uppercase">${efilekelola_escapeHtml(p.nama)}</div><div class="small text-muted"><i class="fas fa-id-badge mr-1"></i> NIP: ${vn} | ${p.status}</div></a>`);
+    } $b.show(); 
+}
+
+function efilekelola_pilihPtk(e) {
+    e.preventDefault(); var $i = $(this); var id = $i.attr('data-id'); var nm = $i.attr('data-nama'); var np = $i.attr('data-nip') || '-';
+    var $fg = $i.closest('.form-group'); var $f = $i.closest('form');
+    $fg.find('input[type="hidden"]').val(id); $fg.find('input[type="text"]').val(`${nm} [NIP: ${np}]`).attr('readonly', 'readonly').removeClass('border-maroon text-dark').addClass('border-success text-success bg-white');
+    $fg.find('.list-group').hide(); $fg.find('.btn-secondary').show();
+    EFILEKELOLA_SELECTED_PTK_FILES = EFILEKELOLA_CACHE_DATA.filter(r => String(r.id_ptk).trim() === String(id).trim());
+    $f.find('#efilekelola_msgPilihPtk').hide(); $f.find('#efilekelola_btnAddRow, #efilekelola_btnSimpan').prop('disabled', false);
+    EFILEKELOLA_ROW_COUNT = 0; $f.find('#efilekelola_uploadContainer').empty(); efilekelola_createUploadRowContext($f.find('#efilekelola_uploadContainer'));
+}
+
+function efilekelola_resetPtk() { efilekelola_resetPtkContext($(this).closest('.modal')); }
+function efilekelola_resetPtkContext($m) {
+    $m.find('input[type="hidden"]').val(''); $m.find('input[type="text"]').val('').removeAttr('readonly').removeClass('border-success text-success bg-white').addClass('border-maroon text-dark');
+    $m.find('.btn-secondary').hide(); $m.find('.list-group').empty().hide(); EFILEKELOLA_SELECTED_PTK_FILES = []; $m.find('#efilekelola_uploadContainer').empty();
+    $m.find('#efilekelola_msgPilihPtk').show(); $m.find('#efilekelola_btnAddRow, #efilekelola_btnSimpan').prop('disabled', true);
+}
+
+function efilekelola_getKategoriOptionsHTML() {
+    var html = '<option value="">- Pilih Kategori -</option>';
+    EFILEKELOLA_MASTER_KAT.forEach(function(k) { html += `<option value="${k.idKat}">${k.namaKat} (${k.parent})</option>`; });
+    return html;
+}
+
+function efilekelola_createUploadRow() { efilekelola_createUploadRowContext($(this).closest('form').find('#efilekelola_uploadContainer')); }
+function efilekelola_createUploadRowContext($c) {
+    if ($c.find('.efilekelola-upload-row').length >= 10) { Sultan.notif.info('Maksimal 10 berkas.'); return; }
+    EFILEKELOLA_ROW_COUNT++; var rId = "uprow_" + EFILEKELOLA_ROW_COUNT;
+    var htmlKat = efilekelola_getKategoriOptionsHTML();
+    var delBtn = EFILEKELOLA_ROW_COUNT > 1 ? `<button type="button" class="btn btn-sm btn-danger px-3 efilekelola-btn-del-row"><i class="fas fa-trash"></i></button>` : `<div style="width: 42px;"></div>`; 
+
+    var htmlRow = `
+    <div class="efilekelola-upload-row bg-white border p-3 mb-3 rounded shadow-sm position-relative" id="${rId}" style="display:none;">
+        <span class="position-absolute badge badge-maroon shadow-sm" style="top:-10px; left:15px; font-size:12px;">Berkas #${$c.find('.efilekelola-upload-row').length + 1}</span>
+        <div class="row align-items-end">
+            <div class="col-md-5 mb-2 mb-md-0 efilekelola-kat-wrapper">
+                <label class="form-label-sultan small text-muted text-uppercase mb-1">Kategori Berkas <span class="text-danger">*</span></label>
+                <select class="form-control form-control-sultan border-maroon efilekelola-kategori-select" required>${htmlKat}</select>
+            </div>
+            <div class="col-md-2 mb-2 mb-md-0">
+                <label class="form-label-sultan small text-muted text-uppercase mb-1">Tahun <span class="text-danger">*</span></label>
+                <input type="number" class="form-control form-control-sultan border-maroon efilekelola-tahun-input" placeholder="202X" min="1980" max="2050" required>
+            </div>
+            <div class="col-md-2 mb-2 mb-md-0 efilekelola-periode-wrapper" style="display:none;">
+                <label class="form-label-sultan small text-muted text-uppercase mb-1"><span class="efilekelola-periode-label">Periode</span> <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-sultan border-maroon efilekelola-periode-input">
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0 efilekelola-file-wrapper">
+                <label class="form-label-sultan small text-muted text-uppercase mb-1">
+                    <i class="fas fa-file-pdf text-danger mr-1 efilekelola-format-icon"></i> <span class="efilekelola-format-text">File PDF (1MB)</span> <span class="text-danger">*</span>
+                </label>
+                <div class="custom-file"><input type="file" class="custom-file-input border-maroon efilekelola-file-input" accept="application/pdf" required><label class="custom-file-label text-truncate">Pilih file...</label></div>
+            </div>
+            <div class="col-md-1 text-right">${delBtn}</div>
+        </div>
+    </div>`;
+    $c.append(htmlRow); $c.find('#' + rId).slideDown(200);
+}
+
+function efilekelola_submitBatchUpload(e) {
+    e.preventDefault(); var $form = $(this);
+    var idPtk = String($form.find('input[type="hidden"]').eq(0).val() || "").trim();
+    if (!idPtk) { Sultan.alert('warning', 'Pilih Pegawai', 'Anda belum memilih pegawai.'); return; }
+    if (!$form[0].checkValidity()) { $form.addClass('was-validated'); return; }
+
+    var ptkData = EFILEKELOLA_MASTER_PTK.find(p => String(p.id_ptk).trim() === idPtk);
+    var filePromises = []; var rowEls = $form.find('.efilekelola-upload-row');
+    var tracker = {}; var hasDup = false; var dupMsg = "";
+
+    rowEls.each(function() {
+        if(hasDup) return;
+        var idKat = String($(this).find('.efilekelola-kategori-select').val() || "").trim();
+        var thn = String($(this).find('.efilekelola-tahun-input').val() || "").trim();
+        var pWrap = $(this).find('.efilekelola-periode-wrapper');
+        var per = pWrap.is(':visible') ? String($(this).find('.efilekelola-periode-input').val() || "").trim() : "-";
+        var fIn = $(this).find('.efilekelola-file-input')[0];
+        
+        if(!idKat || !thn || fIn.files.length === 0) return;
+        var katData = EFILEKELOLA_MASTER_KAT.find(k => String(k.idKat).trim() === idKat) || { namaKat: "Berkas" };
+        var uni = idKat + "_" + thn + "_" + per.toLowerCase();
+        
+        if (tracker[uni]) { hasDup = true; dupMsg = `Anda mengunggah <b>${katData.namaKat}</b> periode <b>${thn} ${per}</b> lebih dari satu kali!`; return; }
+        tracker[uni] = true;
+        
+        var inDb = EFILEKELOLA_SELECTED_PTK_FILES.find(f => String(f.id_kategori).trim() === idKat && String(f.tahun).trim() === thn && String(f.periode || "-").toLowerCase().trim() === per.toLowerCase());
+        if (inDb) { hasDup = true; dupMsg = `Berkas <b>${katData.namaKat}</b> periode <b>${thn} ${per}</b> sudah ada (Status: ${inDb.status}).`; return; }
+
+        var p = new Promise(function(resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var ext = fIn.files[0].name.split('.').pop().toLowerCase();
+                var cName = "[" + thn + "] " + katData.namaKat + " " + ptkData.nama + (per !== "-" ? " (" + per + ")" : "") + "." + ext;
+                resolve({
+                    id_ptk: ptkData.id_ptk, nama_ptk: ptkData.nama, npsn: ptkData.npsn,
+                    id_kategori: idKat, nama_kategori: katData.namaKat, tahun: thn, periode: per,
+                    nama_file: cName, mimeType: fIn.files[0].type,
+                    fileBase64: ev.target.result.split(',')[1], user_login: EFILEKELOLA_USER_AKTIF
+                });
+            };
+            reader.onerror = function() { reject("Gagal baca file."); }; reader.readAsDataURL(fIn.files[0]);
+        });
+        filePromises.push(p);
+    });
+
+    if (hasDup) { Sultan.alert('warning', 'Duplikasi', dupMsg); return; }
+    var btn = $form.find('button[type="submit"]'); var txt = btn.html(); btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> MENGUNGGAH BATCH...');
+
+    Promise.all(filePromises).then(function(batch) {
+        if(batch.length === 0) { btn.prop('disabled', false).html(txt); return; }
+        google.script.run.withSuccessHandler(function(json) {
+            btn.prop('disabled', false).html(txt); var res = JSON.parse(json);
+            if(res.success) { $form.closest('.modal').modal('hide'); setTimeout(function(){ $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); Sultan.notif.sukses(res.message); efilekelola_tarikDataServer(); }, 400); } else { Sultan.alert('error', 'Gagal', res.message); }
+        }).withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Error', err.message); }).simpanEfileBatch(batch);
+    }).catch(function(err) { btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Error File', err); });
+}
+
+// VAKSIN NON-DESTRUCTIVE EDIT (Bisa ubah Tahun/TMT tanpa wajib ganti File)
+function efilekelola_bukaModalPerbaiki(rowId) {
+    var data = EFILEKELOLA_CACHE_DATA.find(r => String(r.rowId) === String(rowId));
+    if(!data) return;
+    var $m = $('#efilekelola_modalPerbaiki');
+    $m.find('form')[0].reset(); $m.find('form').removeClass('was-validated');
+    $m.find('.custom-file-label').html('Pilih file baru...').removeClass('text-success font-weight-bold');
+
+    $m.find('#efilekelola_p_rowid').val(rowId); $m.find('#efilekelola_p_idptk').val(data.id_ptk);
+    $m.find('#efilekelola_p_nama').text(data.nama); $m.find('#efilekelola_p_kategori').text(data.nama_kategori);
+    $m.find('#efilekelola_p_catatan').text(data.catatan || "Tidak ada catatan.");
+
+    // Masukkan Tahun ke input yang bisa diedit
+    $m.find('#efilekelola_p_tahun_input').val(data.tahun);
+
+    var kData = EFILEKELOLA_MASTER_KAT.find(k => String(k.idKat).trim() === String(data.id_kategori).trim());
+    var fIn = $m.find('#efilekelola_p_file'); var lFmt = $m.find('#efilekelola_p_lblFormat'); var iFmt = $m.find('#efilekelola_p_iconFormat');
+    var pWrap = $m.find('#efilekelola_p_periode_wrapper'); var pLbl = $m.find('#efilekelola_p_periode_label'); var pIn = $m.find('#efilekelola_p_periode_input');
+
+    if (kData) {
+        var fmt = String(kData.format).toUpperCase();
+        if (fmt.includes('IMG') || fmt.includes('JPG') || fmt.includes('PNG') || fmt.includes('FOTO')) { fIn.attr('accept', 'image/jpeg, image/png, image/jpg'); lFmt.text('Upload JPG/PNG (1MB)'); iFmt.removeClass('fa-file-pdf fa-file-upload').addClass('fa-file-image'); } 
+        else if (fmt.includes('ALL') || fmt.includes('BEBAS') || fmt.includes('ANY')) { fIn.attr('accept', 'application/pdf, image/jpeg, image/png, image/jpg'); lFmt.text('Upload PDF/JPG/PNG (1MB)'); iFmt.removeClass('fa-file-pdf fa-file-image').addClass('fa-file-upload'); } 
+        else { fIn.attr('accept', 'application/pdf'); lFmt.text('Upload PDF Revisi (1MB)'); iFmt.removeClass('fa-file-image fa-file-upload').addClass('fa-file-pdf'); }
+        
+        var jp = String(kData.jenisPeriode).toUpperCase();
+        if(jp.includes("TMT")) { pWrap.show(); pLbl.text("TMT"); pIn.attr("type", "date").prop("required", true).val(data.periode && data.periode !== "-" ? data.periode : ""); }
+        else if(jp.includes("PERIODE")) { pWrap.show(); pLbl.text("Periode"); pIn.attr("type", "text").prop("required", true).val(data.periode && data.periode !== "-" ? data.periode : ""); }
+        else { pWrap.hide(); pIn.prop("required", false).val(""); }
+    }
+    $m.modal('show');
+}
+
+function efilekelola_submitPerbaiki(e) {
+    e.preventDefault(); var $f = $(this);
+    if (!$f[0].checkValidity()) { $f.addClass('was-validated'); return; }
+    
+    var rId = $f.find('#efilekelola_p_rowid').val(); 
+    var dLama = EFILEKELOLA_CACHE_DATA.find(r => String(r.rowId) === String(rId));
+    
+    var thn = String($f.find('#efilekelola_p_tahun_input').val()).trim();
+    var pIn = $f.find('#efilekelola_p_periode_input');
+    var per = pIn.is(':visible') ? String(pIn.val()).trim() : "-";
+    
+    // Cek Duplikat jika mengubah Tahun/Periode
+    if (thn !== String(dLama.tahun) || per.toLowerCase() !== String(dLama.periode || "-").toLowerCase()) {
+        var inDb = EFILEKELOLA_CACHE_DATA.find(f => String(f.id_ptk) === String(dLama.id_ptk) && String(f.id_kategori) === String(dLama.id_kategori) && String(f.tahun) === thn && String(f.periode || "-").toLowerCase() === per.toLowerCase() && String(f.rowId) !== String(rId));
+        if (inDb) { Sultan.alert('warning', 'Duplikasi', 'Berkas untuk Tahun dan Periode tersebut sudah ada di database.'); return; }
+    }
+
+    var btn = $f.find('button[type="submit"]'); var txt = btn.html(); btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> MENYIMPAN...');
+
+    var fIn = $f.find('#efilekelola_p_file')[0];
+    var hasFile = fIn.files.length > 0;
+    
+    var oExt = hasFile ? fIn.files[0].name.split('.').pop().toLowerCase() : dLama.file_name.split('.').pop().toLowerCase();
+    var cName = "[" + thn + "] " + dLama.nama_kategori + " " + dLama.nama + (per && per !== "-" ? " (" + per + ")" : "") + "." + oExt;
+
+    var payload = { rowId: rId, id_ptk: $f.find('#efilekelola_p_idptk').val(), nama_file: cName, tahun: thn, periode: per, user_login: EFILEKELOLA_USER_AKTIF };
+
+    var execPerbaikan = function(fileData) {
+        google.script.run.withSuccessHandler(function(json) {
+            btn.prop('disabled', false).html(txt); var res = JSON.parse(json);
+            if(res.success) { $f.closest('.modal').modal('hide'); setTimeout(function(){ $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); Sultan.notif.sukses(res.message); efilekelola_tarikDataServer(); }, 400); } else { Sultan.alert('error', 'Gagal', res.message); }
+        }).withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Error', err.message); }).perbaikiEfileData(payload, fileData);
+    };
+
+    if(hasFile) {
+        var reader = new FileReader(); reader.onload = function(ev) { execPerbaikan({ data: ev.target.result.split(',')[1], mimeType: fIn.files[0].type }); }; reader.readAsDataURL(fIn.files[0]);
+    } else {
+        execPerbaikan(null);
+    }
+}
+
+function efilekelola_bukaModalVerif(rowId) {
+    var data = EFILEKELOLA_CACHE_DATA.find(r => String(r.rowId) === String(rowId));
+    if(!data) return; var $m = $('#efilekelola_modalVerifikasi');
+
+    $m.find('#efilekelola_v_rowid').val(rowId); $m.find('#efilekelola_v_nama').text(data.nama);
+    $m.find('#efilekelola_v_kategori').text(data.nama_kategori); $m.find('#efilekelola_v_tahun').text(data.tahun);
+    if (data.periode && data.periode !== "-") { $m.find('#efilekelola_v_periode').text(data.periode).show(); } else { $m.find('#efilekelola_v_periode').hide(); }
+
+    var st = String(data.status).toLowerCase();
+    $m.find('#efilekelola_v_status').val(''); $m.find('#efilekelola_v_catatan').val(data.catatan || ""); $m.find('#efilekelola_reqCatatan').hide();
+    if(st.includes('setuju') || st.includes('ok')) $m.find('#efilekelola_v_status').val('Disetujui'); else if(st.includes('revisi')) $m.find('#efilekelola_v_status').val('Revisi'); else if(st.includes('tolak')) $m.find('#efilekelola_v_status').val('Ditolak');
+    if ($m.find('#efilekelola_v_status').val() === 'Revisi' || $m.find('#efilekelola_v_status').val() === 'Ditolak') { $m.find('#efilekelola_reqCatatan').show(); }
+
+    var url = data.url || ""; var pUrl = url;
+    if (url.includes('drive.google.com')) { var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/); if (match && match[1]) pUrl = 'https://drive.google.com/file/d/' + match[1] + '/preview'; }
+
+    var $f = $m.find('#efilekelola_frameVerif'); var $l = $m.find('#efilekelola_loadingVerif');
+    $f.addClass('d-none').attr('src', pUrl); $l.removeClass('d-none').addClass('d-flex'); $m.modal('show');
+    $f.off('load').on('load', function() { $l.removeClass('d-flex').addClass('d-none'); $(this).removeClass('d-none'); });
+    setTimeout(function() { $l.removeClass('d-flex').addClass('d-none'); $f.removeClass('d-none'); }, 3000);
+}
+
+function efilekelola_submitVerif(e) {
+    e.preventDefault(); var $f = $(this);
+    if (!$f[0].checkValidity()) { Sultan.alert('warning', 'Status', 'Isi status dan catatan.'); return; }
+    var rId = $f.find('#efilekelola_v_rowid').val(); var st = $f.find('#efilekelola_v_status').val(); var ket = $f.find('#efilekelola_v_catatan').val();
+    var btn = $f.find('button[type="submit"]'); var txt = btn.html(); btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Eksekusi...');
+    google.script.run.withSuccessHandler(function(json) {
+        btn.prop('disabled', false).html(txt); var res = JSON.parse(json);
+        if (res.success) { $f.closest('.modal').modal('hide'); setTimeout(function() { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); Sultan.notif.sukses(res.message); efilekelola_tarikDataServer(); }, 400); } else { Sultan.alert('error', 'Gagal', res.message); }
+    }).withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Error', err.message); }).verifikasiEfileData(rId, st, ket, EFILEKELOLA_USER_AKTIF);
+}
+
+function efilekelola_bukaModalHapus(rowId) {
+    var data = EFILEKELOLA_CACHE_DATA.find(r => String(r.rowId) === String(rowId)); if(!data) return;
+    var $m = $('#efilekelola_modalHapus'); $m.find('#efilekelola_hapusRowId').val(rowId); $m.find('#efilekelola_hapusNamaFile').text(data.file_name); $m.find('#efilekelola_inputKodeHapus').val(''); $m.modal('show');
+}
+
+function efilekelola_submitHapus(e) {
+    e.preventDefault(); var $f = $(this); var rId = $f.find('#efilekelola_hapusRowId').val(); var kd = $f.find('#efilekelola_inputKodeHapus').val();
+    var btn = $f.find('button[type="submit"]'); var txt = btn.html(); btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menghapus...');
+    google.script.run.withSuccessHandler(function(json) {
+        btn.prop('disabled', false).html(txt); var res = JSON.parse(json);
+        if (res.success) { $f.closest('.modal').modal('hide'); setTimeout(function() { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); Sultan.notif.sukses(res.message); efilekelola_tarikDataServer(); }, 400); } else { Sultan.alert('error', 'Gagal', res.message); }
+    }).withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Error', err.message); }).hapusEfileData(rId, kd);
+}
+
+function efilekelola_bukaPreview(url) {
+    if (!url) return; var pUrl = url;
+    if (url.includes('drive.google.com')) { var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/); if (match && match[1]) pUrl = 'https://drive.google.com/file/d/' + match[1] + '/preview'; }
+    var $m = $('#efilekelola_modalPreview'); var $f = $m.find('#efilekelola_framePreview'); var $l = $m.find('#efilekelola_loadingPreview');
+    $m.modal('show'); $f.addClass('d-none').attr('src', pUrl); $m.find('#efilekelola_btnUnduhPdf').attr('href', url); $l.removeClass('d-none').addClass('d-flex');
+    $f.off('load').on('load', function() { $l.removeClass('d-flex').addClass('d-none'); $(this).removeClass('d-none'); });
+    setTimeout(function() { $l.removeClass('d-flex').addClass('d-none'); $f.removeClass('d-none'); }, 2500);
+}
+
+function efilekelola_lihatCatatan(p) { Swal.fire({ title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Verifikasi', html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + p + '</div>', showConfirmButton: true, confirmButtonText: 'Saya Mengerti', confirmButtonColor: '#85144b', width: '400px' }); }
+function efilekelola_escapeHtml(t) { return t ? String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : ""; }
+function efilekelola_escapeJs(s) { return s ? String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>") : ""; }
+function efilekelola_buildBadgeStatus(st, ket) { 
+    var s = String(st || "").toLowerCase(); var c = 'badge-sultan-light-warning'; var i = 'clock'; var l = st || 'Diproses';
+    if (s.includes('setuju') || s.includes('ok')) { c = 'badge-sultan-light-success'; i = 'check-circle'; } else if (s.includes('revisi')) { c = 'badge-sultan-light-info'; i = 'sync-alt'; } else if (s.includes('tolak')) { c = 'badge-sultan-light-danger'; i = 'times-circle'; } 
+    var b = `<span class="badge badge-sultan ${c}"><i class="fas fa-${i} mr-1"></i>${efilekelola_escapeHtml(l)}</span>`;
+    if (ket && ket.trim().length > 2) return b + `<div class="mt-2"><button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm efilekelola-btn-catatan" style="font-size:10px; border-radius:4px;" data-pesan="${efilekelola_escapeJs(ket)}"><i class="fas fa-comment-dots mr-1"></i> Baca Catatan</button></div>`;
+    return b; 
+}
+</script>

@@ -1,0 +1,524 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-calendar-alt text-maroon mr-2"></i>Rekap Presensi Harian
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#harian_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="harian_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-2 pl-3 text-justify">
+                  <li>Halaman ini menampilkan rekaman presensi harian ASN pada aplikasi Siaba.</li>
+                  <li>Data yang ditampilkan diperbarui pada jangka waktu tertentu (tidak realtime).</li>
+                  <li><strong>Kode:</strong> TP: Tidak Presensi, HK: Hari Kerja, H: Hadir, HA: Hari Apel, APL: Apel, TAp: Tidak Apel, HU: Hari Upacara, U: Upacara, TU: Tidak Upacara, CT: Cuti Tahunan, CAP: Cuti Alasan Penting, CS: Cuti Sakit, CM: Cuti Melahirkan, DD: Dinas Dalam, DL: Dinas Luar, TA: Terlambat, PLA: Pulang Awal.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                <select id="harian_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80" disabled>
+                    <option value="">- Tahun -</option>
+                </select>
+                
+                <select id="harian_filterBulan" class="form-control form-control-sultan input-auto-width" disabled>
+                    <option value="">- Bulan -</option>
+                </select>
+
+                <select id="harian_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="harian_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+                
+                <div class="ml-auto d-none d-md-block"></div>
+                <button type="button" class="btn btn-primary font-weight-bold shadow-sm d-none">Spacer</button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="harian_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="harian_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="harian_tableState" style="display: none;">
+                  <table id="harian_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+                     <thead class="bg-white">
+                        <tr id="harian_rowHeaderUtama">
+                           <th class="col-sticky-left border-right text-left px-3 align-middle bg-white" style="z-index: 5;">Nama ASN</th>
+                           
+                           <th class="text-center align-middle text-danger px-2" style="background-color: #f8d7da !important;">TP</th>
+                           <th class="text-center align-middle text-primary px-2" style="background-color: #cce5ff !important;">HK</th>
+                           <th class="text-center align-middle text-primary px-2" style="background-color: #cce5ff !important;">H</th>
+                           <th class="text-center align-middle text-success px-2" style="background-color: #d4edda !important;">HA</th>
+                           <th class="text-center align-middle text-success px-2" style="background-color: #d4edda !important;">APL</th>
+                           <th class="text-center align-middle text-success px-2" style="background-color: #d4edda !important;">TAp</th>
+                           <th class="text-center align-middle text-dark px-2" style="background-color: #fff3cd !important;">HU</th>
+                           <th class="text-center align-middle text-dark px-2" style="background-color: #fff3cd !important;">U</th>
+                           <th class="text-center align-middle text-dark px-2" style="background-color: #fff3cd !important;">TU</th>
+                           <th class="text-center align-middle text-info px-2" style="background-color: #d1ecf1 !important;">CT</th>
+                           <th class="text-center align-middle text-info px-2" style="background-color: #d1ecf1 !important;">CAP</th>
+                           <th class="text-center align-middle text-info px-2" style="background-color: #d1ecf1 !important;">CS</th>
+                           <th class="text-center align-middle text-info px-2" style="background-color: #d1ecf1 !important;">CM</th>
+                           <th class="text-center align-middle text-purple-sultan px-2" style="background-color: #e2d9f3 !important;">DD</th>
+                           <th class="text-center align-middle text-purple-sultan px-2" style="background-color: #e2d9f3 !important;">DL</th>
+                           <th class="text-center align-middle text-orange px-2" style="background-color: #ffe8d6 !important;">TA</th>
+                           <th class="text-center align-middle text-orange px-2" style="background-color: #ffe8d6 !important;">Waktu TA</th>
+                           <th class="text-center align-middle text-orange px-2" style="background-color: #ffe8d6 !important;">PLA</th>
+                           <th class="text-center align-middle text-orange px-2" style="background-color: #ffe8d6 !important;">Waktu PLA</th>
+                           <th class="text-center align-middle text-danger px-2" style="background-color: #f8d7da !important;">LA</th>
+                           
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">1D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">1P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">2D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">2P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">3D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">3P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">4D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">4P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">5D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">5P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">6D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">6P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">7D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">7P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">8D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">8P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">9D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">9P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">10D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">10P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">11D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">11P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">12D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">12P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">13D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">13P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">14D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">14P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">15D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">15P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">16D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">16P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">17D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">17P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">18D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">18P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">19D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">19P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">20D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">20P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">21D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">21P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">22D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">22P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">23D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">23P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">24D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">24P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">25D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">25P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">26D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">26P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">27D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">27P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">28D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">28P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">29D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">29P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">30D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">30P</th>
+                           <th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">31D</th><th class="text-center align-middle text-dark px-2 harian-col-tanggal" style="background-color: #f4f6f9 !important;">31P</th>
+                        </tr>
+                     </thead>
+                     <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - READ ONLY MULTI COLUMN)
+// BAB I: Prefix harian_ mutlak diterapkan
+// ======================================================================
+var HARIAN_CACHE_DATA = []; 
+var HARIAN_CACHE_THN = "";
+var HARIAN_CACHE_BLN = "";
+var HARIAN_TABEL_INSTANCE = null;
+
+var HARIAN_USER_AKTIF = "";
+var HARIAN_IS_ADMIN = false;
+var HARIAN_UNIT_TERKUNCI = ""; 
+var HARIAN_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE (Hukum Ke-1)
+// =================================================================
+$(document).ready(function() {
+    HARIAN_TABEL_INSTANCE = null;
+    $('#harian_tableState').hide();
+    $('#harian_loadingState').show();
+
+    // Cek Sesi Login & Role
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        HARIAN_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        HARIAN_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        HARIAN_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { HARIAN_USER_NPSN = ""; HARIAN_IS_ADMIN = false; }
+    
+    // VAKSINASI EVENT SPA DELEGATION (Pemusnahan onClick Inline)
+    // 1. Pemicu Dropdown -> Gunakan Cache (Zero Blink)
+    $(document).off('change', '#harian_filterTahun, #harian_filterBulan').on('change', '#harian_filterTahun, #harian_filterBulan', harian_prosesCariData);
+    $(document).off('change', '#harian_filterUnit').on('change', '#harian_filterUnit', harian_terapkanFilterLokal);
+    
+    // 2. Pemicu Tombol Refresh -> Paksa ambil dari Server (Bypass Cache)
+    $(document).off('click', '#harian_btnRefresh').on('click', '#harian_btnRefresh', harian_tarikDataServer);
+    
+    // Inisiasi Waktu di Dropdown Terlebih Dahulu
+    harian_initFilters(); 
+});
+
+// =================================================================
+// 2. CHAINED INITIALIZATION: FILTERS -> GATEKEEPER -> FETCH
+// =================================================================
+function harian_initFilters() {
+    $('#harian_loadingText').html('Memuat Konfigurasi Waktu...');
+    
+    google.script.run.withSuccessHandler(function(res) {
+        var data = JSON.parse(res);
+        
+        var elThn = $('#harian_filterTahun').empty().append('<option value="">- Tahun -</option>');
+        data.years.forEach(y => elThn.append(`<option value="${harian_escapeHtml(y)}">${harian_escapeHtml(y)}</option>`));
+        
+        var elBln = $('#harian_filterBulan').empty().append('<option value="">- Bulan -</option>');
+        data.months.forEach(m => elBln.append(`<option value="${harian_escapeHtml(m)}">${harian_escapeHtml(m)}</option>`));
+
+        var now = new Date();
+        var curYear = now.getFullYear().toString();
+        var mNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+        var curMonth = mNames[now.getMonth()];
+
+        if ($("#harian_filterTahun option[value='"+curYear+"']").length > 0) $('#harian_filterTahun').val(curYear);
+        if ($("#harian_filterBulan option[value='"+curMonth+"']").length > 0) $('#harian_filterBulan').val(curMonth);
+
+        $('#harian_filterTahun, #harian_filterBulan, #harian_btnRefresh').prop('disabled', false);
+
+        harian_validasiAksesUser(); 
+
+    }).getSiabaFilters();
+}
+
+function harian_validasiAksesUser() {
+    $('#harian_loadingText').html('Mempersiapkan Akses...');
+
+    if (HARIAN_IS_ADMIN) {
+        $('#harian_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        harian_tarikDataServer(); 
+    } else {
+        if (!HARIAN_USER_NPSN) {
+            $('#harian_filterUnit').empty().append('<option value="">AKSES DITOLAK (NPSN KOSONG)</option>');
+            $('#harian_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#harian_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#harian_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${harian_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                HARIAN_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#harian_filterUnit').empty().append($('<option>', {value: HARIAN_UNIT_TERKUNCI, text: HARIAN_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                harian_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#harian_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#harian_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Database Induk Terputus: ${harian_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNPSN(HARIAN_USER_NPSN); 
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA DARI SERVER (BAB VIII)
+// =================================================================
+function harian_prosesCariData() {
+    var th = $('#harian_filterTahun').val(); 
+    var bl = $('#harian_filterBulan').val();
+    if (!th || !bl) { Sultan.notif.info('Pilih Tahun dan Bulan.'); return; }
+    
+    // Jika tahun dan bulan sama persis dengan cache, cukup filter lokal (Zero Blink)
+    if (th === HARIAN_CACHE_THN && bl === HARIAN_CACHE_BLN && HARIAN_CACHE_DATA.length > 0) { 
+        harian_terapkanFilterLokal(); 
+    } else { 
+        harian_tarikDataServer(); 
+    }
+}
+
+function harian_tarikDataServer() {
+    var th = $('#harian_filterTahun').val(); 
+    var bl = $('#harian_filterBulan').val();
+    if(!th || !bl) return;
+
+    var btn = $('#harian_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    // MUNCULKAN RUANG A JIKA TABEL BELUM PERNAH DIBUAT ATAU DIPAKSA REFRESH
+    if (!$.fn.DataTable.isDataTable('#harian_tabelUtama')) {
+        $('#harian_tableState').hide();
+        $('#harian_loadingText').html('Mengambil data presensi...');
+        $('#harian_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            
+            var data;
+            try {
+                data = typeof res === 'string' ? JSON.parse(res) : res;
+            } catch(e) {
+                $('#harian_tableState').hide();
+                $('#harian_loadingState').show();
+                $('#harian_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+                return;
+            }
+            
+            if (data && data.error) {
+                $('#harian_tableState').hide();
+                $('#harian_loadingState').show();
+                $('#harian_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${harian_escapeHtml(data.error)}</span>`);
+                return;
+            } 
+            
+            try {
+                HARIAN_CACHE_DATA = data.rows || []; 
+                HARIAN_CACHE_THN = th;
+                HARIAN_CACHE_BLN = bl;
+
+                if(HARIAN_IS_ADMIN) harian_populateDropdownUnit();
+
+                harian_terapkanFilterLokal();
+                
+            } catch(e) { 
+                $('#harian_tableState').hide();
+                $('#harian_loadingState').show();
+                $('#harian_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + harian_escapeHtml(e.message) + '</span>'); 
+            }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            $('#harian_tableState').hide();
+            $('#harian_loadingState').show();
+            $('#harian_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${harian_escapeHtml(err.message)}</span>`);
+        })
+        .getSiabaPresensiHarian(th, bl, "SEMUA");
+}
+
+function harian_populateDropdownUnit() {
+    var unique = new Set();
+    HARIAN_CACHE_DATA.forEach(function(row) {
+        var lastIdx = row.length - 1;
+        var unit = String(row[lastIdx]).trim();
+        if (unit) unique.add(unit);
+    });
+    
+    var sortedUnits = Array.from(unique).sort();
+    var select = $('#harian_filterUnit');
+    var currentVal = select.val();
+    
+    select.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    sortedUnits.forEach(function(u) { select.append(`<option value="${harian_escapeHtml(u)}">${harian_escapeHtml(u)}</option>`); });
+    
+    select.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+    if(currentVal && unique.has(currentVal)) { select.val(currentVal); }
+}
+
+// =================================================================
+// 4. INJEKSI ZERO BLINK & RENDERING (BAB VII)
+// =================================================================
+function harian_terapkanFilterLokal() {
+    var tAdminUnit = HARIAN_IS_ADMIN ? $('#harian_filterUnit').val().toUpperCase() : "";
+    var tUnitUser  = String(HARIAN_UNIT_TERKUNCI).trim().toUpperCase();
+    
+    var hasil = HARIAN_CACHE_DATA.filter(function(row) {
+        var lastIdx = row.length - 1;
+        var rUnit = String(row[lastIdx]).trim().toUpperCase(); 
+        
+        if (HARIAN_IS_ADMIN) {
+            return (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit);
+        } else {
+            return (rUnit === tUnitUser);
+        }
+    });
+
+    harian_renderTabel(hasil);
+}
+
+function harian_renderTabel(dataRows) {
+    var isFirstLoad = !$.fn.DataTable.isDataTable('#harian_tabelUtama');
+    var dtArray = []; 
+    
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+        var visIdx = 0;
+        
+        // Loop ini melompati index 1 (NIP mentah) karena digabung ke index 0 (Hukum Ke-6)
+        for (var rawIdx = 0; rawIdx < row.length - 1; rawIdx++) {
+            if (rawIdx === 1) continue; 
+
+            var val = row[rawIdx];
+            var strVal = String(val).toUpperCase().trim();
+            var display = val;
+            
+            if (visIdx === 0) {
+                // Kolom 1: GABUNGAN NAMA, NIP, & UNIT 
+                var safeNama = harian_escapeHtml(row[0]);
+                var safeNip = harian_escapeHtml(row[1]);
+                var safeUnit = harian_escapeHtml(row[row.length - 1] || '-');
+                var txtUnitHtml = HARIAN_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${safeUnit}</div>` : '';
+                
+                // VAKSIN LEBAR: Menggunakan text-nowrap agar membentang
+                display = `<div class="font-weight-bold text-dark text-nowrap text-left">${safeNama}</div><div class="small text-muted text-left text-nowrap">${safeNip}</div>${txtUnitHtml}`;
+            } 
+            else if (visIdx >= 1 && visIdx <= 20) {
+                // Kolom Rekap (TP s.d LA)
+                if (val == 0 || val == "0" || strVal === "") {
+                    display = `<span class="text-muted opacity-50">-</span>`;
+                } else {
+                    var safeVal = harian_escapeHtml(val);
+                    if (visIdx === 1) display = `<span class="text-danger font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx >= 2 && visIdx <= 3) display = `<span class="text-primary font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx >= 4 && visIdx <= 6) display = `<span class="text-success font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx >= 7 && visIdx <= 9) display = `<span class="text-dark font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx >= 10 && visIdx <= 13) display = `<span class="text-info font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx >= 14 && visIdx <= 15) display = `<span class="text-purple-sultan font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx >= 16 && visIdx <= 19) display = `<span class="text-orange font-weight-bold">${safeVal}</span>`;
+                    else if (visIdx === 20) display = `<span class="text-danger font-weight-bold">${safeVal}</span>`;
+                }
+            }
+            else if (visIdx >= 21) { 
+                // Kolom Tanggal (1D s.d 31P)
+                if (strVal === "") {
+                    display = ""; 
+                }
+                else if (strVal === "-" || val == 0 || val == "0") {
+                    display = `<span class="text-muted opacity-50">-</span>`;
+                }
+                else {
+                    var safeStr = harian_escapeHtml(strVal);
+                    if (['CT','CS','SAP','CM','CB','CLTN'].includes(strVal)) display = `<span class="text-green-sultan font-weight-bold">${safeStr}</span>`;
+                    else if (['DD','DL'].includes(strVal)) display = `<span class="text-blue-sultan font-weight-bold">${safeStr}</span>`;
+                    else if (['TA','PLA','LA'].includes(strVal)) display = `<span class="text-danger font-weight-bold">${safeStr}</span>`;
+                    else display = `<span class="text-dark font-weight-bold">${safeStr}</span>`;
+                }
+            }
+            arrRow.push(display);
+            visIdx++;
+        }
+        dtArray.push(arrRow);
+    });
+
+    // JIKA DATATABLES BELUM PERNAH DIBUAT
+    if (!$.fn.DataTable.isDataTable('#harian_tabelUtama')) {
+        HARIAN_TABEL_INSTANCE = $('#harian_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, // BAB VII: Performa Mutlak untuk tabel 80+ kolom
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+            "columnDefs": [
+                // VAKSIN LEBAR: target 0 pakai width: auto
+                { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle font-weight-bold border-right text-dark text-left" },
+                
+                // VAKSIN BAB VII (Anti "_all"): Membuat array [1, 2, ..., 82] secara matematis
+                { "targets": Array.from({length: 82}, function(_, i) { return i + 1; }), "className": "text-center align-middle" }
+            ],
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "search": "", "searchPlaceholder": "Cari Nama...",
+                "emptyTable": '<div class="py-4 text-center text-muted"><i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3" style="opacity: 0.6;"></i><br><h6 class="font-weight-bold text-dark mb-1">Belum Ada Presensi</h6><p class="small mb-0">Tidak ada data presensi harian untuk filter terpilih.</p></div>' 
+            },
+            
+            // VAKSIN PERFORMA TURBO: Menggunakan Native DOM (Tanpa jQuery attr/addClass) untuk menghindari Paint Lag pada 800+ sel
+            "createdRow": function(row, data, dataIndex) {
+                 var tds = row.childNodes;
+                 for (var visIdx = 0; visIdx < tds.length; visIdx++) {
+                     var cell = tds[visIdx];
+                     var valHtml = data[visIdx]; 
+                     var textVal = cell.textContent.trim(); 
+
+                     if (visIdx > 0) cell.className = 'align-middle text-center px-2 py-2';
+                     else {
+                         cell.className = 'col-sticky-left border-right text-left px-3';
+                         cell.style.position = 'sticky';
+                         cell.style.left = '0';
+                         cell.style.zIndex = '2';
+                         cell.style.backgroundColor = '#ffffff';
+                     }
+
+                     if (visIdx === 1) cell.style.setProperty('background-color', '#f8d7da', 'important'); 
+                     else if (visIdx >= 2 && visIdx <= 3) cell.style.setProperty('background-color', '#cce5ff', 'important'); 
+                     else if (visIdx >= 4 && visIdx <= 6) cell.style.setProperty('background-color', '#d4edda', 'important'); 
+                     else if (visIdx >= 7 && visIdx <= 9) cell.style.setProperty('background-color', '#fff3cd', 'important'); 
+                     else if (visIdx >= 10 && visIdx <= 13) cell.style.setProperty('background-color', '#d1ecf1', 'important'); 
+                     else if (visIdx >= 14 && visIdx <= 15) cell.style.setProperty('background-color', '#e2d9f3', 'important'); 
+                     else if (visIdx >= 16 && visIdx <= 19) cell.style.setProperty('background-color', '#ffe8d6', 'important'); 
+                     else if (visIdx === 20) cell.style.setProperty('background-color', '#f8d7da', 'important'); 
+
+                     if (visIdx >= 21) {
+                         if (valHtml === "") {
+                             cell.style.setProperty('background-color', '#f8d7da', 'important'); 
+                         } 
+                         else if (textVal === "-" || textVal === "0") {
+                             cell.style.setProperty('background-color', '#e9ecef', 'important'); 
+                         }
+                     }
+                 }
+            }
+        });
+
+        // BAB VII: Tampil secara instan (tanpa fadeIn)
+        $('#harian_loadingState').hide();
+        $('#harian_tableState').show();
+        
+        // VAKSIN MICRO BLINK (Beri waktu browser menyelesaikan lukisan sebelum mengatur ulang kolom)
+        setTimeout(function(){ HARIAN_TABEL_INSTANCE.columns.adjust(); }, 100);
+        
+    } 
+    // JIKA TABEL SUDAH ADA (Refresh / Filter)
+    else {
+        HARIAN_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#harian_tableState').is(':hidden')) {
+            $('#harian_loadingState').hide();
+            $('#harian_tableState').show();
+        }
+        
+        setTimeout(function(){ HARIAN_TABEL_INSTANCE.columns.adjust(); }, 50);
+    }
+}
+
+// =================================================================
+// 5. HELPER UTILITIES: PEMBERSIH XSS (Hukum Ke-5)
+// =================================================================
+function harian_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

@@ -1,9 +1,580 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-  </head>
-  <body>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-tachometer-alt text-maroon mr-2"></i>Dashboard Laporan Bulan
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
     
-  </body>
-</html>
+    <div class="row justify-content-center mb-3">
+        <div class="col-12">
+            <div class="card-sultan p-3 shadow-sm border-left-maroon">
+                <div class="d-flex-gap align-items-center justify-content-center flex-wrap">
+                    <label class="mb-0 mr-2 font-weight-bold text-maroon"><i class="fas fa-filter mr-1"></i> PERIODE DATA:</label>
+                    <select id="dashlapbul_dashTahun" class="form-control form-control-sultan input-auto-width font-weight-bold" style="min-width: 120px;"></select>
+                    <select id="dashlapbul_dashBulan" class="form-control form-control-sultan input-auto-width font-weight-bold text-dark" style="min-width: 150px;">
+                        <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+                        <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+                        <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+                        <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+                    </select>
+                    <button type="button" id="dashlapbul_btnTampilkan" class="btn btn-maroon shadow-sm ml-2 font-weight-bold">
+                        <i class="fas fa-sync-alt mr-1"></i> TAMPILKAN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashlapbul_contentDash" class="row">
+        
+        <div class="col-lg-3 col-6">
+            <div class="card-sultan mb-3 border-left-info shadow-sm h-100">
+                <div class="card-body position-relative">
+                    <div id="dashlapbul_loadSd" class="position-absolute w-100 h-100 d-none justify-content-center align-items-center rounded" style="top:0; left:0; background:rgba(255,255,255,0.8); z-index:5; font-size:1.5rem;">
+                        <i class="fas fa-spinner fa-spin text-info"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-weight-bold text-info m-0">JENJANG SD</h6><i class="fas fa-school text-black-50 fa-2x"></i>
+                    </div>
+                    <h3 class="font-weight-bold text-dark mb-1 dashlapbul-count" id="dashlapbul_valSdPersen">0%</h3>
+                    <div class="progress mb-2" style="height: 6px;"><div id="dashlapbul_progSd" class="progress-bar bg-info" style="width: 0%"></div></div>
+                    <div class="d-flex justify-content-between small text-muted font-weight-bold">
+                        <span>Sudah: <b id="dashlapbul_valSdSudah" class="text-success">0</b></span><span>Total: <b id="dashlapbul_valSdTotal">0</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="card-sultan mb-3 border-left-warning shadow-sm h-100">
+                <div class="card-body position-relative">
+                    <div id="dashlapbul_loadPaud1" class="position-absolute w-100 h-100 d-none justify-content-center align-items-center rounded" style="top:0; left:0; background:rgba(255,255,255,0.8); z-index:5; font-size:1.5rem;">
+                        <i class="fas fa-spinner fa-spin text-warning"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-weight-bold text-warning m-0">JENJANG TK</h6><i class="fas fa-child text-black-50 fa-2x"></i>
+                    </div>
+                    <h3 class="font-weight-bold text-dark mb-1 dashlapbul-count" id="dashlapbul_valTkPersen">0%</h3>
+                    <div class="progress mb-2" style="height: 6px;"><div id="dashlapbul_progTk" class="progress-bar bg-warning" style="width: 0%"></div></div>
+                    <div class="d-flex justify-content-between small text-muted font-weight-bold">
+                        <span>Sudah: <b id="dashlapbul_valTkSudah" class="text-success">0</b></span><span>Total: <b id="dashlapbul_valTkTotal">0</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="card-sultan mb-3 border-left-success shadow-sm h-100">
+                <div class="card-body position-relative">
+                    <div id="dashlapbul_loadPaud2" class="position-absolute w-100 h-100 d-none justify-content-center align-items-center rounded" style="top:0; left:0; background:rgba(255,255,255,0.8); z-index:5; font-size:1.5rem;">
+                        <i class="fas fa-spinner fa-spin text-success"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-weight-bold text-success m-0">JENJANG KB</h6><i class="fas fa-shapes text-black-50 fa-2x"></i>
+                    </div>
+                    <h3 class="font-weight-bold text-dark mb-1 dashlapbul-count" id="dashlapbul_valKbPersen">0%</h3>
+                    <div class="progress mb-2" style="height: 6px;"><div id="dashlapbul_progKb" class="progress-bar bg-success" style="width: 0%"></div></div>
+                    <div class="d-flex justify-content-between small text-muted font-weight-bold">
+                        <span>Sudah: <b id="dashlapbul_valKbSudah" class="text-success">0</b></span><span>Total: <b id="dashlapbul_valKbTotal">0</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-6">
+            <div class="card-sultan mb-3 border-left-primary shadow-sm h-100">
+                <div class="card-body position-relative">
+                    <div id="dashlapbul_loadPaud3" class="position-absolute w-100 h-100 d-none justify-content-center align-items-center rounded" style="top:0; left:0; background:rgba(255,255,255,0.8); z-index:5; font-size:1.5rem;">
+                        <i class="fas fa-spinner fa-spin text-primary"></i>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="font-weight-bold text-primary m-0">JENJANG SPS</h6><i class="fas fa-home text-black-50 fa-2x"></i>
+                    </div>
+                    <h3 class="font-weight-bold text-dark mb-1 dashlapbul-count" id="dashlapbul_valSpsPersen">0%</h3>
+                    <div class="progress mb-2" style="height: 6px;"><div id="dashlapbul_progSps" class="progress-bar bg-primary" style="width: 0%"></div></div>
+                    <div class="d-flex justify-content-between small text-muted font-weight-bold">
+                        <span>Sudah: <b id="dashlapbul_valSpsSudah" class="text-success">0</b></span><span>Total: <b id="dashlapbul_valSpsTotal">0</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mt-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="font-weight-bold text-maroon m-0">
+                    <i class="fas fa-exclamation-circle mr-2"></i>Daftar Sekolah Belum Lapor
+                </h6>
+                <button id="dashlapbul_btnCopyUtama" class="btn btn-sm btn-outline-danger shadow-sm font-weight-bold" title="Salin Semua Data ke WhatsApp">
+                    <i class="fas fa-copy mr-1"></i> Salin Semua (WA)
+                </button>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card-sultan h-100 border-top-info">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="m-0 font-weight-bold text-info small">SD Belum Lapor <span id="dashlapbul_countBelumSd" class="badge badge-info float-right">0</span></h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul id="dashlapbul_listBelumSd" class="list-group list-group-flush small sultan-scroll" style="max-height: 250px; overflow-y: auto;">
+                                <li class="list-group-item text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Memuat...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card-sultan h-100 border-top-warning">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="m-0 font-weight-bold text-warning small">TK Belum Lapor <span id="dashlapbul_countBelumTk" class="badge badge-warning float-right text-white">0</span></h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul id="dashlapbul_listBelumTk" class="list-group list-group-flush small sultan-scroll" style="max-height: 250px; overflow-y: auto;">
+                                <li class="list-group-item text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Memuat...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card-sultan h-100 border-top-success">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="m-0 font-weight-bold text-success small">KB Belum Lapor <span id="dashlapbul_countBelumKb" class="badge badge-success float-right">0</span></h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul id="dashlapbul_listBelumKb" class="list-group list-group-flush small sultan-scroll" style="max-height: 250px; overflow-y: auto;">
+                                <li class="list-group-item text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Memuat...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card-sultan h-100 border-top-primary">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="m-0 font-weight-bold text-primary small">SPS Belum Lapor <span id="dashlapbul_countBelumSps" class="badge badge-primary float-right">0</span></h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul id="dashlapbul_listBelumSps" class="list-group list-group-flush small sultan-scroll" style="max-height: 250px; overflow-y: auto;">
+                                <li class="list-group-item text-center text-muted"><i class="fas fa-spinner fa-spin"></i> Memuat...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-12 mt-2">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card-sultan mb-3 h-100">
+                        <div class="card-header bg-white border-bottom-0">
+                            <h6 class="card-title font-weight-bold text-maroon"><i class="fas fa-chart-bar mr-2"></i>Komparasi Status Antar Jenjang</h6>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 350px; width: 100%;">
+                                <canvas id="dashlapbul_chartLapbul"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card-sultan mb-3 h-100">
+                        <div class="card-header bg-white border-bottom-0">
+                            <h6 class="card-title font-weight-bold text-maroon"><i class="fas fa-chart-pie mr-2"></i>Proporsi Total (Semua Jenjang)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div style="height: 220px; position: relative;">
+                                <canvas id="dashlapbul_chartTotalStatus"></canvas>
+                            </div>
+                            <div class="mt-4">
+                                <table class="table table-sm table-borderless small mb-0">
+                                    <tr>
+                                        <td><i class="fas fa-circle text-success"></i> Disetujui</td>
+                                        <td class="text-right font-weight-bold" id="dashlapbul_txtTotSetuju">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-circle text-info"></i> Diproses</td>
+                                        <td class="text-right font-weight-bold" id="dashlapbul_txtTotProses">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-circle text-warning"></i> Revisi</td>
+                                        <td class="text-right font-weight-bold" id="dashlapbul_txtTotRevisi">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-circle text-danger"></i> Ditolak</td>
+                                        <td class="text-right font-weight-bold" id="dashlapbul_txtTotTolak">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fas fa-circle text-secondary"></i> Belum Lapor</td>
+                                        <td class="text-right font-weight-bold" id="dashlapbul_txtTotBelum">0</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="dashlapbul_modalBelumLapor" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-maroon text-white py-3">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-clipboard-list mr-2"></i>Daftar Sekolah Belum Lapor</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body bg-light p-4">
+                <div class="alert alert-warning mb-3 py-2 px-3 small w-100 shadow-sm border-warning">
+                    <i class="fas fa-info-circle mr-1"></i> Menampilkan data periode terpilih.
+                </div>
+                <input type="text" class="form-control form-control-sultan mb-3 font-weight-bold" id="dashlapbul_cariBelumModal" placeholder="Ketik nama sekolah untuk mencari cepat...">
+                
+                <div class="bg-white border rounded shadow-sm" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-sm table-hover table-striped mb-0 small">
+                        <tbody id="dashlapbul_listBelumBodyModal"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-white p-3 justify-content-between">
+                <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Tutup</button>
+                <button type="button" class="btn btn-maroon font-weight-bold shadow-sm px-4" id="dashlapbul_btnCopyModal">
+                    <i class="fas fa-copy mr-1"></i> Salin Daftar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================================================================
+    // BAB I: ISOLASI VARIABEL GLOBAL & PENCEGAH RACE CONDITION SPA
+    // ======================================================================
+    var DASHLAPBUL_CHART_INSTANCE = null;
+    var DASHLAPBUL_CHART_TOTAL_INSTANCE = null; // Vaksin: Variabel grafik pie baru
+    
+    var DASHLAPBUL_DASH_DATA = {
+        sd:  { ok:0, pro:0, rev:0, no:0, blm:0 },
+        tk:  { ok:0, pro:0, rev:0, no:0, blm:0 },
+        kb:  { ok:0, pro:0, rev:0, no:0, blm:0 },
+        sps: { ok:0, pro:0, rev:0, no:0, blm:0 }
+    };
+    
+    var DASHLAPBUL_GLOBAL_BELUM_LAPOR = { sd: [], tk: [], kb: [], sps: [] };
+    var dashlapbul_pendingRequests = 0; 
+
+    $(document).ready(function() {
+        // Setup Option Tahun Otomatis
+        var d = new Date(); d.setMonth(d.getMonth() - 1); 
+        var thn = d.getFullYear(); var bln = d.getMonth() + 1;
+        var $sel = $('#dashlapbul_dashTahun').empty();
+        for(var i = thn - 4; i <= thn + 1; i++){ $sel.append('<option value="'+i+'">'+i+'</option>'); }
+        $sel.val(thn); $('#dashlapbul_dashBulan').val(bln);
+
+        // VAKSIN EVENT DELEGATION (Anti Memory Leak)
+        $(document).off('click', '#dashlapbul_btnTampilkan').on('click', '#dashlapbul_btnTampilkan', dashlapbul_loadDashboard);
+        $(document).off('click', '#dashlapbul_btnCopyUtama').on('click', '#dashlapbul_btnCopyUtama', dashlapbul_copySemuaBelumLapor);
+        $(document).off('click', '#dashlapbul_btnCopyModal').on('click', '#dashlapbul_btnCopyModal', dashlapbul_copySemuaBelumLapor);
+        $(document).off('keyup', '#dashlapbul_cariBelumModal').on('keyup', '#dashlapbul_cariBelumModal', dashlapbul_filterBelumModal);
+
+        // Injeksi Library ChartJS jika belum ada
+        if (typeof Chart === 'undefined') {
+            $.getScript("https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js").done(function() {
+                dashlapbul_initChart(); dashlapbul_loadDashboard();
+            });
+        } else {
+            dashlapbul_initChart(); dashlapbul_loadDashboard();
+        }
+    });
+
+    // ======================================================================
+    // BAB VIII: FETCH DATA SERVER (DENGAN RACE CONDITION HANDLER)
+    // ======================================================================
+    function dashlapbul_loadDashboard() {
+        if (dashlapbul_pendingRequests > 0) return;
+        
+        dashlapbul_pendingRequests = 2; // Request SD dan PAUD
+        $('#dashlapbul_btnTampilkan').prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-1"></i> MEMPROSES');
+
+        var t = $('#dashlapbul_dashTahun').val();
+        var b = $('#dashlapbul_dashBulan').val();
+
+        dashlapbul_resetDataStore();
+        if(DASHLAPBUL_CHART_INSTANCE) dashlapbul_updateChart(); 
+        
+        DASHLAPBUL_GLOBAL_BELUM_LAPOR = { sd: [], tk: [], kb: [], sps: [] };
+
+        ['Sd', 'Tk', 'Kb', 'Sps'].forEach(function(j) {
+            $('#dashlapbul_listBelum'+j).html('<li class="list-group-item text-center text-muted py-4"><i class="fas fa-spinner fa-spin mb-2"></i><br>Memuat...</li>');
+            $('#dashlapbul_countBelum'+j).text('...');
+        });
+
+        $('#dashlapbul_loadSd, #dashlapbul_loadPaud1, #dashlapbul_loadPaud2, #dashlapbul_loadPaud3').removeClass('d-none').addClass('d-flex');
+        
+        google.script.run
+            .withSuccessHandler(function(json) { dashlapbul_handleResponse('sd', json); })
+            .withFailureHandler(function(e){ dashlapbul_finishRequest('sd'); Sultan.alert('error', 'Koneksi Error', e.message); })
+            .getLapbulMetric_SD(t, b);
+
+        google.script.run
+            .withSuccessHandler(function(json) { dashlapbul_handleResponse('paud', json); })
+            .withFailureHandler(function(e){ dashlapbul_finishRequest('paud'); })
+            .getLapbulMetric_PAUD(t, b);
+    }
+
+    function dashlapbul_finishRequest(source) {
+        if (source === 'sd') $('#dashlapbul_loadSd').removeClass('d-flex').addClass('d-none');
+        if (source === 'paud') $('#dashlapbul_loadPaud1, #dashlapbul_loadPaud2, #dashlapbul_loadPaud3').removeClass('d-flex').addClass('d-none');
+        
+        dashlapbul_pendingRequests--;
+        if (dashlapbul_pendingRequests <= 0) {
+            $('#dashlapbul_btnTampilkan').prop('disabled', false).html('<i class="fas fa-sync-alt mr-1"></i> TAMPILKAN');
+        }
+    }
+
+    function dashlapbul_handleResponse(source, json) {
+        var data;
+        try {
+             data = JSON.parse(json);
+        } catch(e) {
+             dashlapbul_finishRequest(source); return;
+        }
+        
+        if (source === 'sd') {
+            dashlapbul_updateCard('Sd', data.sd); dashlapbul_updateStore('sd', data.sd);
+            DASHLAPBUL_GLOBAL_BELUM_LAPOR.sd = data.sd.listBelum || [];
+            dashlapbul_renderListBelum('Sd', DASHLAPBUL_GLOBAL_BELUM_LAPOR.sd); 
+        } 
+        else if (source === 'paud') {
+            dashlapbul_updateCard('Tk', data.tk); dashlapbul_updateStore('tk', data.tk);
+            dashlapbul_updateCard('Kb', data.kb); dashlapbul_updateStore('kb', data.kb);
+            dashlapbul_updateCard('Sps', data.sps); dashlapbul_updateStore('sps', data.sps);
+
+            DASHLAPBUL_GLOBAL_BELUM_LAPOR.tk = data.tk.listBelum || [];
+            DASHLAPBUL_GLOBAL_BELUM_LAPOR.kb = data.kb.listBelum || [];
+            DASHLAPBUL_GLOBAL_BELUM_LAPOR.sps = data.sps.listBelum || [];
+
+            dashlapbul_renderListBelum('Tk', DASHLAPBUL_GLOBAL_BELUM_LAPOR.tk);
+            dashlapbul_renderListBelum('Kb', DASHLAPBUL_GLOBAL_BELUM_LAPOR.kb);
+            dashlapbul_renderListBelum('Sps', DASHLAPBUL_GLOBAL_BELUM_LAPOR.sps);
+        }
+        dashlapbul_updateChart(); 
+        dashlapbul_finishRequest(source);
+    }
+
+    function dashlapbul_renderListBelum(jenjang, dataList) {
+        var ul = $('#dashlapbul_listBelum' + jenjang); 
+        var badge = $('#dashlapbul_countBelum' + jenjang);
+        ul.empty();
+        
+        if (!dataList || dataList.length === 0) {
+            var msgHtml = '<li class="list-group-item text-center text-success py-4 font-weight-bold"><i class="fas fa-check-circle fa-2x mb-2"></i><br>Semua Sudah Lapor!</li>';
+            ul.html(msgHtml);
+            badge.text("0");
+            return;
+        }
+
+        badge.text(dataList.length);
+
+        dataList.forEach(function(namaSekolah, i) {
+            ul.append('<li class="list-group-item py-2 px-3 border-bottom-light text-dark font-weight-bold" style="font-size:12px;"><span class="badge badge-light border text-muted mr-2" style="width:25px;">' + (i+1) + '</span> ' + namaSekolah + '</li>');
+        });
+    }
+
+    function dashlapbul_filterBelumModal() {
+        var val = $('#dashlapbul_cariBelumModal').val().toLowerCase();
+        $("#dashlapbul_listBelumBodyModal tr").filter(function() { 
+            $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1) 
+        });
+    }
+
+    function dashlapbul_copySemuaBelumLapor() {
+        var th = $('#dashlapbul_dashTahun').val();
+        var blnText = $('#dashlapbul_dashBulan option:selected').text();
+        
+        var totalBelum = DASHLAPBUL_GLOBAL_BELUM_LAPOR.sd.length + DASHLAPBUL_GLOBAL_BELUM_LAPOR.tk.length + DASHLAPBUL_GLOBAL_BELUM_LAPOR.kb.length + DASHLAPBUL_GLOBAL_BELUM_LAPOR.sps.length;
+
+        if (totalBelum === 0) {
+            Sultan.notif.sukses('Hebat! Semua sekolah sudah lapor.'); return;
+        }
+
+        var txt = `*DAFTAR SEKOLAH BELUM LAPOR BULANAN*\nPeriode: ${blnText} ${th}\n\n`;
+
+        function appendList(title, list) {
+            txt += `*${title}:*\n`;
+            if (!list || list.length === 0) {
+                txt += `_Semua sudah lapor_ ✅\n\n`;
+            } else {
+                list.forEach((nama, i) => { txt += `${i + 1}. ${nama}\n`; });
+                txt += `\n`;
+            }
+        }
+
+        appendList('JENJANG SD', DASHLAPBUL_GLOBAL_BELUM_LAPOR.sd);
+        appendList('JENJANG TK', DASHLAPBUL_GLOBAL_BELUM_LAPOR.tk);
+        appendList('JENJANG KB', DASHLAPBUL_GLOBAL_BELUM_LAPOR.kb);
+        appendList('JENJANG SPS', DASHLAPBUL_GLOBAL_BELUM_LAPOR.sps);
+
+        txt += `_Mohon segera mengirimkan laporan ke sistem SIKS-REBORN._`;
+
+        navigator.clipboard.writeText(txt).then(function() {
+            Sultan.notif.sukses('Tersalin ke Clipboard! Data siap ditempel di WhatsApp.');
+        }).catch(function(err) {
+            Sultan.alert('error', 'Gagal', 'Gagal menyalin text. Browser Anda mungkin memblokir fitur clipboard.');
+        });
+    }
+
+    function dashlapbul_updateCard(jenjang, stats) {
+        if(!stats) return;
+        dashlapbul_animateValue('dashlapbul_val' + jenjang + 'Persen', stats.persen, "%");
+        dashlapbul_animateValue('dashlapbul_val' + jenjang + 'Sudah', stats.sudah);
+        dashlapbul_animateValue('dashlapbul_val' + jenjang + 'Total', stats.total);
+        $('#dashlapbul_prog' + jenjang).css('width', stats.persen + "%");
+    }
+
+    function dashlapbul_updateStore(key, s) {
+        if(!s) return;
+        DASHLAPBUL_DASH_DATA[key] = { ok: s.disetujui, pro: s.diproses, rev: s.revisi, no: s.ditolak, blm: s.belum };
+    }
+
+    // ======================================================================
+    // PENGATURAN KEDUA GRAFIK CHART.JS
+    // ======================================================================
+    function dashlapbul_initChart() {
+        // 1. Chart Bar Komparasi (Original)
+        var ctxBar = document.getElementById('dashlapbul_chartLapbul').getContext('2d');
+        DASHLAPBUL_CHART_INSTANCE = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['SD', 'TK', 'KB', 'SPS'],
+                datasets: [
+                    { label: 'Disetujui', backgroundColor: '#28a745', data: [0,0,0,0] },
+                    { label: 'Diproses', backgroundColor: '#17a2b8', data: [0,0,0,0] },
+                    { label: 'Revisi', backgroundColor: '#ffc107', data: [0,0,0,0] },
+                    { label: 'Ditolak', backgroundColor: '#dc3545', data: [0,0,0,0] },
+                    { label: 'Belum Lapor', backgroundColor: '#6c757d', data: [0,0,0,0] }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false }, stacked: false },
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                },
+                plugins: { legend: { position: 'bottom' } },
+                animation: { duration: 500 }
+            }
+        });
+
+        // 2. Chart Pie Total Status (Pengganti Timeline)
+        var ctxPie = document.getElementById('dashlapbul_chartTotalStatus').getContext('2d');
+        DASHLAPBUL_CHART_TOTAL_INSTANCE = new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: ['Disetujui', 'Diproses', 'Revisi', 'Ditolak', 'Belum Lapor'],
+                datasets: [{
+                    data: [0.1, 0, 0, 0, 0], // Dummy awal agar bulat abu-abu
+                    backgroundColor: ['#e9ecef', '#17a2b8', '#ffc107', '#dc3545', '#6c757d'],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                animation: { animateScale: true, animateRotate: true }
+            }
+        });
+    }
+
+    function dashlapbul_updateChart() {
+        if(!DASHLAPBUL_CHART_INSTANCE || !DASHLAPBUL_CHART_TOTAL_INSTANCE) return;
+        var d = DASHLAPBUL_DASH_DATA;
+        
+        // Update Chart Bar Komparasi
+        DASHLAPBUL_CHART_INSTANCE.data.datasets[0].data = [d.sd.ok, d.tk.ok, d.kb.ok, d.sps.ok];
+        DASHLAPBUL_CHART_INSTANCE.data.datasets[1].data = [d.sd.pro, d.tk.pro, d.kb.pro, d.sps.pro];
+        DASHLAPBUL_CHART_INSTANCE.data.datasets[2].data = [d.sd.rev, d.tk.rev, d.kb.rev, d.sps.rev];
+        DASHLAPBUL_CHART_INSTANCE.data.datasets[3].data = [d.sd.no, d.tk.no, d.kb.no, d.sps.no];
+        DASHLAPBUL_CHART_INSTANCE.data.datasets[4].data = [d.sd.blm, d.tk.blm, d.kb.blm, d.sps.blm];
+        DASHLAPBUL_CHART_INSTANCE.update();
+
+        // Kalkulasi Total untuk Chart Doughnut
+        var totOk = d.sd.ok + d.tk.ok + d.kb.ok + d.sps.ok;
+        var totPro = d.sd.pro + d.tk.pro + d.kb.pro + d.sps.pro;
+        var totRev = d.sd.rev + d.tk.rev + d.kb.rev + d.sps.rev;
+        var totNo = d.sd.no + d.tk.no + d.kb.no + d.sps.no;
+        var totBlm = d.sd.blm + d.tk.blm + d.kb.blm + d.sps.blm;
+        var totalAll = totOk + totPro + totRev + totNo + totBlm;
+
+        var finalDataTot = totalAll === 0 ? [0.1, 0, 0, 0, 0] : [totOk, totPro, totRev, totNo, totBlm];
+        var finalColorsTot = totalAll === 0 
+            ? ['#e9ecef', '#17a2b8', '#ffc107', '#dc3545', '#6c757d'] 
+            : ['#28a745', '#17a2b8', '#ffc107', '#dc3545', '#6c757d']; // Sesuaikan warna dengan Bar
+
+        DASHLAPBUL_CHART_TOTAL_INSTANCE.data.datasets[0].data = finalDataTot;
+        DASHLAPBUL_CHART_TOTAL_INSTANCE.data.datasets[0].backgroundColor = finalColorsTot;
+        DASHLAPBUL_CHART_TOTAL_INSTANCE.options.plugins.tooltip.enabled = (totalAll > 0);
+        DASHLAPBUL_CHART_TOTAL_INSTANCE.update();
+
+        // Update Text Summary di bawah Doughnut
+        $('#dashlapbul_txtTotSetuju').text(totOk);
+        $('#dashlapbul_txtTotProses').text(totPro);
+        $('#dashlapbul_txtTotRevisi').text(totRev);
+        $('#dashlapbul_txtTotTolak').text(totNo);
+        $('#dashlapbul_txtTotBelum').text(totBlm);
+    }
+
+    function dashlapbul_resetDataStore() {
+        DASHLAPBUL_DASH_DATA = {
+            sd:  { ok:0, pro:0, rev:0, no:0, blm:0 },
+            tk:  { ok:0, pro:0, rev:0, no:0, blm:0 },
+            kb:  { ok:0, pro:0, rev:0, no:0, blm:0 },
+            sps: { ok:0, pro:0, rev:0, no:0, blm:0 }
+        };
+    }
+
+    // VAKSIN ANIMASI ANGKA
+    function dashlapbul_animateValue(id, endValue, suffix = "") {
+        var obj = document.getElementById(id);
+        if(!obj) return;
+        var start = 0; var end = parseInt(endValue);
+        if (isNaN(end)) end = 0; 
+        
+        if (end === 0) { obj.innerHTML = "0" + (suffix ? `<small class="ml-1">${suffix}</small>` : ''); return; }
+        
+        var duration = 800; 
+        var range = end - start; 
+        var current = start; 
+        var stepTime = Math.abs(Math.floor(duration / range));
+        if(stepTime < 10) stepTime = 10; 
+        
+        var stepVal = Math.ceil(range / (duration / stepTime));
+        
+        var timer = setInterval(function() {
+            current += stepVal; 
+            if (current >= end) { current = end; clearInterval(timer); }
+            obj.innerHTML = current + (suffix ? `<small class="ml-1">${suffix}</small>` : '');
+        }, stepTime);
+    }
+</script>

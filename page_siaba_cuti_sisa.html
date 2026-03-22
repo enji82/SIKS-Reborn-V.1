@@ -1,139 +1,323 @@
-<header>
-  <h2>SISA CUTI TAHUNAN PEGAWAI</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterUnitCutiSisa">Unit Kerja:</label>
-    <select id="filterUnitCutiSisa"></select>
-  </div>
-  
-  <div class="filter-group" style="margin-left: auto;">
-    <label for="searchCutiSisa" class="search-icon-label"><i class="fas fa-search"></i></label>
-    <input type="search" id="searchCutiSisa" class="search-input" placeholder="Cari Nama/NIP...">
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-chart-pie text-maroon mr-2"></i>Data Sisa Cuti Tahunan
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  <div id="tableWrapperCutiSisa" style="display:flex; position: relative;"> 
-    
-    <div id="tableOverlayLoaderCutiSisa" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
-        <div class="spinner-container">
-            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
-            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
-            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
-            <div class="spinner-bar" style="background-color: #3498db;"></div>
-        </div>
-        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
-    </div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
 
-    <div class="table-container">
-        <table id="cutiSisaTable" class="data-table freeze-pane-table">
-          <thead></thead>
-          <tbody></tbody>
-        </table>
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#sisact_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="sisact_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Tabel ini menampilkan sisa hak cuti tahunan (N, N-1, N-2).</li>
+                  <li class="mb-1">Sisa CT akan berkurang otomatis jika usulan cuti tahunan disetujui.</li>
+                  <li class="mb-1">Kolom berwarna <span class="text-success font-weight-bold">hijau</span> adalah total hak cuti yang bisa diambil, dan warna <span class="text-danger font-weight-bold">pink</span> adalah cuti yang telah diambil.</li>
+                  <li>Nilai <span class="badge badge-danger">Minus</span> menandakan cuti diambil melebihi kuota (utang cuti).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-sultan p-3 mb-3" id="sisact_filterContainer" style="display: none;">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="sisact_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="sisact_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+            </div>
+        </div>
+
+        <div class="card-sultan">
+          <div class="card-body p-3">
+            
+            <div id="sisact_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold mt-3" id="sisact_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sisact_tableState" style="display: none;">
+                <table id="sisact_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact w-100 text-nowrap">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="col-sticky-left border-right text-left align-middle" style="z-index: 5; min-width: 250px;">Nama ASN</th>
+                            <th class="text-center align-middle" id="sisact_th_1">Status</th>
+                            <th class="text-center align-middle" id="sisact_th_2">N-2</th>
+                            <th class="text-center align-middle" id="sisact_th_3">N-1</th>
+                            <th class="text-center align-middle" id="sisact_th_4">N</th>
+                            <th class="text-center align-middle" id="sisact_th_5" style="background-color: #d4edda !important; color: #155724 !important;">Jml. N</th>
+                            <th class="text-center align-middle" id="sisact_th_6" style="background-color: #f8d7da !important; color: #721c24 !important;">Diambil</th>
+                            <th class="text-center align-middle" id="sisact_th_7">Sisa N-2</th>
+                            <th class="text-center align-middle" id="sisact_th_8">Sisa N-1</th>
+                            <th class="text-center align-middle" id="sisact_th_9">Sisa N</th>
+                            <th class="text-center align-middle border-left" id="sisact_th_10" style="background-color: #cce5ff !important; color: #004085 !important;">Sisa CT</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
-</main>
+</section>
 
-<style>
-  /* --- 1. LAYOUT WRAPPER --- */
-  #main-content { overflow-y: hidden !important; }
-  
-  main.table-view-container { 
-      flex-grow: 1 !important; 
-      min-height: 0 !important; 
-      display: flex !important; 
-      flex-direction: column !important; 
-  }
-  
-  #tableWrapperCutiSisa { 
-      flex-grow: 1 !important; 
-      min-height: 0 !important; 
-      display: flex !important; 
-      flex-direction: column !important; 
-      margin-bottom: 0; 
-  }
-  
-  #tableWrapperCutiSisa .table-container { 
-      flex-grow: 1 !important; 
-      overflow: auto !important; 
-      border-radius: 10px; 
-      border-bottom: none; 
-  }
-  #tableWrapperCutiSisa .table-container::-webkit-scrollbar { display: none !important; }
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - READ ONLY DATA)
+// ======================================================================
+var SISACT_CACHE_DATA = []; 
+var SISACT_TABEL_INSTANCE = null; 
 
-  /* --- 2. ATURAN KOLOM SPESIFIK --- */
-  
-  /* Kolom 1 (No): Paksa lebar fix 50px */
-  #cutiSisaTable th:nth-child(1),
-  #cutiSisaTable td:nth-child(1) {
-      width: 50px;
-      min-width: 50px;
-      max-width: 50px;
-      box-sizing: border-box !important;
-  }
+var SISACT_USER_AKTIF = "";
+var SISACT_IS_ADMIN = false;
+var SISACT_UNIT_TERKUNCI = ""; 
+var SISACT_USER_NPSN = "";
 
-  /* Kolom 2 (Nama ASN): Rata Kiri & Lebar Min */
-  #cutiSisaTable tbody td:nth-child(2) {
-      text-align: left !important; 
-      min-width: 200px;
-  }
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE
+// =================================================================
+$(document).ready(function() {
+    SISACT_TABEL_INSTANCE = null;
+    $('#sisact_tableState').hide();
+    $('#sisact_loadingState').show();
+    $('#sisact_filterContainer').hide(); 
 
-  /* Rata Kiri Lainnya */
-  #cutiSisaTable tbody td:nth-child(3) {
-      text-align: left !important;
-  }
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        SISACT_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        SISACT_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        SISACT_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { SISACT_USER_NPSN = ""; SISACT_IS_ADMIN = false; }
 
-  /* --- 3. PERBAIKAN FREEZE PANE (SUDUT MATI) --- */
-  /* Masalah scroll terjadi karena Header Kolom 1 & 2 perlu dikunci 2 arah (Top & Left) */
-  /* Kita override CSS global khusus untuk 2 sel header ini dengan !important */
-  
-  #cutiSisaTable thead th:nth-child(1) {
-      position: sticky !important;
-      top: 0 !important;        /* Kunci ke Atas */
-      left: 0 !important;       /* Kunci ke Kiri */
-      z-index: 10 !important;   /* Layer Paling Atas (di atas header lain & body) */
-      background-color: #101E26 !important; /* Pastikan background tidak transparan */
-  }
-  
-  #cutiSisaTable thead th:nth-child(2) {
-      position: sticky !important;
-      top: 0 !important;        /* Kunci ke Atas */
-      left: 50px !important;    /* Kunci ke Kiri (setelah kolom 1) */
-      z-index: 10 !important;   /* Layer Paling Atas */
-      background-color: #101E26 !important;
-  }
+    $(document).off('click', '#sisact_btnRefresh').on('click', '#sisact_btnRefresh', sisact_tarikDataServer); 
+    $(document).off('change', '#sisact_filterUnit').on('change', '#sisact_filterUnit', sisact_terapkanFilterLokal);
 
-  /* --- 4. PEWARNAAN KOLOM --- */
-  
-  /* Kolom 7 (Biru Muda) */
-  #cutiSisaTable tbody td:nth-child(7) {
-      background-color: rgba(52, 152, 219, 0.15);
-      color: #3498db;
-      font-weight: bold;
-  }
+    sisact_validasiAksesUser();
+});
 
-  /* Kolom 8 (Ungu Muda) */
-  #cutiSisaTable tbody td:nth-child(8) {
-      background-color: rgba(155, 89, 182, 0.15);
-      color: #9b59b6;
-      font-weight: bold;
-  }
+// =================================================================
+// 2. GATEKEEPER MUTLAK
+// =================================================================
+function sisact_validasiAksesUser() {
+    if (SISACT_IS_ADMIN) {
+        $('#sisact_filterContainer').show();
+        $('#sisact_loadingText').html('Mempersiapkan Database Admin...');
+        $('#sisact_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        sisact_tarikDataServer(); 
+    } else {
+        if (!SISACT_USER_NPSN) {
+            $('#sisact_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
 
-  /* Kolom 12 (Hijau) */
-  #cutiSisaTable tbody td:nth-child(12) {
-      background-color: rgba(46, 204, 113, 0.15);
-      color: #2ecc71;
-      font-weight: bold;
-  }
-  
-  /* Hover Effect */
-  #cutiSisaTable tbody tr:hover td { background-color: rgba(255, 255, 255, 0.08); }
-  
-  /* Pastikan hover kolom freeze (kiri) warnanya konsisten/gelap */
-  #cutiSisaTable tbody tr:hover td:nth-child(1), 
-  #cutiSisaTable tbody tr:hover td:nth-child(2) { 
-      background-color: #2a4152 !important; 
-  }
-</style>
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#sisact_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>'+sisact_escapeHtml(dataUnit.error)+'</span>');
+                    return;
+                }
+
+                SISACT_UNIT_TERKUNCI = dataUnit.unitKerja;
+                sisact_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#sisact_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: '+sisact_escapeHtml(err.message)+'</span>');
+            })
+            .getUnitKerjaByNPSN(SISACT_USER_NPSN);
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA TABEL (BAB VII - TURBO SEAMLESS)
+// =================================================================
+function sisact_tarikDataServer() {
+    var btn = $('#sisact_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#sisact_tabelUtama')) {
+        $('#sisact_tableState').hide();
+        $('#sisact_loadingText').html('Menyinkronkan data dari server...');
+        $('#sisact_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(jsonString) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            var res;
+            try { res = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString; } 
+            catch(e) { $('#sisact_loadingText').html('<span class="text-danger">Gagal memproses struktur JSON Server.</span>'); return; }
+
+            if (res && res.error) {
+                $('#sisact_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + sisact_escapeHtml(res.error) + '</span>');
+                return;
+            }
+
+            try {
+                SISACT_CACHE_DATA = res.data || []; 
+                var headers = res.headers || []; 
+                
+                // Cukup ganti isi teksnya saja, biarkan struktur DOM HTML utuh 100%
+                if (headers.length >= 13) {
+                    $('#sisact_th_1').text(headers[3] || "Status");
+                    $('#sisact_th_2').text(headers[4] || "N-2");
+                    $('#sisact_th_3').text(headers[5] || "N-1");
+                    $('#sisact_th_4').text(headers[6] || "N");
+                    $('#sisact_th_5').text(headers[7] || "Jml. N");
+                    $('#sisact_th_6').text(headers[8] || "Diambil");
+                    $('#sisact_th_7').text(headers[9] || "Sisa N-2");
+                    $('#sisact_th_8').text(headers[10] || "Sisa N-1");
+                    $('#sisact_th_9').text(headers[11] || "Sisa N");
+                    $('#sisact_th_10').text(headers[12] || "Sisa CT");
+                }
+
+                if (!$.fn.DataTable.isDataTable('#sisact_tabelUtama')) {
+                    sisact_inisialisasiDataTables();
+                }
+                
+                if(SISACT_IS_ADMIN) sisact_populateDropdownUnit();
+                sisact_terapkanFilterLokal(); 
+                
+                $('#sisact_loadingState').hide();
+                $('#sisact_tableState').show(); 
+                if(SISACT_TABEL_INSTANCE) { setTimeout(function() { SISACT_TABEL_INSTANCE.columns.adjust(); }, 50); }
+
+            } catch (e) {
+                $('#sisact_loadingText').html('<span class="text-danger">Gagal merakit tabel: ' + sisact_escapeHtml(e.message) + '</span>');
+            }
+        })
+        .withFailureHandler(function(e){
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            $('#sisact_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Server Terputus.</span>');
+        }).getSisaCutiData(); 
+}
+
+// =================================================================
+// 4. INISIALISASI DATATABLES (SIMPLE & STATIC)
+// =================================================================
+function sisact_inisialisasiDataTables() {
+    SISACT_TABEL_INSTANCE = $('#sisact_tabelUtama').DataTable({
+        "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+        "deferRender": true,
+        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        "columnDefs": [
+            { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-left text-nowrap" },
+            { "targets": [1,2,3,4,5,6,7,8,9,10], "className": "text-center align-middle text-nowrap" }
+        ],
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada data Sisa Cuti." },
+        
+        // Pewarnaan baris data secara Native DOM (Cepat & Ringan)
+        "createdRow": function(row, data, dataIndex) {
+             var tds = row.children;
+             if(tds[0]) { tds[0].style.position = 'sticky'; tds[0].style.left = '0'; tds[0].style.zIndex = '2'; tds[0].style.backgroundColor = '#ffffff'; }
+             if(tds[5]) { tds[5].style.backgroundColor = '#d4edda'; tds[5].style.color = '#155724'; tds[5].classList.add('font-weight-bold'); }
+             if(tds[6]) { tds[6].style.backgroundColor = '#f8d7da'; tds[6].style.color = '#721c24'; tds[6].classList.add('font-weight-bold'); }
+             if(tds[10]) { tds[10].style.backgroundColor = '#cce5ff'; tds[10].style.color = '#004085'; tds[10].classList.add('font-weight-bold', 'border-left'); }
+        }
+    });
+}
+
+function sisact_populateDropdownUnit() {
+    if(!SISACT_IS_ADMIN) return;
+    var unikUnit = [...new Set(SISACT_CACHE_DATA.map(item => String(item[0]).trim()))].sort();
+    var $filUnit = $('#sisact_filterUnit');
+    var curVal = $filUnit.val();
+    
+    $filUnit.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    unikUnit.forEach(function(u){ if(u) $filUnit.append($('<option>', {value: u, text: u})); });
+    
+    $filUnit.prop('disabled', false);
+    $('#sisact_btnRefresh').prop('disabled', false);
+    if(curVal && $filUnit.find('option[value="'+curVal+'"]').length > 0) { $filUnit.val(curVal); }
+}
+
+// =================================================================
+// 5. FILTER LOKAL & INJEKSI DATA
+// =================================================================
+function sisact_terapkanFilterLokal() {
+    if (!SISACT_TABEL_INSTANCE) return;
+
+    var tAdminUnit = SISACT_IS_ADMIN ? $('#sisact_filterUnit').val().toUpperCase() : "";
+    var tUnitUser = String(SISACT_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var hasil = SISACT_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase(); 
+        if (SISACT_IS_ADMIN) { return (tAdminUnit === "SEMUA" || tAdminUnit === "" || rUnit === tAdminUnit); } 
+        else { return (rUnit === tUnitUser); }
+    });
+    
+    sisact_renderTabel(hasil);
+}
+
+function sisact_renderTabel(data) {
+    var dtArray = [];
+
+    data.forEach(function(row) {
+        var arrRow = [];
+        
+        var txtUnitHtml = SISACT_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${sisact_escapeHtml(row[0])}</div>` : '';
+        var uiNama = `<div class="font-weight-bold text-dark text-nowrap text-left">${sisact_escapeHtml(row[1])}</div><div class="small text-muted text-nowrap text-left">${sisact_escapeHtml(row[2])}</div>${txtUnitHtml}`;
+        
+        arrRow.push(uiNama); 
+        
+        // Kolom Status s/d Sisa CT (Index Array Data 3 s/d 12)
+        for(var c=3; c<=12; c++) {
+            var val = row[c]; var disp = val;
+            if (val == 0 || val == "0" || val == "0.00" || val === "" || val == null || val == "-") {
+                disp = `<span class="opacity-50">-</span>`; 
+            } else {
+                var num = parseFloat(String(val).replace(',', '.'));
+                if (!isNaN(num) && num < 0) { 
+                    disp = `<span class="badge badge-danger px-2 py-1">${sisact_escapeHtml(val)}</span>`; 
+                } else {
+                    disp = sisact_escapeHtml(val);
+                }
+            }
+            arrRow.push(disp);
+        }
+        dtArray.push(arrRow);
+    });
+
+    SISACT_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+}
+
+function sisact_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

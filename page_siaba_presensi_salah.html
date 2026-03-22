@@ -1,0 +1,826 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-exclamation-circle text-maroon mr-2"></i>Data Salah Presensi
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#salah_infoCollapse">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="salah_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Fasilitas bagi ASN yang salah memilih jenis presensi (Datang/Pulang) di aplikasi Siaba.</li>
+                  <li>Batas waktu perbaikan adalah maksimal 30 hari dari tanggal kejadian.</li>
+                  <li>Klik tombol <span class="badge badge-outline-danger">💬 Baca Catatan</span> untuk melihat alasan dari admin jika status ditolak/revisi.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="salah_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+
+                <select id="salah_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80"></select>
+                
+                <select id="salah_filterBulan" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Bulan -</option>
+                    <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Maret">Maret</option>
+                    <option value="April">April</option><option value="Mei">Mei</option><option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option><option value="Agustus">Agustus</option><option value="September">September</option>
+                    <option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                </select>
+
+                <select id="salah_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Status -</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Revisi">Revisi</option>
+                    <option value="Ditolak">Ditolak</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="salah_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="salah_btnTambah" class="btn btn-maroon text-white font-weight-bold shadow-sm" disabled>
+                    <i class="fas fa-plus mr-1"></i> Tambah
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+          <div class="card-body p-3">
+            
+            <div id="salah_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold mt-3" id="salah_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="salah_tableState" style="display: none;">
+                <table id="salah_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact w-100">
+                   <thead class="bg-light">
+                      <tr>
+                         <th class="col-sticky-left border-right text-center align-middle" style="z-index: 5;">Aksi</th>
+                         <th class="text-left align-middle">Nama ASN</th>
+                         <th class="text-center align-middle">Tanggal</th>
+                         <th class="text-center align-middle">Jam</th>
+                         <th class="text-center align-middle">Terekam (Salah)</th>
+                         <th class="text-left align-middle">Status</th>
+                         <th class="text-left align-middle">Dikirim</th>
+                         <th class="text-left align-middle">Diubah</th>
+                         <th class="text-left align-middle">Verifikasi</th>
+                      </tr>
+                   </thead>
+                   <tbody></tbody>
+                </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="salah_modalForm" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg modal-content-sultan">
+      <div class="modal-header bg-maroon" id="salah_headerModalForm">
+        <h5 class="modal-title font-weight-bold" id="salah_judulModalForm" style="color: #fff;"><i class="fas fa-file-signature mr-2"></i>Tambah Data</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" id="salah_closeModalForm"><span>&times;</span></button>
+      </div>
+      <form id="salah_formUtama">
+      <div class="modal-body bg-light p-4">
+        <input type="hidden" id="salah_inputIdData">
+        <input type="hidden" id="salah_inputNipLama">
+        <input type="hidden" id="salah_inputTglLama">
+        <input type="hidden" id="salah_inputJamLama">
+        
+        <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Unit Kerja <span class="text-danger">*</span></label>
+            <select class="form-control form-control-sultan font-weight-bold text-maroon bg-light" id="salah_inputUnit" required disabled>
+                <option value="">- Memuat Database Pegawai... -</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Nama ASN <span class="text-danger">*</span></label>
+            <select class="form-control form-control-sultan" id="salah_inputNama" required disabled>
+                <option value="">- Pilih Unit Dulu -</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">NIP / NIY</label>
+            <select class="form-control form-control-sultan" id="salah_inputNip" required disabled>
+                <option value="">- Otomatis -</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tanggal <span class="text-danger">*</span></label>
+                    <input type="date" id="salah_inputTanggal" class="form-control form-control-sultan" required>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="form-group">
+                    <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Waktu (Jam) <span class="text-danger">*</span></label>
+                    <input type="time" id="salah_inputWaktu" class="form-control form-control-sultan" required>
+                </div>
+            </div>
+        </div>
+        <div class="form-group mb-0">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Presensi yang Terekam (Salah) <span class="text-danger">*</span></label>
+            <select id="salah_inputJenis" class="form-control form-control-sultan border-maroon" required>
+                <option value="">- Pilih -</option>
+                <option value="Datang">Datang</option>
+                <option value="Pulang">Pulang</option>
+            </select>
+            <small class="text-muted mt-2 d-block"><i class="fas fa-info-circle mr-1"></i> Pilih jenis presensi sesuai yang terekam di aplikasi Siaba.</small>
+        </div>
+      </div>
+      <div class="modal-footer bg-white justify-content-between p-3 border-top">
+          <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+          <button type="submit" id="salah_btnSimpanForm" class="btn btn-maroon text-white shadow-sm font-weight-bold px-4"><i class="fas fa-save mr-1"></i> Simpan</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="salah_modalHapus" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Konfirmasi Hapus</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="salah_formHapus">
+            <div class="modal-body bg-white p-4">
+                <input type="hidden" id="salah_hapusIdData">
+                <div class="alert alert-warning text-dark border-warning shadow-sm mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mt-1 mr-3 fa-lg"></i>
+                        <div>
+                            <strong>Peringatan!</strong><br>
+                            Anda akan menghapus data Salah Presensi atas nama:<br>
+                            <span id="salah_hapusNamaView" class="font-weight-bold text-uppercase" style="font-size: 1.1em; color: #000;">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-0">
+                    <label class="form-label-sultan small font-weight-bold text-uppercase text-muted">Kode Keamanan <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-key text-danger"></i></span></div>
+                        <input type="password" id="salah_hapusKode" class="form-control form-control-sultan border-left-0" placeholder="Hubungi admin Korwil untuk mendapatkan kode." required autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light justify-content-between p-3 border-top">
+                <button type="button" class="btn btn-default border shadow-sm px-4 font-weight-bold" data-dismiss="modal">Batal</button>
+                <button type="submit" id="salah_btnEksekusiHapus" class="btn btn-danger shadow-sm px-4 font-weight-bold"><i class="fas fa-trash mr-1"></i> HAPUS DATA</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="salah_modalVerif" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-primary text-white py-2">
+                <h5 class="modal-title font-weight-bold h6 mb-0"><i class="fas fa-clipboard-check mr-2"></i>Panel Verifikasi Data</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="salah_formVerif">
+                <div class="modal-body bg-light p-4">
+                    <input type="hidden" id="salah_verifIdData">
+                    
+                    <h5 class="text-primary font-weight-bold border-bottom pb-2 mb-4"><i class="fas fa-user-circle mr-2"></i> Informasi Ajuan</h5>
+                    <table class="table table-borderless mb-4 text-dark">
+                        <tr><td class="text-muted font-weight-bold align-middle py-2" width="35%" style="font-size: 14px;">Nama ASN</td><td class="font-weight-bold text-dark py-2" id="salah_vNama" style="font-size: 18px; text-transform: uppercase;">-</td></tr>
+                        <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">NIP</td><td class="text-dark py-2" id="salah_vNip" style="font-size: 16px;">-</td></tr>
+                        <tr><td colspan="2" class="py-2"><hr class="my-0 dashed"></td></tr>
+                        <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Tanggal</td><td class="font-weight-bold text-dark py-2" id="salah_vTgl" style="font-size: 16px;">-</td></tr>
+                        <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Jam</td><td class="font-weight-bold text-danger py-2" id="salah_vJam" style="font-size: 16px;">-</td></tr>
+                        <tr><td class="text-muted font-weight-bold align-middle py-2" style="font-size: 14px;">Terekam (Salah)</td><td class="font-weight-bold py-2" id="salah_vJenis" style="font-size: 16px;">-</td></tr>
+                    </table>
+                    
+                    <div class="card bg-white border-0 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="form-group mb-3">
+                                <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Keputusan Verifikasi <span class="text-danger">*</span></label>
+                                <select class="form-control form-control-sultan font-weight-bold text-dark" id="salah_verifStatus" required style="font-size: 16px; height: auto !important; padding: 10px 15px;">
+                                    <option value="">-- Tentukan Status --</option><option value="Disetujui">Disetujui</option><option value="Revisi">Revisi</option><option value="Ditolak">Ditolak</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Catatan Admin</label>
+                                <textarea class="form-control form-control-sultan" id="salah_verifCatatan" rows="3" placeholder="Wajib diisi jika ditolak / direvisi..." style="font-size: 15px; padding: 10px 15px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top shadow-lg d-flex justify-content-between p-3">
+                    <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4 py-2" style="font-size:16px;" data-dismiss="modal">Tutup</button>
+                    <button type="submit" id="salah_btnVerifEksekusi" class="btn btn-primary font-weight-bold shadow-sm px-4 py-2" style="font-size:16px;"><i class="fas fa-check-double mr-2"></i> Eksekusi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8)
+// ======================================================================
+var SALAH_DATA_MASTER = {}; 
+var SALAH_DB_PEGAWAI = [];
+var SALAH_CACHE_DATA = []; 
+var SALAH_CACHE_THN = "";
+var SALAH_CACHE_BLN = "";
+var SALAH_TABEL_INSTANCE = null; 
+
+var SALAH_USER_AKTIF = "";
+var SALAH_IS_ADMIN = false;
+var SALAH_UNIT_TERKUNCI = ""; 
+var SALAH_USER_NPSN = "";
+
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE
+// =================================================================
+$(document).ready(function() {
+    SALAH_TABEL_INSTANCE = null;
+    $('#salah_tableState').hide();
+    $('#salah_loadingState').show();
+
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        SALAH_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        SALAH_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        SALAH_USER_NPSN = user.npsn || user.username || ""; 
+    } catch(e) { SALAH_USER_NPSN = ""; SALAH_IS_ADMIN = false; }
+
+    // VAKSINASI EVENT SPA DELEGATION (Pemusnahan onClick / onChange Inline)
+    $(document).off('change', '#salah_filterTahun, #salah_filterBulan, #salah_filterStatus').on('change', '#salah_filterTahun, #salah_filterBulan, #salah_filterStatus', salah_prosesCariData);
+    $(document).off('change', '#salah_filterUnit').on('change', '#salah_filterUnit', salah_terapkanFilterLokal);
+    
+    $(document).off('click', '#salah_btnRefresh').on('click', '#salah_btnRefresh', salah_tarikDataServer);
+    $(document).off('click', '#salah_btnTambah').on('click', '#salah_btnTambah', salah_bukaModalTambah);
+    
+    // Event Modal Forms
+    $(document).off('submit', '#salah_formUtama').on('submit', '#salah_formUtama', salah_submitFormUtama);
+    $(document).off('submit', '#salah_formHapus').on('submit', '#salah_formHapus', salah_submitHapusPermanen);
+    $(document).off('submit', '#salah_formVerif').on('submit', '#salah_formVerif', salah_submitVerifikasi);
+    
+    // Event Form Inputs
+    $(document).off('change', '#salah_inputUnit').on('change', '#salah_inputUnit', salah_filterDropdownNama);
+    $(document).off('change', '#salah_inputNama').on('change', '#salah_inputNama', salah_filterDropdownNip);
+
+    // Event Aksi Tabel Dinamis
+    $(document).off('click', '.salah-btn-verif').on('click', '.salah-btn-verif', function() { salah_bukaModalVerif($(this).data('id')); });
+    $(document).off('click', '.salah-btn-edit').on('click', '.salah-btn-edit', function() { salah_bukaModalEdit($(this).data('id')); });
+    $(document).off('click', '.salah-btn-hapus').on('click', '.salah-btn-hapus', function() { salah_bukaModalHapus($(this).data('id')); });
+    $(document).off('click', '.salah-btn-catatan').on('click', '.salah-btn-catatan', function() { salah_lihatCatatanSultan($(this).data('pesan')); });
+
+    // Inisiasi Waktu Dropdown
+    var thn = new Date().getFullYear();
+    var $selThn = $('#salah_filterTahun').empty();
+    for(var i = thn - 3; i <= thn + 1; i++){ $selThn.append('<option value="'+i+'">'+i+'</option>'); }
+    $selThn.val(thn); 
+    $('#salah_filterBulan').val('');  
+    $('#salah_filterStatus').val(''); 
+
+    salah_validasiAksesUser();
+});
+
+// =================================================================
+// 2. GATEKEEPER & CHAINED FETCH
+// =================================================================
+function salah_validasiAksesUser() {
+    if (SALAH_IS_ADMIN) {
+        $('#salah_loadingText').html('Mempersiapkan Database Admin...');
+        
+        google.script.run.withSuccessHandler(function(data) {
+            if(Array.isArray(data)) SALAH_DB_PEGAWAI = data;
+            
+            var unikUnit = [...new Set(SALAH_DB_PEGAWAI.map(item => String(item.unit).trim()))].sort();
+            var optFilter = '<option value="SEMUA">- Semua Unit Kerja -</option>';
+            var optInput = '<option value="">- Pilih Unit -</option>';
+            
+            unikUnit.forEach(function(u) {
+                if (u) {
+                    optFilter += '<option value="' + salah_escapeHtml(u) + '">' + salah_escapeHtml(u) + '</option>';
+                    optInput += '<option value="' + salah_escapeHtml(u) + '">' + salah_escapeHtml(u) + '</option>';
+                }
+            });
+            
+            $('#salah_filterUnit').html(optFilter).prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+            $('#salah_inputUnit').html(optInput).prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+            $('#salah_btnRefresh, #salah_btnTambah').prop('disabled', false);
+            
+            salah_tarikDataServer(); 
+        }).getDatabasePegawai();
+        
+    } else {
+        if (!SALAH_USER_NPSN) {
+            $('#salah_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#salah_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#salah_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#salah_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>'+salah_escapeHtml(dataUnit.error)+'</span>');
+                    return;
+                }
+
+                SALAH_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#salah_filterUnit').empty().append('<option value="' + salah_escapeHtml(SALAH_UNIT_TERKUNCI) + '">' + salah_escapeHtml(SALAH_UNIT_TERKUNCI) + '</option>').prop('disabled', true);
+                
+                google.script.run.withSuccessHandler(function(data){
+                    if(Array.isArray(data)) SALAH_DB_PEGAWAI = data;
+                    
+                    $('#salah_inputUnit').empty().append('<option value="' + salah_escapeHtml(SALAH_UNIT_TERKUNCI) + '">' + salah_escapeHtml(SALAH_UNIT_TERKUNCI) + '</option>').prop('disabled', true);
+                    salah_filterDropdownNama(); 
+                    
+                    $('#salah_btnRefresh, #salah_btnTambah').prop('disabled', false);
+                    salah_tarikDataServer();
+                }).getDatabasePegawai();
+
+            })
+            .withFailureHandler(function(err) {
+                $('#salah_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#salah_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: '+salah_escapeHtml(err.message)+'</span>');
+            })
+            .getUnitKerjaByNPSN(SALAH_USER_NPSN);
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA TABEL (PENERAPAN BAB VIII - SMART CACHE)
+// =================================================================
+function salah_prosesCariData() {
+    var th = $('#salah_filterTahun').val(); 
+    var bl = $('#salah_filterBulan').val();
+    if (!th) { Sultan.notif.info('Tahun harus dipilih.'); return; }
+    
+    // VAKSIN CACHE CERDAS: Jika tahun sama dan cache mengandung "Semua Bulan", gunakan filter lokal
+    if (th === SALAH_CACHE_THN && SALAH_CACHE_DATA.length > 0) {
+        if (bl === SALAH_CACHE_BLN || SALAH_CACHE_BLN === "") {
+            salah_terapkanFilterLokal(); 
+            return;
+        }
+    }
+    
+    salah_tarikDataServer(); 
+}
+
+function salah_tarikDataServer() {
+    var th = $('#salah_filterTahun').val(); 
+    var bl = $('#salah_filterBulan').val();
+    if (!th) return; 
+
+    var btn = $('#salah_btnRefresh'); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#salah_tabelUtama')) {
+        $('#salah_tableState').hide();
+        $('#salah_loadingText').html('Menyinkronkan data dari server...');
+        $('#salah_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(jsonString) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            try { 
+                var responseData = JSON.parse(jsonString); 
+                if (responseData.error) { 
+                    $('#salah_tableState').hide();
+                    $('#salah_loadingState').show();
+                    $('#salah_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + salah_escapeHtml(responseData.error) + '</span>'); 
+                    return; 
+                }
+                
+                SALAH_CACHE_DATA = responseData; 
+                SALAH_CACHE_THN = th; 
+                SALAH_CACHE_BLN = bl;
+                
+                // BAB VII: Inisialisasi Murni 1X Saja (Tanpa createdRow)
+                if (!$.fn.DataTable.isDataTable('#salah_tabelUtama')) {
+                    SALAH_TABEL_INSTANCE = $('#salah_tabelUtama').DataTable({
+                        "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+                        "deferRender": true,
+                        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                        "columnDefs": [ 
+                            // VAKSIN PROPORSI GOLDEN RATIO: Aksi(1%), Nama(Auto), Meta(12%)
+                            { "targets": 0, "width": "1%", "className": "col-sticky-left bg-white align-middle border-right text-center text-nowrap" },
+                            { "targets": 1, "className": "text-left align-middle" },
+                            { "targets": [2,3,4,5], "width": "1%", "className": "text-center align-middle text-nowrap" },
+                            { "targets": [6,7,8], "width": "12%", "className": "text-left align-middle text-nowrap" }
+                        ],
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada riwayat Salah Presensi." }
+                    });
+                }
+
+                salah_terapkanFilterLokal(); 
+                
+                // BAB VII: Tampil seketika tanpa animasi fadeIn
+                $('#salah_loadingState').hide();
+                $('#salah_tableState').show();
+                if(SALAH_TABEL_INSTANCE) {
+                    setTimeout(function(){ SALAH_TABEL_INSTANCE.columns.adjust(); }, 100);
+                }
+
+            } catch (e) { 
+                $('#salah_loadingText').html('<span class="text-danger">Gagal memproses struktur data.</span>'); 
+            }
+        })
+        .withFailureHandler(function(e){
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            $('#salah_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Server Terputus.</span>');
+        }).getDaftarSalahPresensi(th, bl); 
+}
+
+function salah_terapkanFilterLokal() {
+    if (!SALAH_TABEL_INSTANCE) return;
+
+    var st = $('#salah_filterStatus').val();
+    var tStat = (st && st !== "") ? String(st).trim().toUpperCase() : "";
+
+    var bl = $('#salah_filterBulan').val();
+    var tBulan = (bl && bl !== "") ? String(bl).trim().toLowerCase() : "";
+
+    var tAdminUnit = SALAH_IS_ADMIN ? $('#salah_filterUnit').val().toUpperCase() : "";
+    var tNpsnUser = String(SALAH_USER_NPSN).trim().toUpperCase(); 
+    var tUnitUser = String(SALAH_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var hasil = SALAH_CACHE_DATA.filter(function(row) {
+        var rNpsn = String(row.npsn || "").trim().toUpperCase(); 
+        var rUnit = String(row.unit || "").trim().toUpperCase(); 
+        var rStat = String(row.status || "").trim().toUpperCase();
+        
+        // 1. Ekstraktor Bulan Otomatis dari string "YYYY-MM-DD" / "DD-MM-YYYY"
+        var rBulanRaw = "";
+        var rawTgl = String(row.tanggal || "").replace(/'/g, "").trim();
+        if (rawTgl !== "" && rawTgl !== "-") {
+            var parts = rawTgl.split('-');
+            if (parts.length === 3) {
+                var mIdx = parts[0].length === 4 ? parts[1] : parts[1];
+                var mNames = ["", "januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+                rBulanRaw = mNames[parseInt(mIdx, 10)] || "";
+            }
+        }
+
+        // 2. Filter Unit
+        var pSekolah = false;
+        if (SALAH_IS_ADMIN) {
+            if (tAdminUnit === "SEMUA" || rUnit === tAdminUnit) pSekolah = true;
+        } else {
+            if (tNpsnUser !== "" && rNpsn === tNpsnUser) pSekolah = true;
+            else if (tUnitUser !== "" && rUnit === tUnitUser) pSekolah = true;
+        }
+        
+        // 3. Filter Status
+        var pStat = true;
+        if (tStat !== "") { 
+            if (tStat === "DIPROSES") pStat = (rStat === "" || rStat === "DIPROSES"); 
+            else pStat = rStat.includes(tStat); 
+        }
+
+        // 4. Filter Bulan
+        var pBulan = true;
+        if (tBulan !== "") {
+            pBulan = (rBulanRaw === tBulan);
+        }
+
+        return pSekolah && pStat && pBulan;
+    });
+    
+    hasil.sort(function(a, b) { return Math.max(salah_parseDateLogic(b.tglKirim), salah_parseDateLogic(b.tglEdit), salah_parseDateLogic(b.tglVerif)) - Math.max(salah_parseDateLogic(a.tglKirim), salah_parseDateLogic(a.tglEdit), salah_parseDateLogic(a.tglVerif)); });
+
+    salah_renderTabel(hasil);
+}
+
+function salah_renderTabel(hasil) {
+    var dtArray = []; SALAH_DATA_MASTER = {}; 
+    
+    hasil.forEach(function(row) {
+        SALAH_DATA_MASTER[row.rowBaris] = row; 
+        var id = String(row.rowBaris); 
+        var rawTgl = (row.tanggal || "").replace(/'/g, ""); var uiTgl = salah_formatTanggalIndo(rawTgl); 
+        var badgeJenis = (row.jenis || "").includes('Datang') ? '<span class="badge badge-sultan badge-sultan-light-orange"><i class="fas fa-sun mr-1"></i>Datang</span>' : '<span class="badge badge-sultan badge-sultan-light-dark"><i class="fas fa-moon mr-1"></i>Pulang</span>';
+        
+        var badgeStatus = salah_buildBadgeStatus(row.status, row.ket);
+        
+        var isLocked = (String(row.status).toLowerCase().includes('ok') || String(row.status).toLowerCase().includes('setuju'));
+        var attrDis = isLocked ? 'disabled style="cursor:not-allowed; opacity:0.6; filter: grayscale(100%);"' : '';
+        
+        // BAB III: Tombol Aksi Kepatuhan Sultan (Admin susut menjadi icon-only)
+        var txtVerif = SALAH_IS_ADMIN ? "" : " Verif";
+        var txtEdit  = SALAH_IS_ADMIN ? "" : " Edit";
+        var txtHapus = SALAH_IS_ADMIN ? "" : " Hapus";
+        var marginIcon = SALAH_IS_ADMIN ? "" : "mr-1";
+
+        var btnAdmin = SALAH_IS_ADMIN ? `<button type="button" class="btn btn-sm btn-primary font-weight-bold shadow-sm salah-btn-verif" data-id="${id}" title="Verifikasi"><i class="fas fa-clipboard-check ${marginIcon}"></i>${txtVerif}</button>` : '';
+        var btnEdit  = `<button type="button" class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm salah-btn-edit" data-id="${id}" title="Edit" ${attrDis}><i class="fas fa-pencil-alt ${marginIcon}"></i>${txtEdit}</button>`;
+        var btnHapus = `<button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm salah-btn-hapus" data-id="${id}" title="Hapus" ${attrDis}><i class="fas fa-trash-alt ${marginIcon}"></i>${txtHapus}</button>`;
+        
+        // VAKSIN TATA LETAK: flex-nowrap agar tombol stabil sebaris
+        var aksiHTML = `<div class="d-flex flex-nowrap justify-content-center" style="gap:5px;">${btnAdmin}${btnEdit}${btnHapus}</div>`;
+
+        // VAKSIN LEBAR NAMA ASN: Kelas text-nowrap dihapus agar bisa wrap jika terpaksa
+        var txtUnitHtml = SALAH_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${salah_escapeHtml(row.unit)}</div>` : '';
+        var uiNama   = `<div class="font-weight-bold text-dark">${salah_escapeHtml(row.nama)}</div><div class="small text-muted">${salah_escapeHtml(row.nip)}</div>${txtUnitHtml}`;
+        
+        var metaKirim= `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglKirim||'-'}</span><span class="d-block text-muted text-nowrap">${salah_cleanText(row.userInput)}</span></div>`;
+        var metaEdit = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglEdit||'-'}</span><span class="d-block text-muted text-nowrap">${salah_cleanText(row.userEdit)}</span></div>`;
+        var metaVerif= `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${row.tglVerif||'-'}</span><span class="d-block text-muted text-nowrap">${salah_cleanText(row.adminVerif)}</span></div>`;
+
+        dtArray.push([ aksiHTML, uiNama, uiTgl, salah_escapeHtml((row.jam || "").substring(0, 5)), badgeJenis, badgeStatus, metaKirim, metaEdit, metaVerif ]);
+    });
+
+    SALAH_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+    
+    if ($('#salah_tableState').is(':hidden')) {
+        $('#salah_loadingState').hide();
+        $('#salah_tableState').show();
+    }
+    
+    // Vaksin micro blink (mengamankan adjust column)
+    setTimeout(function(){ SALAH_TABEL_INSTANCE.columns.adjust(); }, 50);
+}
+
+// =================================================================
+// 4. KONTROLER MODAL & CRUD
+// =================================================================
+function salah_bukaModalTambah() {
+    if (SALAH_DB_PEGAWAI.length === 0) { Sultan.notif.info('Sistem sedang memuat Database Pegawai. Mohon tunggu 1-2 detik.'); return; }
+
+    $('#salah_formUtama')[0].reset(); $('#salah_inputIdData').val('');
+    $('#salah_headerModalForm').removeClass('bg-warning').addClass('bg-maroon'); 
+    $('#salah_judulModalForm').html('<i class="fas fa-file-signature mr-2"></i>Tambah Data').css('color', '#fff'); 
+    $('#salah_closeModalForm').removeClass('text-dark').addClass('text-white'); 
+    $('#salah_btnSimpanForm').removeClass('btn-warning text-dark').addClass('btn-maroon text-white').html('<i class="fas fa-save mr-1"></i> Simpan');
+    
+    if (SALAH_IS_ADMIN) {
+        $('#salah_inputUnit').val('').prop('disabled', false); 
+        $('#salah_inputNama').empty().append('<option value="">- Pilih Unit Dulu -</option>').prop('disabled', true);
+    } else {
+        $('#salah_inputUnit').val(SALAH_UNIT_TERKUNCI).trigger('change').prop('disabled', true); 
+    }
+    
+    $('#salah_inputNip').empty().append('<option value="">- Otomatis -</option>').prop('disabled', true);
+    $('#salah_modalForm').modal('show');
+}
+
+function salah_bukaModalEdit(id) {
+    if (SALAH_DB_PEGAWAI.length === 0) { Sultan.notif.info('Sistem sedang memuat Database Pegawai. Mohon tunggu sebentar.'); return; }
+
+    var row = SALAH_DATA_MASTER[id]; if(!row) return; 
+    
+    salah_bukaModalTambah(); 
+    
+    $('#salah_inputIdData').val(row.rowBaris); 
+    $('#salah_headerModalForm').removeClass('bg-maroon').addClass('bg-warning'); 
+    $('#salah_judulModalForm').html('<i class="fas fa-edit mr-2"></i>Edit Data').css('color', '#343a40'); 
+    $('#salah_closeModalForm').removeClass('text-white').addClass('text-dark'); 
+    $('#salah_btnSimpanForm').removeClass('btn-maroon text-white').addClass('btn-warning text-dark').html('<i class="fas fa-save mr-1"></i> Update');
+    
+    $('#salah_inputUnit').val(row.unit).prop('disabled', true); 
+
+    setTimeout(() => { 
+        var tNama = String(row.nama).trim(); var tNip = String(row.nip).trim();
+        $('#salah_inputNama').empty().append('<option value="' + salah_escapeHtml(tNama) + '">' + salah_escapeHtml(tNama) + '</option>').prop('disabled', true); 
+        $('#salah_inputNip').empty().append('<option value="' + salah_escapeHtml(tNip) + '">' + salah_escapeHtml(tNip) + '</option>').prop('disabled', true); 
+    }, 200);
+
+    $('#salah_inputTanggal').val(row.tanggal ? row.tanggal.replace(/'/g,"") : ""); $('#salah_inputWaktu').val(row.jam ? row.jam.replace(/'/g,"").substring(0,5) : ""); $('#salah_inputJenis').val(row.jenis); 
+    $('#salah_inputNipLama').val(row.nip); $('#salah_inputTglLama').val(row.tanggal); $('#salah_inputJamLama').val(row.jam); 
+}
+
+function salah_submitFormUtama(e) { 
+    e.preventDefault(); 
+    var formAktif = $(e.target);
+    var recId = formAktif.find('#salah_inputIdData').val(); 
+    
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...'); 
+    
+    var finalNpsn = SALAH_USER_NPSN; 
+    if (SALAH_IS_ADMIN) {
+        var inputNama = formAktif.find('#salah_inputNama').val();
+        var inputNip = formAktif.find('#salah_inputNip').val();
+        var pgw = SALAH_DB_PEGAWAI.find(p => String(p.nama).trim() === String(inputNama).trim() && String(p.nip).trim() === String(inputNip).trim());
+        if(pgw) finalNpsn = pgw.npsn;
+    }
+
+    var dataForm = { 
+        recId: recId, unit_kerja: formAktif.find('#salah_inputUnit').val(), nama_asn: formAktif.find('#salah_inputNama').val(), nip_asn: formAktif.find('#salah_inputNip').val(), 
+        tanggal: formAktif.find('#salah_inputTanggal').val(), waktu: formAktif.find('#salah_inputWaktu').val(), jenis: formAktif.find('#salah_inputJenis').val(), 
+        user_login: SALAH_USER_AKTIF, nip_lama: formAktif.find('#salah_inputNipLama').val(), tgl_lama: formAktif.find('#salah_inputTglLama').val(), jam_lama: formAktif.find('#salah_inputJamLama').val(),
+        npsn: finalNpsn 
+    }; 
+    
+    var cbSuccess = function(res) { 
+        btn.prop('disabled', false).html(txt); 
+        var pesan = String(res).toLowerCase(); 
+        if (pesan.includes('sukses') || pesan.includes('berhasil')) { 
+            formAktif.closest('.modal').modal('hide'); 
+            setTimeout(() => { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); salah_tarikDataServer(); Sultan.notif.sukses('Data berhasil disimpan.'); }, 400); 
+        } else { Sultan.alert('error', 'Gagal Menyimpan', res); } 
+    }; 
+    var cbFail = function(err) { btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Koneksi Terputus', err.message); };
+    
+    if (recId) google.script.run.withSuccessHandler(cbSuccess).withFailureHandler(cbFail).updateSalahAbsen(dataForm); 
+    else google.script.run.withSuccessHandler(cbSuccess).withFailureHandler(cbFail).simpanSalahAbsen(dataForm); 
+}
+
+function salah_bukaModalHapus(id) {
+    var row = SALAH_DATA_MASTER[id]; if(!row) return; $('#salah_hapusIdData').val(id);
+    var detailNip = row.nip ? ' (' + salah_cleanText(row.nip) + ')' : ''; $('#salah_hapusNamaView').text(salah_cleanText(row.nama) + detailNip); 
+    $('#salah_hapusKode').val(''); $('#salah_modalHapus').modal('show');
+}
+
+function salah_submitHapusPermanen(e) {
+    e.preventDefault();
+    var formAktif = $(e.target);
+    var d = new Date(); var kd = d.getFullYear()+""+String(d.getMonth()+1).padStart(2,'0')+""+String(d.getDate()).padStart(2,'0');
+    var inputUser = formAktif.find('#salah_hapusKode').val().trim();
+    if(inputUser !== kd) { Sultan.notif.gagal('Kode Validasi salah!'); return; }
+    
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...');
+    var payload = { recId: formAktif.find('#salah_hapusIdData').val(), kode: inputUser, user_login: SALAH_USER_AKTIF };
+    
+    google.script.run.withSuccessHandler(function(r) {
+        btn.prop('disabled', false).html(txt);
+        if (r === "KODE_SALAH") Sultan.notif.gagal('Kode Validasi keamanan salah!');
+        else if (r === "Sukses" || String(r).includes("Sukses")) { 
+            formAktif.closest('.modal').modal('hide'); 
+            setTimeout(() => { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); salah_tarikDataServer(); Sultan.notif.sukses('Data dihapus permanen.'); }, 400); 
+        } else Sultan.alert('error', 'Gagal Menghapus', r);
+    }).hapusSalahAbsen(payload);
+}
+
+function salah_bukaModalVerif(id) {
+    var row = SALAH_DATA_MASTER[id]; if (!row) return; 
+    $('#salah_verifIdData').val(row.rowBaris); $('#salah_verifStatus').val(''); $('#salah_verifCatatan').val(row.ket || '');
+    $('#salah_vNama').text(row.nama || '-'); $('#salah_vNip').text(row.nip || '-'); var rawTgl = (row.tanggal || "").replace(/'/g, ""); $('#salah_vTgl').text(salah_formatTanggalIndo(rawTgl)); 
+    $('#salah_vJam').text(row.jam ? String(row.jam).substring(0,5) : '-'); $('#salah_vJenis').html((row.jenis || "").includes('Datang') ? '<i class="fas fa-sun mr-2 text-warning"></i>Datang' : '<i class="fas fa-moon mr-2 text-dark"></i>Pulang');
+    $('#salah_modalVerif').modal('show');
+}
+
+function salah_submitVerifikasi(e){
+    e.preventDefault(); 
+    var formAktif = $(e.target);
+    var st = formAktif.find('#salah_verifStatus').val(); 
+    var ket = formAktif.find('#salah_verifCatatan').val().trim();
+    
+    if(!st) { Sultan.alert('warning', 'Pilih Status', 'Tentukan status verifikasi.'); return; }
+    if((st === 'Ditolak' || st === 'Revisi') && !ket){ Sultan.alert('warning', 'Catatan Wajib', 'Berikan alasan untuk perbaikan user!'); return; }
+    
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Eksekusi...');
+    
+    var payload = { recId: formAktif.find('#salah_verifIdData').val(), status: st, keterangan: ket, user_verif: SALAH_USER_AKTIF };
+    
+    google.script.run
+        .withSuccessHandler(function(res){ 
+            btn.prop('disabled', false).html(txt); 
+            if (res === "Sukses" || String(res).includes("Sukses")) {
+                formAktif.closest('.modal').modal('hide'); 
+                setTimeout(() => { $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', ''); salah_tarikDataServer(); Sultan.notif.sukses('Status diperbarui!'); }, 400);
+            } else { Sultan.alert('error', 'Gagal Verifikasi', res); }
+        })
+        .withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Koneksi Terputus', err.message); })
+        .verifikasiSalahAbsen(payload);
+}
+
+// =================================================================
+// 5. HELPER UTILITIES & VAKSIN DROPDOWN
+// =================================================================
+function salah_formatTanggalIndo(tglStr) { if(!tglStr) return '-'; var parts = tglStr.split('-'); if(parts.length !== 3) return tglStr; var thn = parts[0].length === 4 ? parts[0] : parts[2]; var bln = parts[0].length === 4 ? parts[1] : parts[1]; var tgl = parts[0].length === 4 ? parts[2] : parts[0]; var namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]; return parseInt(tgl, 10) + " " + namaBulan[parseInt(bln, 10)] + " " + thn; }
+
+function salah_filterDropdownNama(){
+    var $selNama = $('#salah_inputNama').empty().append('<option value="">- Pilih Nama -</option>').prop('disabled',true);
+    var $selNip = $('#salah_inputNip').empty().append('<option value="">- Otomatis -</option>').prop('disabled',true);
+    
+    var unitTerpilih = String($('#salah_inputUnit').val() || "").trim();
+    if (!unitTerpilih) return; 
+
+    var filtered = SALAH_DB_PEGAWAI.filter(x => String(x.unit).trim() === unitTerpilih);
+        
+    var unikNama = [...new Set(filtered.map(item => String(item.nama).trim()))].sort();
+    
+    if(unikNama.length > 0) {
+        unikNama.forEach(nama => { 
+            if(nama) $selNama.append('<option value="' + salah_escapeHtml(nama) + '">' + salah_escapeHtml(nama) + '</option>'); 
+        });
+        $selNama.prop('disabled',false);
+    }
+}
+
+function salah_filterDropdownNip(){
+    var unitTerpilih = String($('#salah_inputUnit').val() || "").trim();
+    var nama = String($('#salah_inputNama').val() || "").trim();
+    var $selNip = $('#salah_inputNip').empty();
+    
+    if(!nama){ 
+        $selNip.append('<option value="">- Otomatis -</option>').prop('disabled',true); 
+        return; 
+    }
+    
+    var kandidat = SALAH_DB_PEGAWAI.filter(x => String(x.unit).trim() === unitTerpilih && String(x.nama).trim() === nama);
+
+    if(kandidat.length === 1){
+        var cNip = String(kandidat[0].nip).trim();
+        $selNip.append('<option value="' + salah_escapeHtml(cNip) + '" selected>' + salah_escapeHtml(cNip) + '</option>').prop('disabled',true);
+    }else if(kandidat.length > 1){
+        $selNip.append('<option value="">- Pilih NIP -</option>');
+        kandidat.forEach(x => { 
+            var mNip = String(x.nip).trim();
+            $selNip.append('<option value="' + salah_escapeHtml(mNip) + '">' + salah_escapeHtml(mNip) + '</option>'); 
+        });
+        $selNip.prop('disabled',false);
+    } else {
+        $selNip.append('<option value="">- NIP Tdk Ditemukan -</option>').prop('disabled',true);
+    }
+}
+
+function salah_cleanText(text){if(!text)return"";return String(text).replace(/(\r\n|\n|\r)/gm," ").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function salah_escapeHtml(text){if(!text)return"";return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");}
+function salah_parseDateLogic(str){if(!str||str.length<5)return 0;var clean=String(str).replace(/'/g,"").trim();if(clean==="-"||clean==="")return 0;try{var parts=clean.split(/\s+/);var d=parts[0].split(/[-/]/);if(d.length!==3)return 0;var t=(parts[1]||"00:00:00").split(":");return new Date(parseInt(d[2]),parseInt(d[1])-1,parseInt(d[0]),parseInt(t[0]||0),parseInt(t[1]||0),parseInt(t[2]||0)).getTime();}catch(e){return 0;}}
+
+function salah_escapeJs(str) { 
+    if (!str) return ""; 
+    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>"); 
+}
+
+function salah_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Verifikasi',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+function salah_buildBadgeStatus(status, ket) { 
+    var s = String(status || "").toLowerCase(); 
+    var style = 'badge-sultan-light-warning'; 
+    var icon = 'clock'; 
+    var labelStatus = status || 'Diproses';
+    
+    if (s.includes('ok') || s.includes('setuju')) { style = 'badge-sultan-light-success'; icon = 'check-circle'; } 
+    else if (s.includes('revisi')) { style = 'badge-sultan-light-info'; icon = 'sync-alt'; } 
+    else if (s.includes('tolak')) { style = 'badge-sultan-light-danger'; icon = 'times-circle'; } 
+    
+    var badgeHtml = '<span class="badge badge-sultan ' + style + '"><i class="fas fa-' + icon + ' mr-1"></i>' + salah_escapeHtml(labelStatus) + '</span>';
+
+    if (ket && ket.trim().length > 2 && (s.includes('revisi') || s.includes('tolak'))) {
+        var safeKet = salah_escapeJs(ket);
+        var btnCatatan = '<div class="mt-2"><button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm salah-btn-catatan" style="font-size:10px; border-radius:4px;" data-pesan="' + safeKet + '"><i class="fas fa-comment-dots mr-1"></i> Baca Catatan</button></div>';
+        return badgeHtml + btnCatatan;
+    }
+
+    return badgeHtml; 
+}
+</script>

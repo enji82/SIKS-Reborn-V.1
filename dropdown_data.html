@@ -1,0 +1,100 @@
+<script>
+// Ini adalah "kulkas" data kita
+const DROPDOWN_STATIS = {
+  
+  "Agama": [
+    "Islam", 
+    "Kristen", 
+    "Katolik", 
+    "Hindu", 
+    "Buddha", 
+    "Konghucu", 
+    "Kepercayaan"
+  ],
+  
+  "Pendidikan": [
+    "S2", "S1", "D4", "D3", "D2", "D1", 
+    "SMA", "SMK", "MA", "Paket C", 
+    "SMP", "MTs", "Paket B", 
+    "SD", "MI", "Paket A"
+  ],
+
+  "StatusKepegawaian": [
+    "PNS",
+    "PPPK",
+    "PPPK PW",
+    "Tenaga Non ASN"
+  ],
+
+  "StatusKepegawaianSwasta": [
+    "GTY",
+    "PTY",
+    "GTT",
+    "PTT"
+  ],
+
+  "TugasJabatan": [
+    "Kepala Sekolah", "Guru Kelas", "Guru PAI", "Guru PJOK", 
+    "Guru PA Kristen", "Guru PA Katolik", "Guru Bhs. Inggris", 
+    "Guru TIK", "Guru Inklusi", "Guru Mapel Lainnya", 
+    "Operator Layanan Operasional", "Pengelola Umum Operasional", 
+    "Pengelola Layanan Operasional", "Penata Layanan Operasional", 
+    "Pengadministrasi Perkantoran", "Penjaga", "Tenaga Administrasi", 
+    "Pustakawan", "Tendik Lainnya"
+  ],
+
+  "TugasTambahan": [
+    "Bendahara BOS", "Operator Dapodik", "Pengelola Aset", 
+    "Administrasi Sekolah", "Pembina Ekstrakurikuler", 
+    "Petugas Perpustakaan", "Tugas Lainnya", "Tidak Ada Tugas Tambahan"
+  ],
+  
+  "NamaSD": ["SDN SECANG 1", "SDN SECANG 2", "SDN SECANG 3", "SDN KRINCING", 
+    "SDN KUWALUHAN", "SDN MADUSARI", "SDN NGABEAN", "SDN MADYOCONDRO", 
+    "SDN NGADIROJO", "SDN KALIJOSO", "SDN PAYAMAN 1", "SDN JAMBEWANGI", 
+    "SDN PANCURANMAS", "SDN PUCANG", "SDN PIRIKAN", "SDN SETAN",
+    "SDN CANDISARI", "SDN SIDOMULYO", "SDN DONOMULYO", "SDN PURWOSARI", 
+    "SDN KARANGKAJEN", "SDN GIRIKULON", "SD MUHAMMADIYAH PAYAMAN", 
+    "SD MUHAMMADIYAH DONOREJO", "SDIT AR RISALAH", "SDIT ALAM AL HIKMAH", 
+    "SDQ ANWARUL MUKHLASIN"
+  ],
+
+    "UnitKerja": ["SDN SECANG 1", "SDN SECANG 2", "SDN SECANG 3", "SDN KRINCING", 
+    "SDN KUWALUHAN", "SDN MADUSARI", "SDN NGABEAN", "SDN MADYOCONDRO", 
+    "SDN NGADIROJO", "SDN KALIJOSO", "SDN PAYAMAN 1", "SDN JAMBEWANGI", 
+    "SDN PANCURANMAS", "SDN PUCANG", "SDN PIRIKAN", "SDN SETAN",
+    "SDN CANDISARI", "SDN SIDOMULYO", "SDN DONOMULYO", "SDN PURWOSARI", 
+    "SDN KARANGKAJEN", "SDN GIRIKULON"
+  ],
+
+      "UnitKerjaSiaba": ["SDN SECANG 1", "SDN SECANG 2", "SDN SECANG 3", "SDN KRINCING", 
+    "SDN KUWALUHAN", "SDN MADUSARI", "SDN NGABEAN", "SDN MADYOCONDRO", 
+    "SDN NGADIROJO", "SDN KALIJOSO", "SDN PAYAMAN 1", "SDN JAMBEWANGI", 
+    "SDN PANCURANMAS", "SDN PUCANG", "SDN PIRIKAN", "SDN SETAN",
+    "SDN CANDISARI", "SDN SIDOMULYO", "SDN DONOMULYO", "SDN PURWOSARI", 
+    "SDN KARANGKAJEN", "SDN GIRIKULON", "TKN PEMBINA"
+  ],
+
+  "TahunAjaran": ["2025/2026", "2024/2025", "2023/2024", "2022/2023"],
+  "Semester": ["Semester 1", "Semester 2"],
+  "KriteriaSK": [
+    "Awal Semester", "Perubahan ke 1", "Perubahan ke 2", "Perubahan ke 3", "Perubahan ke 4", "Perubahan ke 5"
+  ],
+};
+
+function renderDropdown(elementId, kategori) {
+    const d = $('#' + elementId);
+    if (!d.length) return;
+    
+    d.empty().append('<option value="">-- Pilih --</option>');
+    
+    // Pastikan memanggil DROPDOWN_STATIS sesuai nama objek di atas
+    if (DROPDOWN_STATIS[kategori]) {
+      DROPDOWN_STATIS[kategori].forEach(item => {
+        d.append('<option value="' + item + '">' + item + '</option>');
+      });
+    } else {
+      console.warn("Kategori dropdown tidak ditemukan: " + kategori);
+    }
+}
+</script>

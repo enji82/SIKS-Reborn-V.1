@@ -1,454 +1,435 @@
 <script>
-$(document).ready(function() {
-  console.log("SIKS-REBORN: Engine Started.");
-  
-  // 1. JALANKAN SATPAM (Pengecekan Utama)
-  inisialisasiAplikasi();
-
-  // 2. NAVIGASI SIDEBAR
-  $(document).on('click', '.nav-link[data-page]', function(e) {
-    e.preventDefault();
-    var h = $(this).attr('data-page');
-    if (h) {
-      loadPage(h);
-      $('.nav-sidebar .nav-link').removeClass('active');
-      $(this).addClass('active');
-      if ($('body').hasClass('sidebar-open')) {
-        $('[data-widget="pushmenu"]').PushMenu('collapse');
-      }
-    }
-  }); 
-});
-
-// --- 1. CARI FUNGSI INI DAN GANTI TOTAL ---
-function handleLogout() {
-  NotifSultan.konfirmasi('KELUAR?', 'Yakin ingin mengakhiri sesi?')
-    .then((result) => {
-      if (result.isConfirmed) {
-        // HAPUS SEMUA JEJAK (INI YANG TADI KURANG)
-        localStorage.removeItem('username'); 
-        localStorage.removeItem('siksUser'); // <--- INI WAJIB DIHAPUS!
-        
-        // Refresh Halaman ke Login
-        google.script.run.withSuccessHandler(function(url){
-           window.open(url, '_top');
-        }).getScriptUrl(); 
-      }
+/* =============================================================
+   1. GLOBAL HELPER: NOTIFIKASI SULTAN (THEME FIX)
+   ============================================================= */
+var NotifSultan = {
+  config: { warnaMaroon: '#800000', warnaHitam: '#343a40', warnaSukses: '#28a745', warnaGagal: '#dc3545', warnaWarning: '#ffc107', warnaBatal: '#6c757d' },
+  toast: (tipe, pesan) => {
+    Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true, background: '#fff', color: '#343a40' })
+    .fire({ icon: tipe, title: `<span style="font-weight:600">${pesan}</span>` });
+  },
+  alert: (tipe, judul, pesan) => {
+    let btnColor = (tipe === 'success') ? NotifSultan.config.warnaMaroon : NotifSultan.config.warnaGagal;
+    return Swal.fire({ 
+        icon: tipe, 
+        title: `<h5 class="font-weight-bold" style="margin-top:10px; color:${NotifSultan.config.warnaMaroon}">${judul}</h5>`, 
+        html: `<div class="text-muted">${pesan}</div>`, 
+        width: '350px', 
+        confirmButtonColor: btnColor, 
+        padding: '1.2rem', 
+        customClass: { popup: 'card-sultan' } 
     });
+  },
+  loading: (pesan) => {
+    Swal.fire({ 
+        width: '300px', title: '', 
+        html: `<div class="text-center p-3"><div class="spinner-border text-maroon" style="width: 3rem; height: 3rem;"></div><p class="mt-3 mb-0 font-weight-bold text-secondary">${pesan || 'Memproses...'}</p></div>`, 
+        showConfirmButton: false, allowOutsideClick: false,
+        customClass: { popup: 'card-sultan' }
+    });
+  }
+};
+
+/* =============================================================
+   1.B GABUNGAN CORE SULTAN
+   ============================================================= */
+var Sultan = {
+    notif: {
+        sukses: (pesan) => NotifSultan.toast('success', pesan),
+        gagal: (pesan) => NotifSultan.toast('error', pesan),
+        info: (pesan) => NotifSultan.toast('info', pesan),
+        loading: (judul) => NotifSultan.loading(judul),
+        tutup: () => Swal.close()
+    },
+    alert: NotifSultan.alert,
+    konfirmasi: function(opsi, callbackYa) {
+        Swal.fire({
+            title: `<h5 class="font-weight-bold text-maroon">${opsi.judul || 'Konfirmasi'}</h5>`,
+            text: opsi.teks || "Apakah Anda yakin?",
+            icon: 'warning', 
+            showCancelButton: true, 
+            confirmButtonColor: '#800000', 
+            cancelButtonColor: '#6c757d',  
+            confirmButtonText: opsi.btnYa || 'Ya, Lanjutkan', 
+            cancelButtonText: opsi.btnBatal || 'Batal',
+            customClass: { popup: 'card-sultan' }
+        }).then((result) => {
+            if (result.isConfirmed && callbackYa) callbackYa();
+        });
+    },
+    format: {
+        strip: function(val) { return (!val || val == "0" || val == "") ? "-" : val; },
+        rupiah: function(angka) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(angka); },
+        tanggal: function(dateStr) {
+            if(!dateStr) return "-";
+            var d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    }
+};
+
+function toast(pesan, tipe) { NotifSultan.toast(tipe, pesan); }
+function tampilkanNotif(pesan, tipe) { NotifSultan.toast(tipe, pesan); }
+
+/* =============================================================
+   2. SISTEM MANAJEMEN SESI & ROLE
+   ============================================================= */
+function getSesiUser() {
+    var raw = localStorage.getItem("siksUser");
+    if (!raw || raw === "null" || raw === "undefined") return null;
+    try { 
+        var parsed = JSON.parse(raw); 
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed); 
+        return parsed;
+    } catch (e) { return null; }
 }
 
-// --- 2. CARI FUNGSI INI DAN GANTI TOTAL ---
+function checkUserRoleIsAdmin() {
+    try {
+        var user = getSesiUser();
+        if (!user) return false;
+        var role = String(user.role || "").toLowerCase();
+        
+        // VAKSIN 1: Gunakan .includes() agar "Administrator", "Admin Korwil", dll bisa lolos
+        if (role.includes('admin') || role.includes('verifikator') || role.includes('korwil')) return true;
+        return false;
+    } catch (e) { return false; }
+}
+
+/* =============================================================
+   3. CORE APP SCRIPT (INISIALISASI & ROUTING)
+   ============================================================= */
+$(document).ready(function() {
+  console.log("SIKS-REBORN: Engine Started.");
+  $(document).on('show.bs.modal', '.modal', function () { $(this).appendTo('body'); });
+  inisialisasiAplikasi();
+
+  $(document).on('click', '.nav-sidebar .nav-link', function(e) {
+      var pageName = $(this).data('page'); 
+      if (pageName) {
+          e.preventDefault(); loadContent(pageName); 
+          if ($(window).width() < 768) { $('body').removeClass('sidebar-open').addClass('sidebar-closed sidebar-collapse'); }
+      }
+  });
+
+  $(document).on('click', '.btn-home-crumb', function(e) {
+      e.preventDefault(); loadContent('home');
+  });
+});
+
 function inisialisasiAplikasi() {
   var preloader = $('.preloader');
-  var sesiUser = localStorage.getItem("siksUser");
+  try {
+      var user = getSesiUser();
+      if (!user) {
+        $('#konten-aplikasi').hide(); $('#gerbang-login').fadeIn('fast'); 
+        if (preloader.length) preloader.fadeOut('fast');
+        return;
+      }
+      $('#gerbang-login').hide(); $('#konten-aplikasi').fadeIn('fast');
+      updateUI(user); tampilkanMenuAdmin(user); loadContent('home'); 
+      if (preloader.length) preloader.fadeOut('fast');
 
-  if (!sesiUser) {
-    console.log("🔒 Status: Belum Login.");
-    if (preloader.length) preloader.fadeOut('fast');
-    $('#konten-aplikasi').hide();
-    $('#gerbang-login').show();
-  } else {
-    console.log("🔓 Status: Sesi Ditemukan.");
-    var user = JSON.parse(sesiUser);
-
-    // --- PERBAIKAN: RESTORE USERNAME ---
-    // Jika username hilang tapi sesi masih ada, kita kembalikan lagi
-    if (user.username) {
-        localStorage.setItem("username", user.username);
-    }
-    // -----------------------------------
-    
-    $('#gerbang-login').remove(); 
-    $('#konten-aplikasi').show();
-    $('body').removeClass('login-page').addClass('sidebar-mini layout-fixed');
-    
-    loadPage('home');
-    updateUI(user);
-    
-    if (preloader.length) preloader.fadeOut('fast');
+      var isInvalidName = !user.nama_lengkap || user.nama_lengkap === "User Web" || user.nama_lengkap === user.username;
+      if (isInvalidName && user.username) {
+          google.script.run.withSuccessHandler(function(res){
+              if(res.found && res.nama_lengkap) {
+                  user.nama_lengkap = res.nama_lengkap; user.nama = res.nama_lengkap; 
+                  user.role = res.role; user.unit = res.unit;
+                  localStorage.setItem("siksUser", JSON.stringify(user));
+                  updateUI(user);
+              }
+          }).getUserProfileByName(user.username);
+      }
+  } catch(fatalError) {
+      $('#gerbang-login').hide(); $('#konten-aplikasi').show();
+      loadContent('home');
+      if (preloader.length) preloader.fadeOut('fast');
   }
 }
 
-// --- FUNGSI LOGIN ---
+/* =============================================================
+   4. ENGINE ROUTING ANTI-BLINK
+   ============================================================= */
+function loadContent(pageName) {
+  if(!pageName) return;
+  const $content = $('#app-content'); 
+
+  $('body > .modal').remove(); $('.modal-backdrop').remove(); $('body').removeClass('modal-open').css('padding-right', '');
+  highlightSidebar(pageName); updateBreadcrumb(pageName);
+  
+  if (typeof NProgress !== 'undefined') { NProgress.configure({ showSpinner: false, speed: 400 }); NProgress.start(); }
+  
+  $content.css('min-height', $content.height() + 'px');
+  $content.css({'transition': 'opacity 0.2s ease', 'opacity': '0'});
+
+  google.script.run
+    .withSuccessHandler(function(html) {
+      if (typeof NProgress !== 'undefined') NProgress.done();
+      setTimeout(function() {
+          $content.html(html); void $content[0].offsetWidth; $content.css('opacity', '1');
+          setTimeout(function() { $content.css('min-height', ''); }, 300);
+      }, 200);
+    })
+    .withFailureHandler(function(err){
+      if (typeof NProgress !== 'undefined') NProgress.done();
+      setTimeout(function() {
+          $content.html('<div class="alert alert-danger m-3">Gagal memuat halaman: ' + err.message + '</div>').css('opacity', '1');
+          $content.css('min-height', '');
+      }, 200);
+      Sultan.notif.gagal('Gagal Memuat Halaman');
+    })
+    .loadPage(pageName); 
+}
+
+/* =============================================================
+   5. FUNGSI LOGIN & LOGOUT (FIX BLANK SCREEN)
+   ============================================================= */
 function handleLoginV2(event) {
-  event.preventDefault(); 
+  event.preventDefault();
   var btn = document.getElementById("tombolLogin");
   var form = document.getElementById("formLogin");
   
-  // --- INI BARIS WAJIB AGAR NAMA LENGKAP BISA DIAMBIL NANTI ---
-  var inputUser = document.getElementById("username").value;
-  localStorage.setItem("username", inputUser); 
-  // -----------------------------------------------------------
-  
-  btn.innerText = "Memverifikasi...";
+  btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Memproses...';
   btn.disabled = true;
 
   google.script.run
     .withSuccessHandler(function(response) {
       if (response.status === "success") {
-          // Ganti notif manual dengan NotifSultan agar aman
-          if(typeof NotifSultan !== 'undefined') {
-             NotifSultan.alert('success', 'BERHASIL', "Selamat Datang, " + response.nama);
-          }
-          
-          localStorage.setItem("siksUser", JSON.stringify(response)); 
-          inisialisasiAplikasi();
+        var userBersih = response.userData ? response.userData : response;
+        localStorage.setItem("siksUser", JSON.stringify(userBersih));
+        Sultan.notif.sukses('Login Berhasil!');
+        setTimeout(function() { 
+            btn.innerText = "MASUK"; btn.disabled = false;
+            inisialisasiAplikasi(); 
+        }, 500); 
       } else {
-          // Hapus memori jika password salah
-          localStorage.removeItem("username"); 
-
-          if(typeof NotifSultan !== 'undefined') {
-             NotifSultan.alert('error', 'GAGAL', response.message);
-          }
-          btn.innerText = "LOGIN";
-          btn.disabled = false;
+        btn.innerText = "MASUK"; btn.disabled = false;
+        Sultan.alert('error', 'Login Gagal', response.message || "Username/Password salah.");
       }
     })
-    .withFailureHandler(function(err){
-       if(typeof NotifSultan !== 'undefined') {
-          NotifSultan.alert('error', 'ERROR', "Gagal terhubung ke server!");
-       }
-       btn.innerText = "LOGIN";
-       btn.disabled = false;
+    .withFailureHandler(function(err) {
+      btn.innerText = "MASUK"; btn.disabled = false;
+      Sultan.alert('error', 'Koneksi Gagal', err.message);
     })
     .processLogin(form);
 }
 
-function highlightSidebar(pageName) {
-  // 1. SAPU BERSIH: Matikan semua lampu active di seluruh sidebar
-  $('.nav-sidebar .nav-link').removeClass('active').css('background-color', '');
-
-  // 2. CARI TARGET (CUCU)
-  var target = $('.nav-sidebar .nav-link[data-page="' + pageName + '"]');
-
-  if (target.length > 0) {
-    // 3. NYALAKAN LAMPU CUCU
-    target.addClass('active');
-
-    // 4. PENULARAN KE ATAS (BAPAK & ANAK)
-    // Kita cari semua elemen .nav-link yang merupakan orang tua dari Cucu ini
-    // dan kita paksa mereka menjadi 'active' agar Level 1 & 2 ikut menyala
-    target.parents('.nav-item').each(function() {
-      // Ambil tombol (nav-link) milik Bapak atau Anak
-      var parentLink = $(this).children('.nav-link');
-      
-      // Berikan kelas active secara paksa
-      parentLink.addClass('active');
-      
-      // Pastikan laci terbuka agar Cucu terlihat (tanpa urus accordion dulu)
-      $(this).addClass('menu-open');
-      $(this).children('.nav-treeview').show();
+function handleLogout() {
+    Swal.fire({
+        title: '<h5 class="text-maroon font-weight-bold mb-0">Keluar Aplikasi?</h5>',
+        text: 'Sesi Anda akan diakhiri.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#800000',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Logout',
+        customClass: { popup: 'card-sultan' }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            // 1. Hapus memori user dari Local Storage
+            localStorage.removeItem("siksUser");
+            
+            // 2. Sembunyikan Dashboard dan bersihkan sisa konten
+            $('#konten-aplikasi').hide();
+            $('#app-content').empty();
+            $('body').removeClass('sidebar-open modal-open').css('padding-right', '0');
+            
+            // 3. MUNCULKAN KEMBALI GERBANG LOGIN (DOM Asli Buatan Anda)
+            $('#gerbang-login').fadeIn('fast');
+            $('.login-screen-wrapper').show();
+            $('#viewSuccess').hide();
+            $('#viewForm').show();
+            $('#logoBox').css('transform', 'scale(1)');
+            $('#headerText').show();
+            $('.card-header-premium').css('padding-bottom', '50px');
+            
+            // 4. PELINDUNG ANTI-CRASH: Cek apakah form ada sebelum di-reset
+            // Ini menyelesaikan masalah awal tombol tidak bereaksi tanpa perlu me-reload halaman
+            if ($('#formLogin').length > 0) {
+                $('#formLogin')[0].reset();
+            }
+            
+            if ($('#tombolLogin').length > 0) {
+                $('#tombolLogin').prop('disabled', false).html('<i class="fas fa-sign-in-alt mr-2"></i> MASUK APLIKASI');
+            }
+            
+            // 5. Kembalikan posisi scroll ke puncak layar
+            window.scrollTo(0, 0);
+        }
     });
-  }
 }
 
-// --- FUNGSI AMBIL HALAMAN ---
-function loadPage(page) {
-  const area = $('#main-content');
-  area.css('opacity', '0.3');
-
-  google.script.run
-    .withSuccessHandler(function(html) {
-      area.html(html).css('opacity', '1');
-
-      // AKTIFKAN SIDEBAR DI SINI (TEMPAT YANG BENAR)
-      highlightSidebar(page);
-
-      console.log("Halaman " + page + " dimuat.");
-    })
-    .getHalaman(page);
-}
-
-
-// --- FUNGSI UPDATE NAMA & FOTO ---
+/* =============================================================
+   6. MANAJEMEN UI (Sidebar & Navigation)
+   ============================================================= */
 function updateUI(u) {
-  // u.nama berasal dari processLogin, u.fullName berasal dari getCurrentUser
-  // Kita buat agar fleksibel menerima keduanya
-  var name = u.nama || u.fullName || "User";
-  var photo = u.foto || u.photo || "";
-
-  var f = photo ? 'https://drive.google.com/thumbnail?id=' + photo + '&sz=w200' : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name);
+  if (!u) return; 
+  var name = u.nama_lengkap || u.fullName || u.nama || u.username || "User";
+  var photo = u.photo || u.foto || "";
+  var role = u.role || "User";
+  var f = photo ? 'https://drive.google.com/thumbnail?id=' + photo + '&sz=w200' : 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=random';
   
   $('#nav-user-photo, #dropdown-user-photo').attr('src', f);
-  $('#nav-user-name').text(name);
-  $('#dropdown-user-name-big').text(name);
-  $('#dropdown-user-role').text(u.role || "User");
+  $('#nav-user-name, #dropdown-user-name-big, .user-panel .info a').text(name);
+  $('#dropdown-user-role').text(role);
+  $('.user-capsule span, .user-menu .nav-link span, .dropdown-user .dropdown-toggle span').text(name);
+
+  if($('#uniUserLogin').length) $('#uniUserLogin').val(name);
 }
+
+function tampilkanMenuAdmin(user) {
+  if (!user) return;
+  var daftarMenuAdmin = ["menuTrashSK", "menu-setting-admin", "menu-monitoring-admin"];
+  var isAdmin = checkUserRoleIsAdmin(); 
+  daftarMenuAdmin.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) {
+      if (isAdmin) { el.classList.remove("d-none"); el.style.display = "block"; } 
+      else { el.classList.add("d-none"); }
+    }
+  });
+}
+
+// VAKSIN ROUTING: Penambahan Dictionary E-File di baris ini
+var MENU_MAPPING = {
+    'home': 'Beranda', 'sk_dashboard': 'Dashboard SK', 'sk_data': 'Data SK', 'sk_status': 'Status Pengiriman',
+    'lapbul_dashboard': 'Dashboard Laporan Bulan', 'lapbul_kelola': 'Kelola Data', 'lapbul_status': 'Status Laporan',
+    'lapbul_format': 'Format Laporan',
+    'siaba_dashboard': 'Dashboard SIABA', 'siaba_presensi_harian': 'Harian', 'siaba_presensi_apel': 'Apel dan Upacara',
+    'siaba_presensi_tidak': 'Tidak Presensi', 'siaba_presensi_terlambat': 'Terlambat', 'siaba_presensi_pulang': 'Pulang Awal',
+    'siaba_presensi_unduh': 'Unduh Rekap Bulanan', 
+    'siaba_presensi_arsip': 'Arsip Siaba',
+    'siaba_presensi_lupa': 'Lupa Presensi', 'siaba_presensi_salah': 'Salah Presensi',
+    'siaba_perjalanan_dinas': 'Perjalanan Dinas', 'siaba_cuti_data': 'Pengajuan', 'siaba_cuti_sisa': 'Sisa Cuti Tahunan',
+    'siaba_cuti_rekap': 'Rekap Cuti', 'siaba_cuti_unggah': 'Unggah Surat Cuti', 'siaba_cuti_informasi': 'Informasi',
+    'siaba_format_panduan': 'Format dan Panduan', 'tata_naskah_dinas': 'Tata Naskah Dinas',  
+    'ptk_dashboard': 'Dashboard PTK', 'ptk_kelola_paud': 'Daftar Nama PTK PAUD',
+    'ptk_keadaan_paud': 'Keadaan PTK PAUD', 'ptk_kelola_sdn': 'Daftar Nama PTK SDN', 'ptk_keadaan_sdn': 'Keadaan PTK SDN',
+    'ptk_kebutuhan_sdn': 'Kebutuhan Guru SDN', 'ptk_kelola_sds': 'Daftar Nama PTK SDS', 'ptk_keadaan_sds': 'Keadaan PTK SDS',
+    'ptk_kebutuhan_sds': 'Kebutuhan Guru SDS', 'murid_dashboard': 'Dashboard Murid', 'murid_paud_rombel': 'PAUD Menurut Rombel',
+    'murid_paud_jenis_kelamin': 'PAUD Menurut Jenis Kelamin', 'murid_sd_kelas': 'SD Menurut Kelas', 'murid_sd_rombel': 'SD Menurut Rombel',
+    'murid_sd_agama': 'SD Menurut Agama', 'setting': 'Pengaturan', 'monitoring': 'Monitoring Aktivitas',
+    'efile_dashboard': 'Dashboard E-File','efile_kelola': 'Kelola & Verifikasi', 'efile_viewer': 'Viewer E-File'
+};
 
 function highlightSidebar(pageName) {
-  // 1. RESET TOTAL: Kembalikan semua ke warna dasar (Putih/Transparan)
-  $('.nav-sidebar .nav-link').removeClass('active').css({
-    'background-color': 'transparent',
-    'color': '#fff' // Memastikan teks dan icon kembali putih
-  });
-  $('.nav-sidebar .nav-link i').css('color', '#fff'); // Paksa icon jadi putih
+    var textMenu = MENU_MAPPING[pageName] || pageName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    $('.nav-sidebar .nav-link').removeClass('active');
+    var target = $('.nav-sidebar .nav-link').filter(function() { return $(this).text().trim() === textMenu; });
 
-  // 2. CARI TARGET (CUCU)
-  var target = $('.nav-sidebar .nav-link[data-page="' + pageName + '"]');
-
-  if (target.length > 0) {
-    // 3. WARNAI CUCU (HIJAU SULTAN)
-    target.addClass('active').css({
-      'background-color': '#28a745', // Hijau sesuai screenshot Anda
-      'color': '#fff'
-    });
-
-    // 4. WARNAI BAPAK & ANAK (MAROON / DARK ACTIVE)
-    // Kita manjat ke atas dan memaksa Bapak/Anak ikut berwarna
-    target.parents('.nav-item').each(function() {
-      var parentLink = $(this).children('.nav-link');
-      
-      // Berikan warna latar belakang yang berbeda agar silsilah terlihat aktif
-      parentLink.addClass('active').css({
-        'background-color': 'rgba(255,255,255,0.1)', // Warna highlight transparan agar tetap elegan
-        'color': '#fff'
-      });
-      
-      // Pastikan icon Bapak/Anak tetap putih, bukan merah
-      parentLink.find('i').css('color', '#fff');
-      
-      // Buka laci agar Cucu terlihat
-      $(this).addClass('menu-open');
-      $(this).children('.nav-treeview').show();
-    });
-  }
-}
-
-// Cara pakai: toast('Berhasil!', 'success'); atau toast('Gagal!', 'error');
-function toast(pesan, tipe) {
-  const Toast = Swal.mixin({
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true
-  });
-
-  Toast.fire({
-    icon: tipe,
-    title: pesan
-  });
-}
-
-/**
- * Fungsi Notifikasi Global (Toast)
- * @param {string} pesan - Tulisan yang ingin ditampilkan
- * @param {string} tipe - Pilihan: 'success', 'error', 'warning', 'info'
- */
-function tampilkanNotif(pesan, tipe) {
-  const Toast = Swal.mixin({
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timer: 3000,
-    timerProgressBar: true,
-    didOpen: (toast) => {
-      toast.addEventListener('mouseenter', Swal.stopTimer)
-      toast.addEventListener('mouseleave', Swal.resumeTimer)
+    if (target.length > 0) {
+        $('.nav-sidebar li.menu-open').not(target.parents('li')).removeClass('menu-open').children('.nav-treeview').slideUp(300);
+        target.addClass('active');
+        target.parents('.nav-item').each(function() {
+            $(this).children('.nav-link').addClass('active');
+            if (!$(this).hasClass('menu-open')) {
+                $(this).addClass('menu-open');
+                $(this).children('.nav-treeview').slideDown(300);
+            }
+        });
     }
-  });
-
-  Toast.fire({
-    icon: tipe,
-    title: pesan
-  });
 }
 
-function handleFormSubmit(event) {
-  event.preventDefault();
-  
-  const btn = $('#submitBtn');
-  const fileInput = document.getElementById('fileUpload');
-  const file = fileInput.files[0];
-  
-  // Ambil data user dari session kita yang baru
-  const user = JSON.parse(localStorage.getItem("siksUser"));
+function updateBreadcrumb(pageName) {
+    var textMenu = MENU_MAPPING[pageName] || pageName;
+    var $activeLink = $('a[data-page="' + pageName + '"]');
+    var homeHtml = '<span style="cursor:pointer" class="btn-home-crumb"><i class="fas fa-home mr-1"></i> Beranda</span>';
+    var separator = ' <i class="fas fa-angle-right mx-2 text-white-50" style="font-size: 0.8em;"></i> ';
+    var breadHtml = homeHtml;
 
-  if (file && file.size > 1024 * 1024) {
-    tampilkanNotif("Ukuran file maksimal 1 MB!", "error");
-    return;
-  }
-
-  btn.html('<i class="fas fa-spinner fa-spin"></i> Mengirim...').attr('disabled', true);
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const formData = {
-      namaSD: $('#namaSD').val(),
-      tahunAjaran: $('#tahunAjaran').val(),
-      semester: $('#semester').val(),
-      nomorSK: $('#nomorSK').val(),
-      tanggalSK: $('#tanggalSK').val(),
-      kriteriaSK: $('#kriteriaSK').val(),
-      userInput: user.nama, // Diambil otomatis dari login
-      fileData: {
-        data: e.target.result.split(',')[1],
-        mimeType: file.type,
-        name: file.name
-      }
-    };
-
-    google.script.run
-      .withSuccessHandler(function(res) {
-        tampilkanNotif(res, "success");
-        $('#manualUploadForm')[0].reset();
-        $('.custom-file-label').html("Pilih file PDF...");
-        btn.html('<i class="fas fa-paper-plane mr-2"></i> Kirim Dokumen').attr('disabled', false);
-      })
-      .processManualForm(formData);
-  };
-  reader.readAsDataURL(file);
-}
-
-function isiDropdownSK() {
-    // Panggil fungsi renderDropdown(ID_ELEMEN, KATEGORI_DI_KULKAS)
-    renderDropdown("namaSD", "NamaSD");
-    renderDropdown("tahunAjaran", "TahunAjaran");
-    renderDropdown("semester", "Semester");
-    renderDropdown("kriteriaSK", "KriteriaSK");
-    
-    console.log("Dropdown SK berhasil dimuat dari data statis.");
-}
-
-const NotifSultan = {
-  // --- KONFIGURASI PUSAT ---
-  config: {
-    warnaMaroon: '#800000',
-    warnaHitam: '#343a40',
-    warnaSukses: '#28a745',
-    warnaGagal: '#dc3545',
-  },
-
-  // 1. TIPE TOAST (Untuk Login / Info Ringan) - Muncul di Kanan Atas
-  toast: (tipe, pesan) => {
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'top-end', // Pojok Kanan Atas
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      background: '#fff',
-      // Style khusus agar Toast pun terlihat Sultan (Ada garis merah kiri)
-      customClass: {
-        popup: 'sultan-toast' 
-      },
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-      }
-    });
-
-    Toast.fire({
-      icon: tipe, // 'success', 'error', 'info'
-      title: pesan
-    });
-  },
-
-  // 2. TIPE ALERT (Untuk Upload / Error Fatal) - Muncul di Tengah
-  alert: (tipe, judul, pesan) => {
-    // Tentukan warna tombol & ikon
-    let btnColor = NotifSultan.config.warnaHitam;
-    let btnText = 'Tutup';
-    
-    if (tipe === 'success') {
-      btnColor = NotifSultan.config.warnaMaroon;
-      btnText = 'Lanjutkan';
-    } else if (tipe === 'error') {
-      btnColor = NotifSultan.config.warnaHitam;
-      btnText = 'Perbaiki';
+    if (pageName !== 'home' && $activeLink.length > 0) {
+        var currentTitle = $activeLink.find('p').clone().children().remove().end().text().trim(); 
+        var $parentTree = $activeLink.closest('.nav-treeview');
+        
+        if ($parentTree.length > 0) {
+            var $parentLi = $parentTree.closest('.nav-item');
+            var $parentLink = $parentLi.children('.nav-link');
+            if ($parentLink.length > 0) {
+                var parentTitle = $parentLink.find('p').clone().children().remove().end().text().trim();
+                var $grandParentTree = $parentLi.closest('.nav-treeview');
+                if ($grandParentTree.length > 0) {
+                     var $grandParentLink = $grandParentTree.closest('.nav-item').children('.nav-link');
+                     if ($grandParentLink.length > 0) {
+                         breadHtml += separator + '<span class="text-white-50">' + $grandParentLink.find('p').clone().children().remove().end().text().trim() + '</span>';
+                     }
+                }
+                breadHtml += separator + '<span class="text-white-50">' + parentTitle + '</span>';
+            }
+        }
+        breadHtml += separator + '<span class="font-weight-bold text-white">' + (currentTitle || textMenu) + '</span>';
     }
+    $('#page-breadcrumb').html(breadHtml);
+}
 
-    return Swal.fire({
-      icon: tipe,
-      title: `<h5 class="font-weight-bold" style="margin-top:10px">${judul}</h5>`,
-      text: pesan,
-      width: '320px', // UKURAN KONSISTEN (MUNGIL)
-      confirmButtonColor: btnColor,
-      confirmButtonText: btnText,
-      padding: '1.5rem',
-      allowOutsideClick: false,
-      // Style Sultan (Garis Merah Atas)
-      customClass: {
-        popup: 'sultan-alert'
-      }
-    });
-  },
+/* =============================================================
+   7. SUPER HELPER: RENDER TABEL (ANTI-BLINK SULTAN)
+   ============================================================= */
+var SultanTable = {
+    renderNative: function(targetId, columns, data, emptyText, onComplete) {
+        var $tabel = $(targetId);
+        if ($tabel.length === 0) return;
 
-  // 3. TIPE LOADING (Proses) - Tengah & Bersih
-  loading: (pesan) => {
-    Swal.fire({
-      width: '300px',
-      title: '',
-      html: `
-        <div class="text-center p-2">
-          <div class="spinner-border" role="status" style="color: ${NotifSultan.config.warnaMaroon}; width: 3rem; height: 3rem;"></div>
-          <p class="mt-3 mb-0 font-weight-bold text-muted">${pesan || 'Memproses Data...'}</p>
-        </div>
-      `,
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      customClass: {
-        popup: 'sultan-alert' // Sama ratakan style dengan Alert
-      }
-    });
-  },
+        if ($.fn.DataTable.isDataTable(targetId)) {
+            $tabel.DataTable().destroy();
+        }
+        $tabel.empty();
 
-  konfirmasi: (judul, pesan) => {
-    return Swal.fire({
-      icon: 'question', // Ikon tanda tanya
-      title: `<h5 class="font-weight-bold" style="margin-top:10px">${judul}</h5>`,
-      text: pesan,
-      width: '320px',
-      showCancelButton: true,
-      confirmButtonColor: '#dc3545', // Merah (untuk Logout/Hapus)
-      cancelButtonColor: '#343a40',  // Hitam (Batal)
-      confirmButtonText: 'Ya, Keluar',
-      cancelButtonText: 'Batal',
-      padding: '1.5rem',
-      reverseButtons: true, // Tombol batal di kiri
-      customClass: { popup: 'sultan-alert' }
-    });
-  }
+        $tabel.DataTable({
+            data: data || [],
+            columns: columns || [{title: "Data"}],
+            ordering: false,
+            pageLength: 10,
+            autoWidth: false,
+            destroy: true,
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json",
+                emptyTable: emptyText || "Tidak ada data."
+            },
+            dom: "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                 "<'row'<'col-sm-12 table-responsive'tr>>" +
+                 "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            initComplete: function() {
+                var api = this.api();
+                $('[data-toggle="tooltip"]').tooltip();
+                if (typeof onComplete === 'function') {
+                    setTimeout(function() { 
+                        api.columns.adjust();
+                        onComplete(); 
+                    }, 50);
+                }
+            }
+        });
+    }
 };
 
-/* ================================
-   SIDEBAR HIGHLIGHT (AMAN & STABIL)
-   ================================ */
-
-function highlightSidebar(pageId) {
-  if (!pageId) return;
-
-  // hapus semua status aktif
-  document.querySelectorAll('.nav-sidebar .nav-link')
-    .forEach(el => el.classList.remove('active'));
-
-  document.querySelectorAll('.nav-sidebar .nav-item')
-    .forEach(el => el.classList.remove('menu-open'));
-
-  // cari menu sesuai halaman
-  const activeLink = document.querySelector(
-    '.nav-sidebar .nav-link[data-page="' + pageId + '"]'
-  );
-
-  if (!activeLink) return;
-
-  // aktifkan menu
-  activeLink.classList.add('active');
-
-  // buka parent menu (2 level)
-  const parentTree = activeLink.closest('.has-treeview');
-  if (parentTree) {
-    parentTree.classList.add('menu-open');
-    const parentLink = parentTree.querySelector(':scope > .nav-link');
-    if (parentLink) parentLink.classList.add('active');
-  }
+function getBadgeSultan(status) {
+    if (!status || status === "-" || status === "") {
+        return '<i class="fas fa-minus text-black-50 small" style="opacity:0.2"></i>';
+    }
+    var s = String(status).trim();
+    var stLower = s.toLowerCase();
+    
+    if (stLower.includes('revisi') || stLower.includes('perbaiki')) {
+         return `<div class="btn-icon-sultan btn-icon-sultan-warning" data-toggle="tooltip" title="${s}"><i class="fas fa-sync-alt"></i></div>`;
+    } else if (stLower.includes('tolak') || stLower.includes('x') || stLower.includes('salah')) {
+         return `<div class="btn-icon-sultan btn-icon-sultan-danger" data-toggle="tooltip" title="${s}"><i class="fas fa-times"></i></div>`;
+    } else if (stLower.includes('verif') || stLower.includes('setuju') || stLower.includes('ok') || stLower.includes('valid')) {
+         return `<div class="btn-icon-sultan btn-icon-sultan-success" data-toggle="tooltip" title="${s}"><i class="fas fa-check"></i></div>`;
+    } else if (s.length > 5 && (stLower.includes('proses') || stLower.includes('tunggu'))) {
+         return `<div class="btn-icon-sultan btn-icon-sultan-info" data-toggle="tooltip" title="${s}"><i class="fas fa-spinner fa-spin"></i></div>`;
+    }
+    
+    var pillColor = 'secondary';
+    if (stLower.includes('hadir') || stLower.includes('aktif') || stLower.includes('sudah')) pillColor = 'success';
+    else if (stLower.includes('belum') || stLower.includes('absen')) pillColor = 'danger';
+    else if (stLower.includes('izin') || stLower.includes('sakit')) pillColor = 'warning';
+    
+    return `<span class="badge badge-pill badge-${pillColor} shadow-sm px-3 py-1 font-weight-bold">${s}</span>`;
 }
 
-/* ================================
-   DIPANGGIL SETELAH HALAMAN DIBUKA
-   ================================ */
-window.afterPageLoaded = function(pageId) {
-  highlightSidebar(pageId);
-};
-
+function renderBadgeSultan(text) { return getBadgeSultan(text); }
+function previewPDF(u){ $('#framePreview').attr('src',u.replace('/view','/preview')); $('#modalPreviewSK').modal('show'); }
+function formatDateForInput(s){ if(!s) return ""; if(typeof s==='string'&&s.match(/^\d{4}-\d{2}-\d{2}$/)) return s; var d=new Date(s); return isNaN(d)?s:d.toISOString().split('T')[0]; }
 </script>

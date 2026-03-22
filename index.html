@@ -6,43 +6,40 @@
   <title>SIKS - REBORN</title>
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-  
   <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css">
   
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+  
   <script>
-    // FIX: Matikan eror autoIframeMode sebelum AdminLTE dimuat
     localStorage.setItem('AdminLTE:IFrame:Options', JSON.stringify({autoIframeMode:false}));
   </script>
-
-  <?!= include('css'); ?>
+  <?!= include('js_core_sultan'); ?>
+  <?!= include('css_sultan'); ?>
 </head>
-<body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed layout-navbar-fixed">
 
-  <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png" alt="Loading" height="60" width="60">
-  </div>
+<body class="hold-transition sidebar-mini layout-fixed layout-footer-fixed layout-navbar-fixed">
 
   <div id="gerbang-login">
     <?!= include('page_login'); ?>
   </div>
 
   <div class="wrapper" id="konten-aplikasi" style="display:none;">
-    <nav class="main-header navbar navbar-expand navbar-dark">
+    
+    <nav class="main-header navbar navbar-expand navbar-dark border-bottom-0">
       <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-md-block">
-          <span class="nav-link font-weight-bold text-white" style="cursor: default; letter-spacing: 0.5px;">
-            Ruang Edukasi dan Layanan Berbasis Online Terintegrasi
-          </span>
+          <span id="page-breadcrumb" class="nav-link text-white" style="cursor: default;"></span>
         </li>
       </ul>
+
       <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown user-menu">
-          
           <a href="#" class="nav-link d-flex align-items-center" data-toggle="dropdown">
             <div class="user-capsule">
               <img id="nav-user-photo" src="https://ui-avatars.com/api/?name=User" alt="User">
@@ -50,21 +47,23 @@
               <i class="fas fa-angle-down ml-2" style="font-size: 0.7rem; opacity: 0.7;"></i>
             </div>
           </a>
-
-          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <li class="user-header">
-              <img id="dropdown-user-photo" src="" class="img-circle" alt="User Image">
-              <div>
-                <p class="user-header-name" id="dropdown-user-name-big">Nama Lengkap</p>
-                <small class="user-header-role" id="dropdown-user-role">Jabatan</small>
-              </div>
+          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="border-radius: 15px; overflow: hidden;">
+            <li class="user-header bg-maroon">
+              <img id="dropdown-user-photo" src="" class="img-circle elevation-2" alt="User Image">
+              <p>
+                <span id="dropdown-user-name-big" class="font-weight-bold">Nama Lengkap</span>
+                <small id="dropdown-user-role">Jabatan</small>
+              </p>
             </li>
-            <li class="user-footer">
-              <a href="#" class="btn btn-default btn-flat text-muted shadow-sm"><i class="fas fa-user-cog mr-1"></i> Profil</a>
-              <button type="button" class="btn btn-danger btn-flat shadow-sm" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-1"></i> Logout</button>
+            <li class="user-footer bg-light">
+              <a href="#" class="btn btn-default btn-flat btn-sm rounded-pill shadow-sm">
+                <i class="fas fa-user-cog mr-1"></i> Profil
+              </a>
+              <button type="button" class="btn btn-danger btn-flat btn-sm rounded-pill shadow-sm float-right" onclick="handleLogout()">
+                <i class="fas fa-sign-out-alt mr-1"></i> Logout
+              </button>
             </li>
           </ul>
-
         </li>
       </ul>
     </nav>
@@ -72,35 +71,228 @@
     <aside class="main-sidebar elevation-4">
       <a href="#" class="brand-link">
         <i class="fa-solid fa-paperclip ml-3 mr-2 text-warning"></i>
-        <span class="brand-text font-weight-bold text-white">SIKS-REBORN</span>
+        <span class="brand-text font-weight-bold text-white" style="letter-spacing: 1px;">SIKS-REBORN</span>
       </a>
-      <div id="sidebar-container">
+      <div id="sidebar-container" class="sidebar">
         <?!= include('sidebar'); ?>
       </div>
     </aside>
 
     <div class="content-wrapper">
-      <div id="main-content" class="p-3"></div>
+      <div id="app-content" class="p-3"></div>
     </div>
 
-    <footer class="main-footer">
+    <footer class="main-footer text-sm">
       <strong>Copyright &copy; 2026 <span class="text-maroon">Korwil Disdikbud Kecamatan Secang</span>.</strong>
-      <span class="ml-1">All rights reserved.</span>
-      <small class="text-muted ml-2" style="font-size: 0.7rem; opacity: 0.6;">(v2.0)</small>
+      <span class="d-none d-sm-inline-block ml-1">All rights reserved.</span>
+      <small class="text-muted ml-2" style="opacity: 0.6;">(v1.0)</small>
     </footer>
+
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
   <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
 
-  <?!= include('dropdown_data.js'); ?>
+  <?!= include('dropdown_data'); ?>
   <?!= include('javascript'); ?>
+
+  <script>
+  // ============================================
+  // UPDATE UI NAVBAR (Kode Asli)
+  // ============================================
+  function updateNavbarUI(user) {
+      if (!user) return;
+      var displayName = user.nama_lengkap || user.nama || user.username || "User";
+      var photoUrl = "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName) + "&background=random&color=fff";
+      if (user.photo && user.photo.trim() !== "") {
+          if (user.photo.startsWith("http")) photoUrl = user.photo;
+          else photoUrl = "https://drive.google.com/thumbnail?id=" + user.photo + "&sz=s200";
+      }
+      
+      $('#nav-user-name').text(displayName);
+      $('#nav-user-photo').attr('src', photoUrl);
+      $('#dropdown-user-name-big').text(displayName);
+      $('#dropdown-user-role').text(user.role || "Pengguna");
+      $('#dropdown-user-photo').attr('src', photoUrl);
+      $('.user-panel .info a').text(displayName);
+      $('.user-panel .image img').attr('src', photoUrl);
+      
+      if(user.role !== 'Admin') { $('#menu-setting-admin').hide(); } 
+      else { $('#menu-setting-admin').show(); }
+  }
+
+  // ============================================
+  // BREADCRUMB (Kode Asli)
+  // ============================================
+  function updateBreadcrumb($activeLink, pageName) {
+      var homeHtml = '<span style="cursor:pointer" class="btn-home-crumb"><i class="fas fa-home mr-1"></i> Beranda</span>';
+      var separator = ' <i class="fas fa-angle-right mx-2 text-white-50" style="font-size: 0.8em; vertical-align: middle;"></i> ';
+      var breadHtml = homeHtml;
+
+      if (pageName !== 'home') {
+          var currentTitle = $activeLink.find('p').clone().children().remove().end().text().trim(); 
+          var $parentTree = $activeLink.closest('.nav-treeview');
+          if ($parentTree.length > 0) {
+              var $parentLi = $parentTree.closest('.nav-item');
+              var $parentLink = $parentLi.children('.nav-link');
+              if ($parentLink.length > 0) {
+                  var parentTitle = $parentLink.find('p').clone().children().remove().end().text().trim();
+                  var $grandParentTree = $parentLi.closest('.nav-treeview');
+                  if ($grandParentTree.length > 0) {
+                       var $grandParentLi = $grandParentTree.closest('.nav-item');
+                       var $grandParentLink = $grandParentLi.children('.nav-link');
+                       if ($grandParentLink.length > 0) {
+                           var grandParentTitle = $grandParentLink.find('p').clone().children().remove().end().text().trim();
+                           breadHtml += separator + '<span class="text-white-50">' + grandParentTitle + '</span>';
+                       }
+                  }
+                  breadHtml += separator + '<span class="text-white-50">' + parentTitle + '</span>';
+              }
+          }
+          breadHtml += separator + '<span class="font-weight-bold text-white">' + (currentTitle || pageName) + '</span>';
+      }
+      $('#page-breadcrumb').html(breadHtml);
+  }
+
+  // ============================================
+  // LOAD KONTEN (Diperbarui dengan Animasi & Accordion Fix)
+  // ============================================
+  function loadContent(pageName) {
+    if(!pageName) return;
+    
+    // --- 1. HIGHLIGHT MENU ---
+    $('.nav-link').removeClass('active'); 
+    var $activeLink = $('a[data-page="' + pageName + '"]');
+    $activeLink.addClass('active');
+
+    // Accordion Fix
+    $('.nav-sidebar li.menu-open').not($activeLink.parents('li')).removeClass('menu-open').children('.nav-treeview').slideUp(300);
+
+    var $parentTree = $activeLink.closest('.nav-treeview');
+    if ($parentTree.length > 0) {
+        $parentTree.show();
+        $parentTree.closest('.nav-item').addClass('menu-open');
+        $parentTree.prev('.nav-link').addClass('active');
+        
+        var $grandParentTree = $parentTree.closest('.nav-item').closest('.nav-treeview');
+        if ($grandParentTree.length > 0) {
+            $grandParentTree.show();
+            $grandParentTree.closest('.nav-item').addClass('menu-open');
+            $grandParentTree.prev('.nav-link').addClass('active');
+        }
+    }
+
+    // --- 2. ENGINE ANTI-BLINK ---
+    var $content = $('#app-content');
+
+    // A. Kunci tinggi layar saat ini agar elemen di bawahnya (Footer) tidak melompat
+    $content.css('min-height', $content.height() + 'px');
+
+    // B. Mulai loading bar
+    if (typeof NProgress !== 'undefined') { 
+        NProgress.configure({ showSpinner: false, speed: 400 }); 
+        NProgress.start(); 
+    }
+
+    // C. Sembunyikan konten lama dengan mulus ke opacity 0 (Tak terlihat tapi ukurannya tetap ada)
+    $content.css({'transition': 'opacity 0.2s ease', 'opacity': '0'});
+
+    // D. Panggil Server
+    google.script.run
+      .withSuccessHandler(function(html) {
+        if (typeof NProgress !== 'undefined') NProgress.done();
+
+        // Beri jeda 200ms agar transisi pudarnya selesai dulu sebelum ganti DOM
+        setTimeout(function() {
+            
+            // E. Suntikkan HTML baru saat layar sedang "gelap"
+            // (Kita hapus div 'sultan-page-transition' karena efek transform-nya bikin blink)
+            $content.html(html); 
+
+            // Paksa browser membaca struktur HTML baru (Reflow)
+            void $content[0].offsetWidth; 
+
+            // F. Munculkan konten baru dengan mulus
+            $content.css('opacity', '1');
+
+            // G. Lepas kunci tinggi layar setelah transisi selesai
+            setTimeout(function() { 
+                $content.css('min-height', ''); 
+            }, 300);
+
+            updateBreadcrumb($activeLink, pageName);
+
+        }, 200);
+      })
+      .withFailureHandler(function(err) {
+        if (typeof NProgress !== 'undefined') NProgress.done();
+        setTimeout(function() {
+            $content.html('<div class="alert alert-danger m-3">Gagal memuat halaman: ' + err.message + '</div>').css('opacity', '1');
+            $content.css('min-height', '');
+        }, 200);
+      })
+      .loadPage(pageName);
+  }
+
+  // ============================================
+  // INISIALISASI (Kode Asli yang dijamin bekerja)
+  // ============================================
+  $(document).ready(function() {
+    
+    var userLocal = localStorage.getItem("siksUser");
+    var user = null;
+    try { user = userLocal ? JSON.parse(userLocal) : null; } catch(e){}
+
+    if (user) {
+        $('#gerbang-login').hide(); $('#konten-aplikasi').show(); 
+        updateNavbarUI(user); loadContent('home'); 
+        
+        // Pengecekan Nama Usang
+        if (!user.nama_lengkap || user.nama_lengkap === user.username || user.nama_lengkap === "User Web") {
+             google.script.run.withSuccessHandler(function(res){
+                if(res.found) {
+                    user.nama_lengkap = res.nama_lengkap; user.nama = res.nama_lengkap;
+                    user.role = res.role; user.unit = res.unit; 
+                    if(res.photo) user.photo = res.photo; 
+                    localStorage.setItem("siksUser", JSON.stringify(user));
+                    updateNavbarUI(user);
+                }
+            }).getUserProfileByName(user.username);
+        }
+    } else {
+        $('#konten-aplikasi').hide(); $('#gerbang-login').show();
+    }
+
+    // Klik Sidebar
+    $(document).on('click', '.nav-sidebar .nav-link', function(e) {
+        var pageName = $(this).data('page'); 
+        if (pageName) {
+            e.preventDefault(); 
+            loadContent(pageName);
+            if ($(window).width() < 768) {
+                $('body').removeClass('sidebar-open').addClass('sidebar-closed sidebar-collapse');
+            }
+        }
+    });
+
+    // Klik Beranda Breadcrumb
+    $(document).on('click', '.btn-home-crumb', function(e) {
+        e.preventDefault();
+        loadContent('home');
+        $('.nav-sidebar .menu-open').removeClass('menu-open');
+        $('.nav-sidebar .nav-treeview').slideUp();
+    });
+
+  });
+  </script>
+
 </body>
 </html>

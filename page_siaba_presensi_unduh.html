@@ -1,0 +1,335 @@
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-cloud-download-alt text-maroon mr-2"></i>Unduh Rekap Bulanan
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        
+        <div class="card-sultan p-3 mb-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center">
+            
+            <div class="d-flex align-items-center flex-wrap gap-10">
+              
+              <button type="button" id="unduh_btnHome" class="btn border-tegas shadow-sm bg-white" title="Folder Utama">
+                <i class="fas fa-home text-maroon"></i>
+              </button>
+
+              <button type="button" id="unduh_btnBack" class="btn border-tegas shadow-sm bg-white" title="Kembali" style="display:none;">
+                <i class="fas fa-level-up-alt text-dark font-weight-bold"></i>
+              </button>
+
+              <button type="button" id="unduh_btnRefresh" class="btn border-tegas shadow-sm bg-white" title="Refresh Folder Ini">
+                <i class="fas fa-sync-alt text-blue-sultan"></i>
+              </button>
+
+              <div class="divider-vertical"></div>
+
+              <div class="d-flex align-items-center bg-abu-terang px-3 py-2 rounded border-tegas" style="min-width: 200px;">
+                  <i class="fas fa-folder-open text-gold-sultan mr-2"></i>
+                  <span id="unduh_folderNameLabel" class="font-weight-bold text-dark small text-uppercase">MEMUAT...</span>
+              </div>
+            </div>
+
+            <div class="mt-2 mt-xl-0 text-muted small font-weight-bold">
+               Total Item: <span id="unduh_totalItemCount" class="text-maroon">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan">
+          <div class="card-body p-3">
+              
+              <div id="unduh_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 40vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="unduh_loadingText">Menghubungkan ke Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="unduh_tableState" style="display: none;">
+                  <table id="unduh_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100 text-nowrap">
+                    <thead class="bg-light">
+                      <tr>
+                        <th class="text-center align-middle px-2" style="width: 1%; white-space: nowrap;">No</th>
+                        <th class="text-left align-middle px-3" style="width: auto; white-space: nowrap;">Nama File / Folder</th>
+                        <th class="text-center align-middle px-2" style="width: 1%; white-space: nowrap;">Ukuran</th>
+                        <th class="text-center align-middle px-2" style="width: 1%; white-space: nowrap;">Tanggal</th>
+                        <th class="text-center align-middle px-2 col-sticky-right" style="width: 1%; white-space: nowrap;">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="unduh_modalPreview" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-full" role="document"> 
+    <div class="modal-content modal-content-full-height border-0 shadow-lg modal-content-sultan"> 
+      
+      <div class="modal-header bg-maroon py-2">
+        <h6 class="modal-title font-weight-bold text-white">
+            <i class="fas fa-file-alt mr-2"></i> Preview Dokumen
+        </h6>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      
+      <div class="modal-body modal-body-full bg-dark position-relative p-0" style="height: calc(100vh - 55px);">
+          <iframe id="unduh_framePreview" class="iframe-full w-100 h-100 border-0 d-none" src=""></iframe>
+          <div id="unduh_loadingPreviewPDF" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100">
+              <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p></div>
+          </div>
+      </div>
+      
+      <div class="modal-footer justify-content-between bg-white py-2 border-top" style="flex-shrink: 0;">
+          <button type="button" class="btn border-tegas shadow-sm font-weight-bold px-4" data-dismiss="modal">Tutup</button>
+          
+          <a id="unduh_btnDownloadFinal" href="#" target="_blank" class="btn btn-success shadow-sm font-weight-bold px-4">
+              <i class="fas fa-download mr-2"></i> UNDUH FILE
+          </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // =================================================================
+  // ISOLASI VARIABEL GLOBAL (PREFIX UNDUH_ MUTLAK)
+  // =================================================================
+  var UNDUH_CURRENT_FOLDER = null; 
+  var UNDUH_PARENT_FOLDER = null;
+  var UNDUH_TABEL_INSTANCE = null;
+
+  // =================================================================
+  // 1. INITIALIZATION & VAKSIN SPA EVENT DELEGATION
+  // =================================================================
+  $(document).ready(function() {
+      
+      // VAKSIN EVENT: Menghubungkan fungsi klik dengan tombol (Anti-Memory Leak)
+      $(document).off('click', '#unduh_btnHome').on('click', '#unduh_btnHome', unduh_goHome);
+      $(document).off('click', '#unduh_btnBack').on('click', '#unduh_btnBack', unduh_navigateUp);
+      $(document).off('click', '#unduh_btnRefresh').on('click', '#unduh_btnRefresh', unduh_refreshFolder);
+      
+      // Event Aksi Tabel (Menggantikan onclick inline di hasil render)
+      $(document).off('click', '.unduh-btn-folder').on('click', '.unduh-btn-folder', function(e) {
+          e.stopPropagation();
+          unduh_loadFolder($(this).data('id'));
+      });
+      $(document).off('click', '.unduh-btn-file').on('click', '.unduh-btn-file', function(e) {
+          e.stopPropagation();
+          unduh_openPreview($(this).data('id'), $(this).data('mime'));
+      });
+
+      // VAKSIN MEMORI IFRAME (BAB V)
+      $('#unduh_modalPreview').on('hidden.bs.modal', function () {
+          $('#unduh_framePreview').attr('src', '').addClass('d-none');
+          $('#unduh_loadingPreviewPDF').removeClass('d-none');
+      });
+
+      // SULTAN UX: Buat seluruh baris bisa di-klik (Klik Baris = Klik Tombol Pertama)
+      $('#unduh_tabelUtama tbody').on('click', 'tr', function(e) {
+          if ($(e.target).is('button') || $(e.target).closest('button').length) return;
+          var btn = $(this).find('button.btn-aksi-sultan');
+          if(btn.length > 0) { btn[0].click(); }
+      });
+
+      // Mulai dengan meload Root Folder (Tabel akan diinisiasi setelah data pertama datang)
+      unduh_goHome(); 
+  });
+
+  // =================================================================
+  // 2. LOGIKA LOAD FOLDER (ZERO-BLINK FETCH)
+  // =================================================================
+  function unduh_loadFolder(folderId) {
+      $('#unduh_folderNameLabel').html('<i class="fas fa-spinner fa-spin mr-2"></i> MEMUAT...');
+      
+      // VAKSIN BLINK: Jika tabel sudah ada, JANGAN SEMBUNYIKAN WADAHNYA. Cukup berikan info di dalam tabel
+      if ($.fn.DataTable.isDataTable('#unduh_tabelUtama')) {
+          UNDUH_TABEL_INSTANCE.clear().draw(false);
+          $('.dataTables_empty').html('<div class="py-5 text-center text-muted font-weight-bold"><i class="fas fa-circle-notch fa-spin fa-2x mb-3 text-maroon"></i><br>Membaca folder dari Server...</div>');
+      } else {
+          // Hanya saat pertama kali load SPA, tunjukkan loading state besar
+          $('#unduh_tableState').hide();
+          $('#unduh_loadingState').show();
+      }
+      
+      google.script.run
+        .withSuccessHandler(unduh_renderArsipTable)
+        .withFailureHandler(function(err) {
+           if ($.fn.DataTable.isDataTable('#unduh_tabelUtama')) {
+               $('.dataTables_empty').html(`<div class="py-5 text-center text-danger font-weight-bold"><i class="fas fa-wifi fa-2x mb-3"></i><br>Gagal memuat folder:<br>${unduh_escapeHtml(err.message)}</div>`);
+           } else {
+               $('#unduh_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${unduh_escapeHtml(err.message)}</span>`);
+           }
+           $('#unduh_folderNameLabel').text('ERROR');
+        })
+        .getSiabaUnduhData(folderId);
+  }
+
+  // =================================================================
+  // 3. RENDER ENGINE: PURE ARRAY PUSH (ANTI-GLITZ)
+  // =================================================================
+  function unduh_renderArsipTable(data) {
+      if (data.error) {
+          if ($.fn.DataTable.isDataTable('#unduh_tabelUtama')) {
+              $('.dataTables_empty').html(`<div class="py-5 text-center text-danger font-weight-bold"><i class="fas fa-exclamation-triangle fa-2x mb-3"></i><br>${unduh_escapeHtml(data.error)}</div>`);
+          } else {
+              $('#unduh_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${unduh_escapeHtml(data.error)}</span>`);
+          }
+          $('#unduh_folderNameLabel').text('ERROR AKSES');
+          return;
+      }
+
+      UNDUH_CURRENT_FOLDER = data.currentId;
+      UNDUH_PARENT_FOLDER = data.parentId;
+      
+      $('#unduh_folderNameLabel').text(data.currentName);
+      $('#unduh_totalItemCount').text(data.items ? data.items.length : 0);
+      
+      if (data.isRoot) $('#unduh_btnBack').hide();
+      else $('#unduh_btnBack').show();
+
+      var items = data.items || [];
+      var dtArray = [];
+
+      items.forEach(function(item, i) {
+          var arrRow = [];
+          var iconHtml = '';
+          var btnAction = '';
+          var nameHtml = '';
+
+          var safeName = unduh_escapeHtml(item.name);
+
+          // --- LOGIKA FOLDER ---
+          if (item.type === 'folder') {
+              iconHtml = '<i class="fas fa-folder text-gold-sultan mr-2 fa-lg"></i>';
+              nameHtml = `<span class="font-weight-bold text-dark text-nowrap">${safeName}</span>`;
+              btnAction = `<button type="button" class="btn btn-sm btn-outline-primary shadow-sm px-3 font-weight-bold btn-aksi-sultan unduh-btn-folder" data-id="${item.id}">Buka Folder</button>`;
+          } 
+          // --- LOGIKA FILE ---
+          else {
+              var mime = item.mimeType;
+              if (mime.includes('pdf')) iconHtml = '<i class="fas fa-file-pdf text-danger mr-2 fa-lg"></i>';
+              else if (mime.includes('image')) iconHtml = '<i class="fas fa-file-image text-purple-sultan mr-2 fa-lg"></i>';
+              else if (mime.includes('spreadsheet') || mime.includes('excel')) iconHtml = '<i class="fas fa-file-excel text-green-sultan mr-2 fa-lg"></i>';
+              else if (mime.includes('document') || mime.includes('word')) iconHtml = '<i class="fas fa-file-word text-blue-sultan mr-2 fa-lg"></i>';
+              else iconHtml = '<i class="fas fa-file text-secondary mr-2 fa-lg"></i>';
+
+              nameHtml = `<span class="text-dark text-nowrap">${safeName}</span>`;
+              btnAction = `<div class="d-flex flex-nowrap justify-content-center"><button type="button" class="btn btn-sm btn-success shadow-sm px-3 font-weight-bold btn-aksi-sultan unduh-btn-file" data-id="${item.id}" data-mime="${item.mimeType}"><i class="fas fa-eye mr-1"></i> Lihat & Unduh</button></div>`;
+          }
+
+          arrRow.push(i + 1);
+          arrRow.push(`<div class="d-flex align-items-center">${iconHtml} ${nameHtml}</div>`);
+          arrRow.push(`<span class="small font-weight-bold text-muted">${item.size}</span>`);
+          arrRow.push(`<span class="small font-weight-bold text-muted">${item.date}</span>`);
+          arrRow.push(btnAction);
+
+          dtArray.push(arrRow);
+      });
+
+      // VAKSIN INISIASI: Buat tabel hanya 1x seumur hidup
+      if (!$.fn.DataTable.isDataTable('#unduh_tabelUtama')) {
+          UNDUH_TABEL_INSTANCE = $('#unduh_tabelUtama').DataTable({
+              "data": dtArray,
+              "destroy": true,
+              "ordering": false, 
+              "pageLength": 10, 
+              "autoWidth": false, // VAKSIN: Matikan autowidth js, biarkan CSS tag <th> bekerja
+              "deferRender": true, 
+              "dom": "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5 small text-muted'i><'col-sm-12 col-md-7'p>>",
+              "language": { 
+                  "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                  "search": "", "searchPlaceholder": "Cari Nama File/Folder...",
+                  "emptyTable": '<div class="py-5 text-center text-muted"><i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i><br>Folder ini kosong.</div>' 
+              },
+              "columnDefs": [
+                  { "targets": 0, "className": "text-center align-middle px-2" },
+                  { "targets": 1, "className": "text-left align-middle px-3" },
+                  { "targets": [2,3,4], "className": "text-center align-middle px-2" }
+              ]
+          });
+          
+          // Buka blokir tirai secara instan
+          $('#unduh_loadingState').hide();
+          $('#unduh_tableState').show();
+          
+          // Cukup 1 kali adjust untuk merapikan tabel saat bangun dari kondisi `display: none`
+          setTimeout(function(){ UNDUH_TABEL_INSTANCE.columns.adjust(); }, 50);
+
+      } else {
+          // VAKSIN ANTI-GLITZ: Murni update data tanpa adjust columns berulang-ulang
+          UNDUH_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+          
+          // Timpa teks kosong jika benar-benar tidak ada data
+          if (dtArray.length === 0) {
+              $('.dataTables_empty').html('<div class="py-5 text-center text-muted"><i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i><br>Folder ini kosong.</div>');
+          }
+      }
+  }
+
+  // =================================================================
+  // 4. KONTROL NAVIGASI
+  // =================================================================
+  function unduh_navigateUp() { if (UNDUH_PARENT_FOLDER) unduh_loadFolder(UNDUH_PARENT_FOLDER); }
+  function unduh_goHome() { unduh_loadFolder(null); }
+  function unduh_refreshFolder() { unduh_loadFolder(UNDUH_CURRENT_FOLDER); }
+
+  // =================================================================
+  // 5. PREVIEW & DOWNLOAD MODAL (VAKSIN BAB V)
+  // =================================================================
+  function unduh_openPreview(fileId, mimeType) {
+      if (mimeType === 'application/vnd.google-apps.folder') return;
+
+      var previewUrl = "https://drive.google.com/file/d/" + fileId + "/preview";
+      var downloadUrl = "https://drive.google.com/uc?export=download&id=" + fileId;
+
+      $('#unduh_loadingPreviewPDF').removeClass('d-none');
+      $('#unduh_framePreview').addClass('d-none').attr('src', previewUrl);
+      $('#unduh_btnDownloadFinal').attr('href', downloadUrl);
+
+      $('#unduh_modalPreview').modal('show');
+
+      // VAKSIN BAB V: Event iframe Load
+      $('#unduh_framePreview').off('load').on('load', function() {
+          $('#unduh_loadingPreviewPDF').addClass('d-none');
+          $(this).removeClass('d-none');
+      });
+
+      // Fallback 2.5 Detik
+      setTimeout(function() {
+          $('#unduh_loadingPreviewPDF').addClass('d-none');
+          $('#unduh_framePreview').removeClass('d-none');
+      }, 2500);
+  }
+
+  // =================================================================
+  // 6. HELPER UTILITY: XSS PREVENTION
+  // =================================================================
+  function unduh_escapeHtml(text) { 
+      if(!text) return ""; 
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+  }
+</script>

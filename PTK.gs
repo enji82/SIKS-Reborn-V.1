@@ -1,867 +1,1026 @@
-function getPtkKeadaanPaudData() {
-    try {
-        const data = getDataFromSheet('PTK_PAUD_KEADAAN');
-        if (!data || data.length < 2) {
-            return { headers: [], rows: [], filterConfigs: [] };
-        }
-        
-        const headers = data[0];
-        const dataRows = data.slice(1);
-        const jenjangIndex = headers.indexOf('Jenjang');
+/* ======================================================================
+   MODUL: KELOLA PTK SD
+   Spreadsheet ID: 1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE
+   Sheet: Master Data GTK
+   ====================================================================== */
 
-        const processedRows = dataRows.map(row => {
-            const rowObject = {};
-            headers.forEach((h, i) => rowObject[h] = row[i]);
-            rowObject['_filterJenjang'] = row[jenjangIndex];
-            return rowObject;
-        });
+var ID_DB_PTK = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE";
+var SHEET_PTK = "Master Data GTK";
 
-        return { 
-            headers: headers, 
-            rows: processedRows,
-            filterConfigs: [{ id: 'filterJenjang', dataColumn: '_filterJenjang' }]
-        };
-    } catch (e) {
-        return handleError('getPtkKeadaanPaudData', e);
-    }
-}
- 
-function getPtkKeadaanSdData() {
+// 1. AMBIL OPSI FILTER (UNIT & STATUS)
+function getFilterOptionsPTK() {
   try {
-    return getDataFromSheet('PTK_SD_KEADAAN');
-  } catch (e) {
-    return handleError('getKeadaanPtkSdData', e);
-  }
-}
+    var ss = SpreadsheetApp.openById(ID_DB_PTK);
+    var sheet = ss.getSheetByName(SHEET_PTK);
+    if (!sheet) return JSON.stringify({ units: [], statuses: [] });
+    
+    // Ambil Kolom C (Unit) dan S (Status)
+    var lastRow = sheet.getLastRow();
+    if(lastRow < 2) return JSON.stringify({ units: [], statuses: [] });
 
-function getPtkJumlahBulananPaudData() {
-  try {
-    const allData = getDataFromSheet('PTK_PAUD_JUMLAH_BULANAN');
-    if (!allData || allData.length < 2) {
-      return { headers: [], rows: [], filterConfigs: [] };
+    // Ambil data Unit (C/Index 2) dan Status (S/Index 18)
+    // Kita ambil range besar sekalian biar 1x call
+    var data = sheet.getRange(2, 1, lastRow - 1, 19).getValues(); 
+    
+    var unitSet = new Set();
+    var statusSet = new Set();
+    
+    for(var i=0; i<data.length; i++){
+        if(data[i][2]) unitSet.add(String(data[i][2]).trim());
+        if(data[i][18]) statusSet.add(String(data[i][18]).trim());
     }
     
-    const headers = allData[0];
-    const dataRows = allData.slice(1);
-
-    const jenjangIndex = headers.indexOf('Jenjang');
-    const tahunIndex = headers.indexOf('Tahun');
-    const bulanIndex = headers.indexOf('Bulan');
-    
-    const processedRows = dataRows.map(row => {
-        const rowObject = {};
-        headers.forEach((h, i) => rowObject[h] = row[i]);
-        rowObject['_filterJenjang'] = row[jenjangIndex];
-        rowObject['_filterTahun'] = row[tahunIndex];
-        rowObject['_filterBulan'] = row[bulanIndex];
-        return rowObject;
+    return JSON.stringify({
+        units: Array.from(unitSet).sort(),
+        statuses: Array.from(statusSet).sort()
     });
-
-    return {
-        headers: headers,
-        rows: processedRows,
-        filterConfigs: [
-            { id: 'filterTahun', dataColumn: '_filterTahun', sortReverse: true },
-            { id: 'filterBulan', dataColumn: '_filterBulan', specialSort: 'bulan' },
-            { id: 'filterJenjang', dataColumn: '_filterJenjang' },
-            { id: 'filterNamaLembaga', dataColumn: 'Nama Lembaga', dependsOn: 'filterJenjang', dependencyColumn: '_filterJenjang' }
-        ]
-    };
-  } catch (e) {
-    return handleError('getPtkJumlahBulananPaudData', e);
-  }
+  } catch(e) { return JSON.stringify({ error: e.message }); }
 }
 
-function getDaftarPtkPaudData() {
+// 2. AMBIL DATA UTAMA (OPTIMASI DISPLAY VALUES)
+function getDataPTKSD(filterUnit, filterStatus) {
+  var ss = SpreadsheetApp.openById(ID_DB_PTK);
+  var sheet = ss.getSheetByName(SHEET_PTK);
+  var data = sheet.getDataRange().getValues();
+  data.shift(); 
+  
+  var result = [];
+  
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    
+    var tglLahirISO = parseIndoDate(row[9]);
+    var tmtJabISO   = parseIndoDate(row[20]);
+    var tmtGolISO   = parseIndoDate(row[22]);
+
+    result.push({
+      id: row[0],              // A
+      npsn: row[1],            // B
+      unit: row[2],            // C
+      gelar_depan: row[3],     // D
+      nama_no_gelar: row[4],   // E
+      gelar_belakang: row[5],  // F
+      nama_lengkap: row[6],    // G
+      nip: row[7],             // H
+      tmp_lahir: row[8],       // I
+      tgl_lahir: tglLahirISO,  // J
+      nik: row[10],            // K
+      lp: row[11],             // L
+      agama: row[12],          // M
+      pendidikan: row[13],     // N
+      jurusan: row[14],        // O
+      thn_lulus: row[15],      // P
+      alamat: row[16],         // Q
+      hp: row[17],             // R
+      status_peg: row[18],     // S
+      jabatan: row[19],        // T
+      tmt_jabatan: tmtJabISO,  // U
+      pangkat: row[21],        // V
+      tmt_gol: tmtGolISO,      // W
+      mkg: row[23],            // X
+      kelas_jab: row[24],      // Y
+      tugas: row[25],          // Z
+      nuptk: row[26],          // AA
+      serdik: row[27],         // AB
+      dapodik: row[28],        // AC
+      tugtam: row[29],         // AD
+      email: row[30],          // AE (Sekarang menjadi Email)
+      diinput: row[31] ? Utilities.formatDate(new Date(row[31]), Session.getScriptTimeZone(), "dd/MM/yy HH:mm") : "", // AF
+      user_input: row[32],     // AG
+      diedit: row[33] ? Utilities.formatDate(new Date(row[33]), Session.getScriptTimeZone(), "dd/MM/yy HH:mm") : "",    // AH
+      user_edit: row[34]       // AI
+    });
+  }
+  
+  return JSON.stringify(result);
+}
+
+// 3. UPDATE DATA PTK
+function updateDataPTK(form) {
   try {
-    const allData = getDataFromSheet('PTK_PAUD_DB');
-    if (!allData || allData.length < 2) {
-        return { headers: [], rows: [], filterConfigs: [] };
+    var ss = SpreadsheetApp.openById(ID_DB_PTK);
+    var sheet = ss.getSheetByName(SHEET_PTK);
+    var data = sheet.getDataRange().getValues();
+    
+    var rowIndex = -1;
+    for(var i=1; i<data.length; i++){
+        if(String(data[i][0]) === String(form.id)){
+            rowIndex = i + 1; 
+            break;
+        }
     }
     
-    // Perbaikan 1: Membersihkan spasi dari semua header
-    const headers = allData[0].map(h => String(h).trim());
-    const dataRows = allData.slice(1);
+    if(rowIndex === -1) return "Error: ID PTK tidak ditemukan.";
 
-    // Perbaikan 2: Menemukan indeks untuk SEMUA 6 filter
-    const jenjangIndex = headers.indexOf('Jenjang');
-    const lembagaIndex = headers.indexOf('Nama Lembaga');
-    const statusIndex = headers.indexOf('Status');
-    const pendidikanIndex = headers.indexOf('Pendidikan');
-    const serdikIndex = headers.indexOf('Serdik');
-    const dapodikIndex = headers.indexOf('Dapodik'); // <-- TARGET KITA
-
-    // --- JEBAKAN LOG DIMULAI ---
-    // Log ini akan mencatat apa yang dilihat server TEPAT SETELAH membersihkan spasi
-    Logger.log("--- JEBAKAN LOG: getDaftarPtkPaudData ---");
-    Logger.log("Header yang Ditemukan (setelah .trim()): " + JSON.stringify(headers));
-    Logger.log("Indeks 'Dapodik' (Harusnya BUKAN -1): " + dapodikIndex);
-    // --- AKHIR JEBAKAN LOG ---
-    
-    const processedRows = dataRows.map((row, i) => { // 'i' ditambahkan untuk index
-        const rowObject = {};
-        // Perbaikan 3: Loop ini menyalin SEMUA data
-        headers.forEach((h, i) => {
-          rowObject[h] = row[i];
-        });
-        
-        // Perbaikan 4: Membuat data untuk SEMUA 6 filter
-        rowObject['_filterJenjang'] = row[jenjangIndex];
-        rowObject['_filterNamaLembaga'] = row[lembagaIndex];
-        rowObject['_filterStatus'] = row[statusIndex];
-        rowObject['_filterPendidikan'] = row[pendidikanIndex];
-        rowObject['_filterSerdik'] = row[serdikIndex];
-        rowObject['_filterDapodik'] = row[dapodikIndex]; // <-- TARGET KITA
-        
-        // --- JEBAKAN LOG 2: Catat data baris pertama ---
-        if (i === 0) { // Hanya log baris data pertama
-            Logger.log("Data Baris Pertama (Mentah): " + JSON.stringify(row));
-            Logger.log("Data Baris Pertama (Diproses): " + JSON.stringify(rowObject));
-            Logger.log("Nilai _filterDapodik (Harusnya 'Ya'/'Tidak'): " + rowObject['_filterDapodik']);
-        }
-        // --- AKHIR JEBAKAN LOG 2 ---
-
-        return rowObject;
-    });
-
-    // (Urutkan data)
-    processedRows.sort((a,b) => (a['Nama'] || "").localeCompare(b['Nama'] || ""));
-
-    // (Kirim kembali header asli dari sheet)
-    return {
-        headers: headers,
-        rows: processedRows,
-        filterConfigs: [
-            { id: 'filterJenjang', dataColumn: '_filterJenjang' },
-            { id: 'filterNamaLembaga', dataColumn: '_filterNamaLembaga', dependsOn: 'filterJenjang', dependencyColumn: '_filterJenjang' },
-            { id: 'filterStatus', dataColumn: '_filterStatus' },
-            { id: 'filterPendidikan', dataColumn: '_filterPendidikan' },
-            { id: 'filterSerdik', dataColumn: '_filterSerdik' },
-            { id: 'filterDapodik', dataColumn: '_filterDapodik' }
-        ]
-    };
-
-  } catch (e) {
-    Logger.log("--- ERROR DI DALAM getDaftarPtkPaudData ---"); // Log error tambahan
-    Logger.log(e);
-    return handleError('getDaftarPtkPaudData', e);
-  }
-}
-
-function getKelolaPtkPaudData() {
-  try {
-    const config = SPREADSHEET_CONFIG.PTK_PAUD_DB;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
-    if (!sheet || sheet.getLastRow() < 2) return { headers: [], rows: [] };
-
-    // 1. Ambil data mentah (untuk tanggal) dan data tampilan (untuk string)
-    const allData = sheet.getDataRange().getValues();
-    const allDisplayData = sheet.getDataRange().getDisplayValues();
-
-    // 2. Bersihkan header (ini penting untuk 'Dapodik')
-    const headers = allDisplayData[0].map(h => String(h).trim());
-    const dataRows = allData.slice(1);
-    const displayRows = allDisplayData.slice(1);
-
-    const updateIndex = headers.indexOf('Update');
-    const dateInputIndex = headers.indexOf('Tanggal Input');
-    const parseDate = (value) => value instanceof Date && !isNaN(value) ? value.getTime() : 0;
-
-    // 3. Gabungkan data dengan indeks baris aslinya
-    const indexedData = dataRows.map((row, index) => ({
-      originalRowIndex: index + 2,
-      rowData: row,
-      displayRow: displayRows[index]
-    }));
-
-    // 4. Urutkan berdasarkan Update (terbaru) lalu Tanggal Input (terbaru)
-    indexedData.sort((a, b) => {
-    // 1. Dapatkan tanggal mentah untuk baris A
-    const updateA = parseDate(a.rowData[updateIndex]);
-    const dateInputA = parseDate(a.rowData[dateInputIndex]);
-    // 2. Tentukan tanggal terbaru untuk baris A (mana yang lebih besar)
-    const newestDateA = Math.max(updateA, dateInputA);
-
-    // 3. Dapatkan tanggal mentah untuk baris B
-    const updateB = parseDate(b.rowData[updateIndex]);
-    const dateInputB = parseDate(b.rowData[dateInputIndex]);
-    // 4. Tentukan tanggal terbaru untuk baris B
-    const newestDateB = Math.max(updateB, dateInputB);
-
-    // 5. Urutkan berdasarkan tanggal terbaru (dari besar ke kecil)
-    return newestDateB - newestDateA;
-      });
-
-    // 5. Susun ulang data menjadi objek yang rapi
-    const finalData = indexedData.map(item => {
-      const rowDataObject = {
-        _rowIndex: item.originalRowIndex,
-        _source: 'PAUD',
-      };
-
-      headers.forEach((header, i) => {
-         // Pastikan Tanggal Input (Q) dan Update (R) diformat dengan benar
-         if (header === 'Tanggal Input' || header === 'Update') {
-            const rawDate = item.rowData[i];
-            if (rawDate instanceof Date) {
-               rowDataObject[header] = Utilities.formatDate(rawDate, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
-            } else {
-               rowDataObject[header] = item.displayRow[i] || ""; // Fallback
+    var inputNip = String(form.nip || "").trim().replace(/[^0-9]/g, '');
+    if (inputNip !== "" && inputNip !== "-") {
+        for (var i = 1; i < data.length; i++) {
+            var rowNip = String(data[i][7]).replace(/[^0-9]/g, ''); 
+            var rowId = String(data[i][0]);
+            if (rowNip === inputNip && rowId !== String(form.id)) {
+                return "Gagal: NIP " + inputNip + " sudah dipakai oleh " + data[i][6];
             }
-         } else {
-            rowDataObject[header] = item.displayRow[i] || ""; // Gunakan display value untuk string
-         }
-      });
-      return rowDataObject;
-    });
+        }
+    }
 
-    // 6. Kirim SEMUA header, biarkan javascript yang memilih
-    return { headers: headers, rows: finalData }; 
-  } catch (e) {
-    return handleError('getKelolaPtkPaudData', e);
-  }
-}
+    var namaFull = (form.gelar_depan ? form.gelar_depan + " " : "") + form.nama_lengkap + (form.gelar_belakang ? ", " + form.gelar_belakang : "");
+    var mkg = ""; if (form.mkg_thn || form.mkg_bln) { mkg = (form.mkg_thn || "0") + " Tahun " + (form.mkg_bln || "0") + " Bulan"; }
+    var now = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss");
+    var user = form.user_login || "Admin";
 
-function getPtkPaudDataByRow(rowIndex) {
-  try {
-    const config = SPREADSHEET_CONFIG.PTK_PAUD_DB;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
-    if (!sheet) throw new Error("Sheet tidak ditemukan.");
+    if (form.npsn_baru && form.unit_kerja) {
+        sheet.getRange(rowIndex, 2).setValue("'" + form.npsn_baru); 
+        sheet.getRange(rowIndex, 3).setValue(form.unit_kerja);      
+    }
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    const values = sheet.getRange(rowIndex, 1, 1, headers.length).getValues()[0];
-    const displayValues = sheet.getRange(rowIndex, 1, 1, headers.length).getDisplayValues()[0];
+    sheet.getRange(rowIndex, 4).setValue(form.gelar_depan || "");         // D
+    sheet.getRange(rowIndex, 5).setValue(form.nama_lengkap || "");        // E
+    sheet.getRange(rowIndex, 6).setValue(form.gelar_belakang || "");      // F
+    sheet.getRange(rowIndex, 7).setValue(namaFull);                       // G
+    sheet.getRange(rowIndex, 8).setValue("'"+(form.nip || ""));           // H
+    sheet.getRange(rowIndex, 9).setValue(form.tmp_lahir || "");           // I
+    sheet.getRange(rowIndex, 10).setValue("'"+(form.tgl_lahir || ""));    // J
+    sheet.getRange(rowIndex, 11).setValue("'"+(form.nik || ""));          // K
+    sheet.getRange(rowIndex, 12).setValue(form.lp || "");                 // L
+    sheet.getRange(rowIndex, 13).setValue(form.agama || "");              // M
+    sheet.getRange(rowIndex, 14).setValue(form.pendidikan || "");         // N
+    sheet.getRange(rowIndex, 15).setValue(form.jurusan || "");            // O
+    sheet.getRange(rowIndex, 16).setValue(form.thn_lulus || "");          // P
+    sheet.getRange(rowIndex, 17).setValue(form.alamat || "");             // Q
+    sheet.getRange(rowIndex, 18).setValue("'"+(form.hp || ""));           // R
+    sheet.getRange(rowIndex, 19).setValue(form.status_peg || "");         // S
+    sheet.getRange(rowIndex, 20).setValue(form.jabatan || "");            // T
+    sheet.getRange(rowIndex, 21).setValue("'"+(form.tmt_jabatan || ""));  // U
+    sheet.getRange(rowIndex, 22).setValue(form.pangkat || "");            // V
+    sheet.getRange(rowIndex, 23).setValue("'"+(form.tmt_gol || ""));      // W
+    sheet.getRange(rowIndex, 24).setValue(mkg);                           // X
+    sheet.getRange(rowIndex, 26).setValue(form.tugas || "");              // Z
+    sheet.getRange(rowIndex, 27).setValue("'"+(form.nuptk || ""));        // AA
+    sheet.getRange(rowIndex, 28).setValue(form.serdik || "");             // AB
+    sheet.getRange(rowIndex, 29).setValue(form.dapodik || "");            // AC
+    sheet.getRange(rowIndex, 30).setValue(form.tugtam || "");             // AD
+    sheet.getRange(rowIndex, 31).setValue(form.email || "");              // AE (Email Disimpan di Sini)
     
-    const rowData = {};
-    headers.forEach((header, i) => {
-      if (header === 'TMT' && values[i] instanceof Date) {
-        rowData[header] = Utilities.formatDate(values[i], "UTC", "yyyy-MM-dd");
-      } else {
-        rowData[header] = displayValues[i];
-      }
-    });
-    return rowData;
-  } catch (e) {
-    return handleError('getPtkPaudDataByRow', e);
-  }
+    sheet.getRange(rowIndex, 34).setValue(now);                           // AH (Diedit)
+    sheet.getRange(rowIndex, 35).setValue(user);                          // AI (User Edit)
+
+    return "Sukses";
+  } catch(e) { return "Error: " + e.message; }
 }
 
-function updatePtkPaudData(formData) {
-  try {
-    const config = SPREADSHEET_CONFIG.PTK_PAUD_DB;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
-    if (!sheet) throw new Error("Sheet tidak ditemukan.");
+/* ======================================================================
+   MODUL: REFERENSI & INSERT PTK (AUTO FILL)
+   ====================================================================== */
 
-    const rowIndex = formData.rowIndex;
-    if (!rowIndex) throw new Error("Row index tidak ditemukan.");
-
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    const range = sheet.getRange(rowIndex, 1, 1, headers.length);
-    const oldValues = range.getValues()[0];
-
-    formData['Update'] = new Date();
-
-    const newRowValues = headers.map((header, index) => {
-      // Cek apakah data baru ada di formData
-      if (formData.hasOwnProperty(header)) {
-
-        // --- ▼▼▼ TAKTIK BARU UNTUK TMT ▼▼▼ ---
-        if (header === 'TMT' && formData[header]) {
-          // formData[header] adalah string "yyyy-mm-dd"
-          return new Date(formData[header]);
-        }
-        // --- ▲▲▲ AKHIR TAKTIK ▲▲▲ ---
-
-        return formData[header]; // Ambil data baru
-      }
-      return oldValues[index]; // Jika tidak ada, pertahankan data lama
-    });
-
-    range.setValues([newRowValues]); // 1. Simpan datanya
-
-    // --- ▼▼▼ MISI FORMATTING (BARU) ▼▼▼ ---
-    const tmtIndex = headers.indexOf('TMT');
-    if (tmtIndex !== -1) {
-      // 2. Terapkan format "dd-mm-yyyy" ke sel yang baru di-update
-      sheet.getRange(rowIndex, tmtIndex + 1).setNumberFormat("dd-MM-yyyy");
+// 1. AMBIL DATA REFERENSI (JABATAN, PANGKAT, TUGAS)
+function getReferensiPTK() {
+  var ss = SpreadsheetApp.openById(ID_DB_PTK);
+  
+  // Fungsi Helper untuk mengambil data kolom tertentu
+  function getColData(sheetName, colIndex) {
+    var s = ss.getSheetByName(sheetName);
+    if (!s) return [];
+    var last = s.getLastRow();
+    if (last < 2) return [];
+    var data = s.getRange(2, colIndex, last - 1, 1).getValues();
+    var res = [];
+    for (var i = 0; i < data.length; i++) {
+        var val = String(data[i][0]).trim();
+        if (val !== "") res.push(val);
     }
-    // --- ▲▲▲ AKHIR MISI ▲▲▲ ---
-
-    return "Data PTK berhasil diperbarui.";
-  } catch (e) {
-    throw new Error(`Gagal memperbarui data: ${e.message}`);
+    return res;
   }
-}
 
-function getNewPtkPaudOptions() {
-  const cacheKey = 'ptk_paud_form_options_v1';
-  // Kita bungkus fungsi aslinya dengan getCachedData
-  return getCachedData(cacheKey, function() {
-    try {
-      const ss = SpreadsheetApp.openById(SPREADSHEET_CONFIG.FORM_OPTIONS_DB.id);
-      const sheet = ss.getSheetByName("Form PAUD");
-      if (!sheet) throw new Error("Sheet 'Form PAUD' tidak ditemukan.");
+  function getPangkat() {
+     var s = ss.getSheetByName("data_pangkat");
+     if(!s) return [];
+     var last = s.getLastRow();
+     if (last < 2) return [];
+     var data = s.getRange(2, 1, last-1, 1).getValues();
+     var res = [];
+     for(var i=0; i<data.length; i++) {
+         var val = String(data[i][0]).trim();
+         if(val !== "") res.push(val);
+     }
+     return res;
+  }
 
-      const lastRow = sheet.getLastRow();
-      const data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
-
-      const jenjangOptions = [...new Set(data.map(row => row[0]).filter(Boolean))].sort();
-      const statusOptions = [...new Set(data.map(row => row[2]).filter(Boolean))].sort();
-      const jabatanOptions = [...new Set(data.map(row => row[3]).filter(Boolean))].sort();
-      
-      const lembagaMap = {};
-      data.forEach(row => {
-        const jenjang = row[0];
-        const lembaga = row[1];
-        if (jenjang && lembaga) {
-          if (!lembagaMap[jenjang]) lembagaMap[jenjang] = [];
-          if (!lembagaMap[jenjang].includes(lembaga)) lembagaMap[jenjang].push(lembaga);
-        }
-      });
-      for (const jenjang in lembagaMap) {
-        lembagaMap[jenjang].sort();
-      }
-
-      return {
-        'Jenjang': jenjangOptions,
-        'Nama Lembaga': lembagaMap,
-        'Status': statusOptions,
-        'Jabatan': jabatanOptions
-      };
-    } catch (e) {
-      // Ini penting agar App Script tidak menyimpan cache error
-      throw new Error(`Gagal mengambil opsi PTK PAUD: ${e.message}`); 
-    }
+  return JSON.stringify({
+    jabatan_non_asn: getColData("isian_jabatan", 1),           // Kolom A
+    jabatan_asn: getColData("isian_jabatan", 2),               // Kolom B
+    tugas_non_asn: getColData("isian_tugas_di_sekolah", 1),    // Kolom A
+    tugas_asn: getColData("isian_tugas_di_sekolah", 2),        // Kolom B
+    pangkat: getPangkat()
   });
 }
 
-function addNewPtkPaud(formData) {
-  try {
-    const config = SPREADSHEET_CONFIG.PTK_PAUD_DB;
-    const sheet = SpreadsheetApp.openById(config.id).getSheetByName(config.sheet);
-    if (!sheet) throw new Error("Sheet tidak ditemukan.");
+// 2. INSERT DATA PTK (AUTO FILL LOGIC)
+function insertDataPTK(form) {
+  var ss = SpreadsheetApp.openById(ID_DB_PTK); 
+  var sheet = ss.getSheetByName(SHEET_PTK);
+  if (!sheet) return "Error: Sheet 'Master Data GTK' tidak ditemukan.";
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
-
-    const newRow = headers.map(header => {
-      if (header === 'Tanggal Input') return new Date();
-
-      // --- ▼▼▼ TAKTIK BARU UNTUK TMT ▼▼▼ ---
-      if (header === 'TMT' && formData[header]) {
-        // formData[header] adalah string "yyyy-mm-dd"
-        // new Date(...) akan mengkonversinya ke Objek Date
-        return new Date(formData[header]); 
+  var inputNip = String(form.nip || "").trim().replace(/[^0-9]/g, ''); 
+  if (inputNip !== "" && inputNip !== "-") {
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        var rowNip = String(data[i][7]).replace(/[^0-9]/g, ''); 
+        if (rowNip === inputNip) {
+          return "Gagal: NIP " + inputNip + " sudah terdaftar atas nama " + data[i][6];
+        }
       }
-      // --- ▲▲▲ AKHIR TAKTIK ▲▲▲ ---
+  }
 
-      return formData[header] || "";
-    });
+  var newId = "GTK-" + new Date().getTime();
+  var namaFull = (form.gelar_depan ? form.gelar_depan + " " : "") + form.nama_lengkap + (form.gelar_belakang ? ", " + form.gelar_belakang : "");
+  var mkg = ""; if (form.mkg_thn || form.mkg_bln) { mkg = (form.mkg_thn || "0") + " Tahun " + (form.mkg_bln || "0") + " Bulan"; }
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
 
-    sheet.appendRow(newRow); // 1. Simpan datanya
+  var rowData = [
+      newId,                  // A (0)
+      form.npsn_baru || form.npsn_login || "",  // B (1)
+      form.unit_kerja || form.unit_login || "",  // C (2)
+      form.gelar_depan || "", // D (3)
+      form.nama_lengkap || "",// E (4)
+      form.gelar_belakang || "",// F (5)
+      namaFull || "",         // G (6)
+      "'" + (form.nip || ""), // H (7)
+      form.tmp_lahir || "",   // I (8)
+      form.tgl_lahir || "",   // J (9)
+      "'" + (form.nik || ""), // K (10)
+      form.lp || "",          // L (11)
+      form.agama || "",       // M (12)
+      form.pendidikan || "",  // N (13)
+      form.jurusan || "",     // O (14)
+      form.thn_lulus || "",   // P (15)
+      form.alamat || "",      // Q (16)
+      "'" + (form.hp || ""),  // R (17)
+      form.status_peg || "",  // S (18)
+      form.jabatan || "",     // T (19)
+      form.tmt_jabatan || "", // U (20)
+      form.pangkat || "",     // V (21)
+      form.tmt_gol || "",     // W (22)
+      mkg,                    // X (23) 
+      "",                     // Y (24) Kelas Jabatan 
+      form.tugas || "",       // Z (25)
+      "'" + (form.nuptk || ""),// AA (26)
+      form.serdik || "",      // AB (27)
+      form.dapodik || "",     // AC (28)
+      form.tugtam || "",      // AD (29)
+      form.email || "",       // AE (30) (Sekarang diisi dengan Email)
+      timestamp,              // AF (31)
+      form.user_login || "",  // AG (32)
+      "",                     // AH (33)
+      ""                      // AI (34)
+  ];
 
-    // --- ▼▼▼ MISI FORMATTING (BARU) ▼▼▼ ---
-    const lastRow = sheet.getLastRow();
-    const tmtIndex = headers.indexOf('TMT');
-    if (tmtIndex !== -1) {
-      // 2. Terapkan format "dd-mm-yyyy" ke sel yang baru ditambahkan
-      sheet.getRange(lastRow, tmtIndex + 1).setNumberFormat("dd-MM-yyyy");
+  sheet.appendRow(rowData);
+  return "Sukses";
+}
+
+function getUnitKerjaByNpsnPTK(npsn) {
+  var id = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE";
+  try {
+    var ss = SpreadsheetApp.openById(id);
+    var sheet = ss.getSheetByName("Database Sekolah");
+    if (!sheet) return JSON.stringify({ error: "Sheet 'Database Sekolah' tidak ditemukan di Spreadsheet PTK." });
+
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return JSON.stringify({ error: "Database Sekolah kosong." });
+
+    // Ambil Kolom A (NPSN), B (Jenjang), C (Unit Kerja)
+    var data = sheet.getRange(2, 1, lastRow - 1, 3).getDisplayValues();
+    var searchNpsn = String(npsn).trim().toUpperCase();
+
+    for (var i = 0; i < data.length; i++) {
+      var rowNpsn = String(data[i][0]).trim().toUpperCase();
+      if (rowNpsn === searchNpsn) {
+        var unitKerja = String(data[i][2]).trim();
+        return JSON.stringify({ unitKerja: unitKerja }); 
+      }
     }
-    // --- ▲▲▲ AKHIR MISI ▲▲▲ ---
-
-    return "Data PTK baru berhasil disimpan.";
-  } catch (e) {
-    throw new Error(`Gagal menyimpan data: ${e.message}`);
-  }
-}
-
-function deletePtkPaudData(rowIndex, deleteCode, alasan) {
-  try {
-    // 1. Validasi Kode Hapus
-    const todayCode = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd");
-    if (String(deleteCode).trim() !== todayCode) throw new Error("Kode Hapus salah.");
-    if (!alasan || String(alasan).trim() === "") throw new Error("Alasan tidak boleh kosong.");
-
-    // 2. Buka kedua sheet (Sumber dan Target)
-    const configSumber = SPREADSHEET_CONFIG.PTK_PAUD_DB;
-    const configTarget = SPREADSHEET_CONFIG.PTK_PAUD_TIDAK_AKTIF;
-    const ss = SpreadsheetApp.openById(configSumber.id); // Asumsi ID-nya sama
     
-    const sheetSumber = ss.getSheetByName(configSumber.sheet);
-    const sheetTarget = ss.getSheetByName(configTarget.sheet);
-    if (!sheetSumber || !sheetTarget) throw new Error("Sheet 'PTK PAUD' atau 'PTK PAUD Tidak Aktif' tidak ditemukan.");
+    return JSON.stringify({ error: "NPSN tidak terdaftar di Database Sekolah PTK." });
+  } catch (e) {
+    return JSON.stringify({ error: "Gagal memuat Database Sekolah PTK: " + e.message });
+  }
+}
 
-    // 3. Ambil Headers dari kedua sheet (bersihkan spasi)
-    const headersSumber = sheetSumber.getRange(1, 1, 1, sheetSumber.getLastColumn()).getDisplayValues()[0].map(h => String(h).trim());
-    const headersTarget = sheetTarget.getRange(1, 1, 1, sheetTarget.getLastColumn()).getDisplayValues()[0].map(h => String(h).trim());
+/* ======================================================================
+   HELPER: PARSE TANGGAL CERDAS (ISO, SLASH, INDO TEXT)
+   ====================================================================== */
+function parseIndoDate(dateStr) {
+  if (!dateStr || dateStr === "-" || dateStr === "") return "";
+  
+  var str = String(dateStr).trim();
 
-    // 4. Ambil data baris yang akan 'dihapus' (mentah, untuk menjaga format tanggal)
-    const dataBarisSumber = sheetSumber.getRange(rowIndex, 1, 1, headersSumber.length).getValues()[0];
+  // 1. Cek jika sudah format ISO (yyyy-MM-dd) -> Cocok untuk HTML Date
+  if (str.match(/^\d{4}-\d{2}-\d{2}$/)) return str;
 
-    // 5. Bangun baris baru untuk sheet "Tidak Aktif" (ini adalah 1D array, [data1, data2, ...])
-    const barisBaruTarget = headersTarget.map(headerTarget => {
-        if (headerTarget === 'Alasan') {
-            return alasan; // Masukkan alasan
-        }
-        if (headerTarget === 'Update') {
-            return new Date(); // Masukkan waktu pemindahan
-        }
-        
-        // Cari data yang cocok dari sheet sumber
-        const indexDiSumber = headersSumber.indexOf(headerTarget);
-        if (indexDiSumber !== -1) {
-            return dataBarisSumber[indexDiSumber]; // Salin data
-        }
-        return ""; // Kolom ada di target tapi tidak di sumber
-    });
+  // 2. Cek format Slash (dd/MM/yyyy) -> Contoh: 31/12/1990
+  var slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashMatch) {
+    var day = slashMatch[1].length === 1 ? "0" + slashMatch[1] : slashMatch[1];
+    var month = slashMatch[2].length === 1 ? "0" + slashMatch[2] : slashMatch[2];
+    var year = slashMatch[3];
+    return year + "-" + month + "-" + day;
+  }
 
-    // --- ▼▼▼ INI ADALAH PERBAIKAN UTAMA ▼▼▼ ---
+  // 3. Cek format Indo Teks (dd MMMM yyyy) -> Contoh: 17 Agustus 1945
+  var months = {
+    'Januari': '01', 'Februari': '02', 'Maret': '03', 'April': '04', 'Mei': '05', 'Juni': '06',
+    'Juli': '07', 'Agustus': '08', 'September': '09', 'Oktober': '10', 'November': '11', 'Desember': '12',
+    'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'Jun': '06', 'Jul': '07', 'Agu': '08', 'Sep': '09', 'Okt': '10', 'Nov': '11', 'Des': '12' 
+  };
 
-    // 6. Buat baris kosong di Bawah Header (di Baris 2)
-    sheetTarget.insertRowAfter(1); 
-
-    // 7. Ambil range baris baru (Baris 2) dan isi datanya
-    // (setValues MENGHARUSKAN 2D array, jadi kita bungkus [barisBaruTarget])
-    sheetTarget.getRange(2, 1, 1, barisBaruTarget.length).setValues([barisBaruTarget]);
-
-    // 8. (Opsional tapi Direkomendasikan) Format Ulang Tanggal di Baris 2
-    const tmtIndex = headersTarget.indexOf('TMT');
-    const tglInputIndex = headersTarget.indexOf('Tanggal Input');
-    const updateIndex = headersTarget.indexOf('Update');
+  var parts = str.split(' '); 
+  if (parts.length >= 3) {
+    // Ambil bagian angka pertama sebagai tanggal (buang karakter non-digit jika ada)
+    var dayRaw = parts[0].replace(/[^0-9]/g, ''); 
+    var day = dayRaw.length === 1 ? "0" + dayRaw : dayRaw;
     
-    if (tmtIndex !== -1) sheetTarget.getRange(2, tmtIndex + 1).setNumberFormat("dd-MM-yyyy");
-    if (tglInputIndex !== -1) sheetTarget.getRange(2, tglInputIndex + 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
-    if (updateIndex !== -1) sheetTarget.getRange(2, updateIndex + 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
-
-    // --- ▲▲▲ AKHIR PERBAIKAN ▲▲▲ ---
-
-    // 9. Hapus baris asli dari sheet "PTK PAUD"
-    sheetSumber.deleteRow(rowIndex);
+    var monthName = parts[1];
+    var year = parts[2];
     
-    return "Data PTK berhasil dinonaktifkan dan dipindah ke arsip.";
-  } catch (e) {
-    // Kirim pesan error yang spesifik ke client
-    return handleError('deletePtkPaudData', e);
+    var month = months[monthName];
+    
+    if (month && year.match(/^\d{4}$/)) {
+        return year + "-" + month + "-" + day;
+    }
   }
+    
+  // 4. Fallback: Coba Parse sebagai Object Date (Excel Serial Number)
+  try {
+    var d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      // Pastikan timezone sesuai script (Jakarta)
+      return Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    }
+  } catch(e) {}
+    
+  return ""; // Nyerah, balikin kosong
 }
 
-function getPtkJumlahBulananSdData() {
+/* ======================================================================
+   MODUL: HAPUS DATA PTK (MOVE TO NON-AKTIF)
+   ====================================================================== */
+function moveDataPTKToNonAktif(id, reason, userLogin) {
   try {
-    return getDataFromSheet('PTK_SD_JUMLAH_BULANAN');
-  } catch (e) {
-    return handleError('getPtkJumlahBulananSdData', e);
-  }
-}
+    var ss = SpreadsheetApp.openById(ID_DB_PTK);
+    var sheetSource = ss.getSheetByName(SHEET_PTK);
+    var sheetTarget = ss.getSheetByName("gtk_non_aktif"); // Pastikan sheet ini ada!
+    
+    // Jika sheet target belum ada, buat baru (Opsional/Safety)
+    if (!sheetTarget) {
+      sheetTarget = ss.insertSheet("gtk_non_aktif");
+      // Copy header dari source
+      var headers = sheetSource.getRange(1, 1, 1, sheetSource.getLastColumn()).getValues();
+      // Tambah header pelengkap
+      headers[0].push("Alasan Hapus", "Tanggal Hapus", "User Hapus");
+      sheetTarget.getRange(1, 1, 1, headers[0].length).setValues(headers);
+    }
 
-function getDaftarPtkSdnData() {
-  try {
-    const config = SPREADSHEET_CONFIG.PTK_SD_DB;
-    return SpreadsheetApp.openById(config.id).getSheetByName("PTK SDN").getDataRange().getDisplayValues();
-  } catch (e) {
-    return handleError('getDaftarPtkSdnData', e);
-  }
-}
+    var data = sheetSource.getDataRange().getValues();
+    var rowIndex = -1;
 
-function getDaftarPtkSdsData() {
-  try {
-    const config = SPREADSHEET_CONFIG.PTK_SD_DB;
-    return SpreadsheetApp.openById(config.id).getSheetByName("PTK SDS").getDataRange().getDisplayValues();
-  } catch (e) {
-    return handleError('getDaftarPtkSdsData', e);
-  }
-}
-
-function getKelolaPtkSdData() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_CONFIG.PTK_SD_DB.id);
-    const sdnSheet = ss.getSheetByName("PTK SDN");
-    const sdsSheet = ss.getSheetByName("PTK SDS");
-    let combinedData = [];
-    let allHeaders = []; 
-
-    const parseDate = (value) => value instanceof Date && !isNaN(value) ? value.getTime() : 0;
-
-    // Fungsi untuk memproses satu sheet
-    const processSheet = (sheet, sourceName) => {
-      if (!sheet || sheet.getLastRow() < 2) return;
-      
-      const range = sheet.getDataRange();
-      const rawValues = range.getValues();
-      const displayValues = range.getDisplayValues();
-
-      const headers = displayValues[0].map(h => String(h).trim());
-      if (allHeaders.length === 0) {
-        // HANYA ambil header yang dibutuhkan oleh klien (untuk Kelola)
-        allHeaders = ["Nama", "Unit Kerja", "Status", "NIP/NIY", "Jabatan", "Aksi", "Input", "Update"]; 
+    // Cari Baris berdasarkan ID (Kolom A / Index 0)
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(id)) {
+        rowIndex = i;
+        break;
       }
-      
-      // Temukan semua indeks kolom yang kita butuhkan
-      const updateIndex = headers.indexOf('Update');
-      const inputIndex = headers.indexOf('Input');
-      const namaIndex = headers.indexOf('Nama');
-      const unitKerjaIndex = headers.indexOf('Unit Kerja');
-      const statusIndex = headers.indexOf('Status'); // Status Kepegawaian
-      const jabatanIndex = headers.indexOf('Jabatan');
-      const nipIndex = headers.indexOf('NIP'); 
-      const niyIndex = headers.indexOf('NIY');
-      
-      const dataRows = displayValues.slice(1);
-      const rawRows = rawValues.slice(1);
+    }
 
-      dataRows.forEach((row, index) => {
-        if (!row[namaIndex] || !row[statusIndex]) return; 
-        
-        const rawRow = rawRows[index];
-        const statusSekolah = (sourceName === 'SDN') ? 'Negeri' : 'Swasta'; // <-- KUNCI PERBAIKAN
+    if (rowIndex === -1) return "Data tidak ditemukan.";
 
-        const rowObject = {
-          _rowIndex: index + 2,
-          _source: sourceName,
-        };
+    // Ambil Data Baris Tersebut
+    var rowData = data[rowIndex];
+    
+    // Tambahkan Info Penghapusan
+    var deleteTime = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss");
+    rowData.push(reason, deleteTime, userLogin);
 
-        const dateUpdate = parseDate(rawRow[updateIndex]);
-        const dateInput = parseDate(rawRow[inputIndex]);
-        rowObject._sortDate = Math.max(dateUpdate, dateInput);
+    // 1. Simpan ke Sheet Non Aktif
+    sheetTarget.appendRow(rowData);
 
-        // Isi data objek
-        rowObject['Nama'] = row[namaIndex] || "";
-        rowObject['Unit Kerja'] = row[unitKerjaIndex] || "";
-        rowObject['Status Kepegawaian'] = row[statusIndex] || ""; // Simpan status kepegawaian sebagai kolom terpisah
-        rowObject['Status'] = statusSekolah; // <-- KUNCI: Status SEKOLAH yang dipakai filter
-        rowObject['Jabatan'] = row[jabatanIndex] || "";
-        rowObject['Input'] = row[inputIndex] || "";
-        rowObject['Update'] = row[updateIndex] || "";
-        
-        // Buat kolom 'NIP/NIY' gabungan
-        if (nipIndex !== -1) {
-            rowObject['NIP/NIY'] = row[nipIndex] || "";
-        } else if (niyIndex !== -1) { 
-            rowObject['NIP/NIY'] = row[niyIndex] || "";
-        } else {
-            rowObject['NIP/NIY'] = ""; 
-        }
-        
-        combinedData.push(rowObject);
+    // 2. Hapus dari Sheet Utama (Perhatikan +1 karena array 0-based vs sheet 1-based)
+    sheetSource.deleteRow(rowIndex + 1);
+
+    return "Sukses";
+
+  } catch (e) {
+    return "Error: " + e.message;
+  }
+}
+
+function getDataKeadaanGTK() {
+  var id = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE"; // ID Spreadsheet
+  var ss = SpreadsheetApp.openById(id);
+  var sheet = ss.getSheetByName("Keadaan GTK");
+  if (!sheet) return [];
+  
+  // Asumsi Data mulai dari Baris 3 (Karena header bertingkat 2 baris)
+  // Kolom A sampai BD (56 Kolom)
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 3) return [];
+  
+  // Ambil Range A3:BD_LastRow
+  var data = sheet.getRange(3, 1, lastRow - 2, 56).getDisplayValues();
+  return data;
+}
+
+function getDataKebutuhanGuru() {
+  var id = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE"; 
+  var ss = SpreadsheetApp.openById(id);
+  var sheet = ss.getSheetByName("Kebutuhan Guru");
+  if (!sheet) return [];
+  
+  // Data mulai baris 3 (Header 2 baris)
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 3) return [];
+  
+  // Ambil A3:AP
+  // A=1, AP=42
+  var data = sheet.getRange(3, 1, lastRow - 2, 42).getDisplayValues();
+  return data;
+}
+
+// =============================================================
+// BACKEND: KELOLA DATA PTK SD SWASTA (SDS) - REVISI ID
+// =============================================================
+
+var ID_SPREADSHEET_PTK = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE"; // ID Database Utama
+
+/**
+ * 1. GET DATA (READ)
+ */
+function getDataPTKSDS() {
+  try {
+    var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PTK); 
+    var sheet = ss.getSheetByName("Master Data GTK SDS");
+    if (!sheet) return JSON.stringify([]);
+
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return JSON.stringify([]); 
+
+    // Ambil Data A2:AF (Index 0 s.d 31) -> Email ada di AF (31)
+    var data = sheet.getRange(2, 1, lastRow - 1, 32).getDisplayValues();
+    
+    var result = [];
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      if(row[0] === "") continue; 
+
+      result.push({
+        id: row[0],             
+        npsn: row[1],           
+        unit: row[2],           
+        gelar_depan: row[3],    
+        nama_no_gelar: row[4],  
+        gelar_belakang: row[5], 
+        nama_lengkap: row[6],   
+        niy: row[7],            
+        tmp_lahir: row[8],      
+        tgl_lahir: row[9],      
+        nik: row[10],           
+        lp: row[11],            
+        agama: row[12],         
+        pendidikan: row[13],    
+        jurusan: row[14],       
+        thn_lulus: row[15],     
+        alamat: row[16],        
+        hp: row[17],            
+        status_peg: row[18],    
+        jabatan: row[19],       
+        tmt_jabatan: row[20],   
+        inpassing: row[21],     
+        tmt_inpassing: row[22], 
+        nuptk: row[23],         
+        serdik: row[24],        
+        dapodik: row[25],       
+        tugtam: row[26], 
+        // Index 27-31: Data Diinput/Diedit & Email
+        diinput: row[27],       
+        user_input: row[28],    
+        diedit: row[29],        
+        user_edit: row[30],
+        email: row[31] || "" // <--- Email di Kolom AF (Index 31)
       });
-    };
-
-    processSheet(sdnSheet, 'SDN');
-    processSheet(sdsSheet, 'SDS');
+    }
+    return JSON.stringify(result);
     
-    combinedData.sort((a, b) => b._sortDate - a._sortDate);
-
-    const desiredHeaders = [
-        "Nama", "Unit Kerja", "Status", "NIP/NIY", "Jabatan", "Aksi", "Input", "Update"
-    ];
-
-    return { headers: desiredHeaders, rows: combinedData };
-
-  } catch (e) {
-    return handleError('getKelolaPtkSdData', e);
+  } catch(e) {
+    return JSON.stringify([]); 
   }
 }
 
-function getNewPtkSdOptions() {
-  const cacheKey = 'ptk_sd_form_options_v1';
-  // Kita bungkus fungsi aslinya dengan getCachedData
-  return getCachedData(cacheKey, function() {
-    try {
-      const ssOptions = SpreadsheetApp.openById(SPREADSHEET_CONFIG.FORM_OPTIONS_DB.id);
-      const ssDropdown = SpreadsheetApp.openById(SPREADSHEET_IDS.DROPDOWN_DATA); 
+/**
+ * 2. INSERT DATA (CREATE)
+ */
+function insertDataPTKSDS(form) {
+  var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PTK);
+  var sheet = ss.getSheetByName("Master Data GTK SDS");
+  if (!sheet) return "Error: Sheet SDS tidak ditemukan.";
 
-      // --- 1. Ambil Unit Kerja ---
-      const sheetSDNS = ssDropdown.getSheetByName("Nama SDNS");
-      const unitKerjaNegeri = [];
-      const unitKerjaSwasta = [];
+  var data = sheet.getDataRange().getValues();
+  var inputNik = String(form.nik).trim(); 
 
-      if (sheetSDNS && sheetSDNS.getLastRow() > 1) {
-          const data = sheetSDNS.getRange(2, 1, sheetSDNS.getLastRow() - 1, 2).getDisplayValues();
-          data.forEach(row => {
-              const status = row[0];
-              const namaSekolah = row[1];
-              if (status === "Negeri" && namaSekolah) {
-                  unitKerjaNegeri.push(namaSekolah);
-              } else if (status === "Swasta" && namaSekolah) {
-                unitKerjaSwasta.push(namaSekolah);
-              }
-          });
+  for (var i = 1; i < data.length; i++) {
+    var rowNik = String(data[i][10]).replace(/'/g, "").trim(); 
+    if (rowNik === inputNik) {
+      var namaPemilik = data[i][6]; 
+      return "NIK " + inputNik + " sudah terdaftar atas nama " + namaPemilik + ", hubungi admin Korwil untuk melanjutkan.";
+    }
+  }
+
+  var newId = "SDS-" + new Date().getTime();
+  var namaFull = (form.gelar_depan ? form.gelar_depan + " " : "") + form.nama_lengkap + (form.gelar_belakang ? ", " + form.gelar_belakang : "");
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+
+  var rowData = [
+    newId,                  
+    form.npsn_baru || form.npsn_login || "",  
+    form.unit_kerja || form.unit_login || "",  
+    form.gelar_depan || "",       
+    form.nama_lengkap || "",      
+    form.gelar_belakang || "",    
+    namaFull || "",               
+    form.niy || "",               
+    form.tmp_lahir || "",         
+    form.tgl_lahir || "",         
+    "'" + (form.nik || ""),         
+    form.lp || "",                
+    form.agama || "",             
+    form.pendidikan || "",        
+    form.jurusan || "",           
+    form.thn_lulus || "",         
+    form.alamat || "",            
+    "'" + (form.hp || ""),          
+    form.status_peg || "",        
+    form.jabatan || "",           
+    form.tmt_jabatan || "",       
+    form.inpassing || "",         
+    form.tmt_inpassing || "",     
+    "'" + (form.nuptk || ""),       
+    form.serdik || "",            
+    form.dapodik || "",           
+    form.tugtam || "",            
+    timestamp,              
+    form.user_login || "",        
+    "",                     
+    "",
+    form.email || ""  // <--- Menyisipkan Email di akhir (Kolom AF)
+  ];
+
+  sheet.appendRow(rowData);
+  return "Sukses";
+}
+
+/**
+ * 3. UPDATE DATA (EDIT)
+ */
+function updateDataPTKSDS(form) {
+  var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PTK); 
+  var sheet = ss.getSheetByName("Master Data GTK SDS");
+  var data = sheet.getDataRange().getValues();
+  
+  var rowIdx = -1;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i][0] == form.id) {
+      rowIdx = i + 1; 
+      break;
+    }
+  }
+  
+  if (rowIdx == -1) return "Error: ID tidak ditemukan.";
+
+  var inputNik = String(form.nik || "").trim();
+  if (inputNik !== "") {
+      for (var i = 1; i < data.length; i++) {
+          var rowNik = String(data[i][10]).replace(/'/g, '').trim(); 
+          var rowId = String(data[i][0]);
+          if (rowNik === inputNik && rowId !== String(form.id)) {
+              return "Gagal: NIK " + inputNik + " sudah dipakai oleh " + data[i][6];
+          }
       }
+  }
 
-      // --- 2. Ambil data PANGKAT dari ssOptions ---
-      const getValuesFromOptionsDB = (sheetName, colLetter = 'A') => {
-        const sheet = ssOptions.getSheetByName(sheetName);
-        if (!sheet) {
-          Logger.log(`Peringatan: Sheet '${sheetName}' tidak ditemukan di FORM_OPTIONS_DB.`);
-          return [];
-        }
-        return sheet.getRange(colLetter + '2:' + colLetter + sheet.getLastRow())
-                    .getValues()
-                    .flat()
-                    .filter(value => String(value).trim() !== '');
-      };
+  var namaFull = (form.gelar_depan ? form.gelar_depan + " " : "") + form.nama_lengkap + (form.gelar_belakang ? ", " + form.gelar_belakang : "");
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+
+  // Mutasi Unit/NPSN
+  if (form.npsn_baru && form.unit_kerja) {
+      sheet.getRange(rowIdx, 2).setValue("'" + form.npsn_baru); 
+      sheet.getRange(rowIdx, 3).setValue(form.unit_kerja);      
+  }
+
+  var updateValues = [[
+    form.gelar_depan || "",       // D
+    form.nama_lengkap || "",      // E
+    form.gelar_belakang || "",    // F
+    namaFull || "",               // G
+    form.niy || "",               // H
+    form.tmp_lahir || "",         // I
+    form.tgl_lahir || "",         // J
+    "'" + (form.nik || ""),       // K
+    form.lp || "",                // L
+    form.agama || "",             // M
+    form.pendidikan || "",        // N
+    form.jurusan || "",           // O
+    form.thn_lulus || "",         // P
+    form.alamat || "",            // Q
+    "'" + (form.hp || ""),        // R
+    form.status_peg || "",        // S
+    form.jabatan || "",           // T
+    form.tmt_jabatan || "",       // U
+    form.inpassing || "",         // V
+    form.tmt_inpassing || "",     // W
+    "'" + (form.nuptk || ""),     // X
+    form.serdik || "",            // Y
+    form.dapodik || "",           // Z
+    form.tugtam || ""             // AA
+  ]];
+  
+  sheet.getRange(rowIdx, 4, 1, 24).setValues(updateValues);
+
+  sheet.getRange(rowIdx, 30).setValue(timestamp);       // AD (Tgl Edit)
+  sheet.getRange(rowIdx, 31).setValue(form.user_login); // AE (User Edit)
+  sheet.getRange(rowIdx, 32).setValue(form.email || ""); // AF (Email)
+
+  return "Sukses";
+}
+
+/**
+ * 4. DELETE DATA
+ */
+function deleteDataPTKSDS(id, alasan, userLogin) {
+  var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PTK); 
+  var sheetSource = ss.getSheetByName("Master Data GTK SDS");
+  var sheetTarget = ss.getSheetByName("gtk_non_aktif_sds"); 
+  
+  if (!sheetTarget) {
+    sheetTarget = ss.insertSheet("gtk_non_aktif_sds");
+    var headers = sheetSource.getRange(1, 1, 1, sheetSource.getLastColumn()).getValues();
+    headers[0].push("Alasan Hapus", "Tanggal Hapus", "User Hapus");
+    sheetTarget.getRange(1, 1, 1, headers[0].length).setValues(headers);
+  }
+
+  var data = sheetSource.getDataRange().getValues();
+  var rowIndex = -1;
+  var rowData = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(id)) {
+      rowIndex = i + 1;
+      rowData = data[i];
+      break;
+    }
+  }
+
+  if (rowIndex === -1) return "Error: Data tidak ditemukan.";
+
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd-MM-yyyy HH:mm:ss");
+  
+  // Masukkan alasan, waktu, dan user ke array data yang dipindah
+  rowData.push(alasan, timestamp, userLogin);
+  sheetTarget.appendRow(rowData);
+  
+  // Hapus dari sheet utama
+  sheetSource.deleteRow(rowIndex);
+
+  return "Sukses";
+}
+
+// ==========================================
+// DATA KEADAAN GTK SDS (Untuk Halaman Laporan)
+// ==========================================
+
+function getDataKeadaanGTKSDS() {
+  var id = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE"; // ID Spreadsheet Database
+  var ss = SpreadsheetApp.openById(id);
+  var sheet = ss.getSheetByName("Keadaan GTK SDS");
+  if (!sheet) return [];
+  
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 3) return []; // Header 2 baris
+  
+  // Ambil Range A3:AA
+  // A=1, AA=27
+  var data = sheet.getRange(3, 1, lastRow - 2, 27).getDisplayValues();
+  return data;
+}
+
+// ==========================================
+// DATA KEBUTUHAN GURU SDS
+// ==========================================
+
+function getDataKebutuhanGuruSDS() {
+  var id = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE"; 
+  var ss = SpreadsheetApp.openById(id);
+  var sheet = ss.getSheetByName("Kebutuhan Guru SDS");
+  if (!sheet) return [];
+  
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 3) return [];
+  
+  // Ambil A3:AA
+  // A=1, AA=27
+  var data = sheet.getRange(3, 1, lastRow - 2, 27).getDisplayValues();
+  return data;
+}
+
+// =============================================================
+// BACKEND: KELOLA DATA PTK PAUD
+// ID Spreadsheet: 1XetGkBymmN2NZQlXpzZ2MQyG0nhhZ0sXEPcNsLffhEU
+// =============================================================
+
+var ID_SPREADSHEET_PAUD = "1XetGkBymmN2NZQlXpzZ2MQyG0nhhZ0sXEPcNsLffhEU";
+
+/**
+ * 1. GET DATA PTK PAUD
+ */
+function getDataPTKPAUD() {
+  try {
+    var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PAUD);
+    var sheet = ss.getSheetByName("Master Data GTK PAUD");
+    if (!sheet) return JSON.stringify([]);
+
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return JSON.stringify([]); 
+
+    // Ambil Data A2:AG (Index 0 s.d 32)
+    var data = sheet.getRange(2, 1, lastRow - 1, 33).getDisplayValues();
+    
+    var result = [];
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      if(row[0] === "") continue; 
+
+      result.push({
+        id: row[0],             
+        npsn: row[1],           
+        unit: row[2],
+        jenjang: row[3],        // D
+        gelar_depan: row[4],    
+        nama_no_gelar: row[5],  
+        gelar_belakang: row[6], 
+        nama_lengkap: row[7],   
+        niy: row[8],            
+        tmp_lahir: row[9],      
+        tgl_lahir: row[10],      
+        nik: row[11],           
+        lp: row[12],            
+        agama: row[13],         
+        pendidikan: row[14],    
+        jurusan: row[15],       
+        thn_lulus: row[16],     
+        alamat: row[17],        
+        hp: row[18],            
+        status_peg: row[19],    
+        jabatan: row[20],       
+        tmt_jabatan: row[21],   
+        inpassing: row[22],     
+        tmt_inpassing: row[23], 
+        nuptk: row[24],         
+        serdik: row[25],        
+        dapodik: row[26],       
+        tugtam: row[27],        
+        diinput: row[28],       
+        user_input: row[29],    
+        diedit: row[30],        
+        user_edit: row[31],
+        email: row[32] || ""    // AG (Index 32)
+      });
+    }
+    return JSON.stringify(result);
+    
+  } catch(e) { return JSON.stringify([]); }
+}
+
+/**
+ * 2. INSERT DATA PTK PAUD (VALIDASI NIK)
+ */
+function insertDataPTKPAUD(form) {
+  var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PAUD);
+  var sheet = ss.getSheetByName("Master Data GTK PAUD");
+  if (!sheet) return "Error: Sheet PAUD tidak ditemukan.";
+
+  var data = sheet.getDataRange().getValues();
+  var inputNik = String(form.nik).trim(); 
+
+  for (var i = 1; i < data.length; i++) {
+    var rowNik = String(data[i][11]).replace(/'/g, "").trim(); 
+    if (rowNik === inputNik) {
+      var namaPemilik = data[i][7]; 
+      return "NIK " + inputNik + " sudah terdaftar atas nama " + namaPemilik + ".";
+    }
+  }
+
+  var newId = "PAUD-" + new Date().getTime();
+  var namaFull = (form.gelar_depan ? form.gelar_depan + " " : "") + form.nama_lengkap + (form.gelar_belakang ? ", " + form.gelar_belakang : "");
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+
+  var rowData = [
+    newId,                  
+    form.npsn_baru || form.npsn_login || "",  
+    form.unit_kerja || form.unit_login || "",
+    form.jenjang || "",     // D: Jenjang
+    form.gelar_depan || "",       
+    form.nama_lengkap || "",      
+    form.gelar_belakang || "",    
+    namaFull || "",               
+    form.niy || "",               
+    form.tmp_lahir || "",         
+    form.tgl_lahir || "",         
+    "'" + (form.nik || ""),         
+    form.lp || "",                
+    form.agama || "",             
+    form.pendidikan || "",        
+    form.jurusan || "",           
+    form.thn_lulus || "",         
+    form.alamat || "",            
+    "'" + (form.hp || ""),          
+    form.status_peg || "",        
+    form.jabatan || "",           
+    form.tmt_jabatan || "",       
+    form.inpassing || "",         
+    form.tmt_inpassing || "",     
+    "'" + (form.nuptk || ""),       
+    form.serdik || "",            
+    form.dapodik || "",           
+    form.tugtam || "",            
+    timestamp,              
+    form.user_login || "",        
+    "",                     
+    "",
+    form.email || ""      // AG
+  ];
+
+  sheet.appendRow(rowData);
+  return "Sukses";
+}
+
+/**
+ * 3. UPDATE DATA PTK PAUD
+ */
+function updateDataPTKPAUD(form) {
+  var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PAUD);
+  var sheet = ss.getSheetByName("Master Data GTK PAUD");
+  var data = sheet.getDataRange().getValues();
+  
+  var rowIdx = -1;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i][0] == form.id) {
+      rowIdx = i + 1; 
+      break;
+    }
+  }
+  
+  if (rowIdx == -1) return "Error: ID tidak ditemukan.";
+
+  var inputNik = String(form.nik || "").trim();
+  if (inputNik !== "") {
+      for (var i = 1; i < data.length; i++) {
+          var rowNik = String(data[i][11]).replace(/'/g, '').trim(); 
+          var rowId = String(data[i][0]);
+          if (rowNik === inputNik && rowId !== String(form.id)) {
+              return "Gagal: NIK " + inputNik + " sudah dipakai oleh " + data[i][7];
+          }
+      }
+  }
+
+  var namaFull = (form.gelar_depan ? form.gelar_depan + " " : "") + form.nama_lengkap + (form.gelar_belakang ? ", " + form.gelar_belakang : "");
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+
+  // Mutasi Unit/NPSN
+  if (form.npsn_baru && form.unit_kerja) {
+      sheet.getRange(rowIdx, 2).setValue("'" + form.npsn_baru); 
+      sheet.getRange(rowIdx, 3).setValue(form.unit_kerja);      
+  }
+
+  var updateValues = [[
+    form.jenjang || "",           // D
+    form.gelar_depan || "",       // E
+    form.nama_lengkap || "",      // F
+    form.gelar_belakang || "",    // G
+    namaFull || "",               // H
+    form.niy || "",               // I
+    form.tmp_lahir || "",         // J
+    form.tgl_lahir || "",         // K
+    "'" + (form.nik || ""),       // L
+    form.lp || "",                // M
+    form.agama || "",             // N
+    form.pendidikan || "",        // O
+    form.jurusan || "",           // P
+    form.thn_lulus || "",         // Q
+    form.alamat || "",            // R
+    "'" + (form.hp || ""),        // S
+    form.status_peg || "",        // T
+    form.jabatan || "",           // U
+    form.tmt_jabatan || "",       // V
+    form.inpassing || "",         // W
+    form.tmt_inpassing || "",     // X
+    "'" + (form.nuptk || ""),     // Y
+    form.serdik || "",            // Z
+    form.dapodik || "",           // AA
+    form.tugtam || ""             // AB
+  ]];
+  
+  sheet.getRange(rowIdx, 4, 1, 25).setValues(updateValues);
+
+  sheet.getRange(rowIdx, 31).setValue(timestamp);       // AE (Tgl Edit)
+  sheet.getRange(rowIdx, 32).setValue(form.user_login); // AF (User Edit)
+  sheet.getRange(rowIdx, 33).setValue(form.email || ""); // AG (Email)
+
+  return "Sukses";
+}
+
+/**
+ * 4. DELETE DATA PTK PAUD
+ */
+function deleteDataPTKPAUD(id, alasan, userLogin) {
+  var ss = SpreadsheetApp.openById(ID_SPREADSHEET_PAUD);
+  var sheetSource = ss.getSheetByName("Master Data GTK PAUD");
+  var sheetTarget = ss.getSheetByName("gtk_non_aktif_paud"); 
+  
+  if (!sheetTarget) {
+    sheetTarget = ss.insertSheet("gtk_non_aktif_paud");
+    var headers = sheetSource.getRange(1, 1, 1, sheetSource.getLastColumn()).getValues();
+    headers[0].push("Alasan Hapus", "Tanggal Hapus", "User Hapus");
+    sheetTarget.getRange(1, 1, 1, headers[0].length).setValues(headers);
+  }
+
+  var data = sheetSource.getDataRange().getValues();
+  var rowIdx = -1;
+  var rowData = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] == id) {
+      rowIdx = i + 1;
+      rowData = data[i];
+      break;
+    }
+  }
+
+  if (rowIdx == -1) return "Error: Data tidak ditemukan.";
+
+  var timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+
+  rowData.push(alasan, timestamp, userLogin);
+  sheetTarget.appendRow(rowData);
+  sheetSource.deleteRow(rowIdx);
+
+  return "Sukses";
+}
+
+// =============================================================
+// HELPER: AMBIL JENJANG DARI DATABASE SEKOLAH (VALIDASI)
+// =============================================================
+
+function getJenjangByNPSN(npsn) {
+  // PENTING: Ganti ID ini dengan ID Spreadsheet dimana sheet "Database Sekolah" berada
+  var id = "1t0-Lmy0YD_GxHzimFWJGh5R5x6RhGL13uqKeVwWoCYE"; 
+  
+  try {
+    var ss = SpreadsheetApp.openById(id);
+    var sheet = ss.getSheetByName("Database Sekolah");
+    if (!sheet) return "Sheet Tidak Ditemukan"; 
+
+    var lastRow = sheet.getLastRow();
+    // Ambil semua data (A:C) biar aman
+    var data = sheet.getRange(2, 1, lastRow - 1, 3).getDisplayValues();
+    
+    var searchNpsn = String(npsn).trim();
+
+    for (var i = 0; i < data.length; i++) {
+      var rowNpsn = String(data[i][0]).trim(); // Kolom A: NPSN
+      var rowJenjang = String(data[i][1]).trim(); // Kolom B: Jenjang
       
-      return {
-        'Unit Kerja Negeri': unitKerjaNegeri, 
-        'Unit Kerja Swasta': unitKerjaSwasta, 
-        'Pangkat PNS': getValuesFromOptionsDB('Form SD', 'D'),
-        'Pangkat PPPK': getValuesFromOptionsDB('Form SD', 'E'),
-        'Pangkat PPPK PW': getValuesFromOptionsDB('Form SD', 'F'),
-      };
-    } catch (e) {
-      // Ini penting agar App Script tidak menyimpan cache error
-      throw new Error(`Gagal mengambil opsi PTK SD: ${e.message}`);
-    }
-  });
-}
-
-// GANTI FUNGSI 'addNewPtkSd' YANG LAMA DENGAN INI
-function addNewPtkSd(formData) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_CONFIG.PTK_SD_DB.id); // 1HlyL...
-    let sheet;
-    
-    // 1. Tentukan sheet target berdasarkan 'statusSekolah'
-    if (formData.statusSekolah === 'Negeri') {
-      sheet = ss.getSheetByName("PTK SDN");
-    } else if (formData.statusSekolah === 'Swasta') {
-      sheet = ss.getSheetByName("PTK SDS");
-    } else {
-      throw new Error("Status Sekolah (Negeri/Swasta) tidak valid.");
-    }
-
-    if (!sheet) throw new Error(`Sheet untuk status '${formData.statusSekolah}' tidak ditemukan.`);
-    
-    // 2. Ambil header dari sheet target
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    
-    // 3. Tambahkan data meta
-    formData['Input'] = new Date();
-    
-    // 4. Bangun baris baru berdasarkan header
-    const newRow = headers.map(header => {
-      let value = formData[header]; // Ambil data dari form
-
-      // Aturan Khusus
-      if (header === 'NUPTK' && value) {
-        return "'" + value; // Simpan NUPTK sebagai Teks
+      if (rowNpsn === searchNpsn) {
+        return rowJenjang; // KETEMU! Kembalikan Jenjang (TK/KB/SPS/TPA)
       }
-      if (header === 'TMT' && value) {
-        return new Date(value); // Konversi string "yyyy-mm-dd" ke Objek Tanggal
-      }
-      
-      // Jika data tidak ada di form (misal: 'Gol. Inpassing' di form Negeri)
-      if (value === undefined) {
-         return ""; // Isi dengan string kosong
-      }
-
-      return value;
-    });
-    
-    // 5. Tambahkan baris ke sheet
-    sheet.appendRow(newRow);
-    
-    // 6. Format ulang sel Tanggal
-    const lastRow = sheet.getLastRow();
-    const tmtIndex = headers.indexOf('TMT');
-    if (tmtIndex !== -1) {
-      sheet.getRange(lastRow, tmtIndex + 1).setNumberFormat("dd-MM-yyyy");
     }
-
-    return "Data PTK baru berhasil disimpan.";
+    return ""; // Tidak ketemu di list
   } catch (e) {
-    throw new Error(`Gagal menyimpan data: ${e.message}`);
+    return ""; // Error Spreadsheet
   }
 }
 
-function getPtkSdDataByRow(rowIndex, source) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_CONFIG.PTK_SD_DB.id);
-    let sheet;
-    if (source === 'SDN') {
-      sheet = ss.getSheetByName("PTK SDN");
-    } else if (source === 'SDS') {
-      sheet = ss.getSheetByName("PTK SDS");
-    } else {
-      throw new Error("Sumber data tidak valid.");
-    }
-    if (!sheet) throw new Error(`Sheet '${source}' tidak ditemukan.`);
+// ==========================================
+// DATA KEADAAN GTK PAUD
+// ID: 1XetGkBymmN2NZQlXpzZ2MQyG0nhhZ0sXEPcNsLffhEU
+// ==========================================
 
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    const values = sheet.getRange(rowIndex, 1, 1, headers.length).getValues()[0];
-    const displayValues = sheet.getRange(rowIndex, 1, 1, headers.length).getDisplayValues()[0];
-    
-    const rowData = {};
-    headers.forEach((header, i) => {
-      if ((header === 'TMT' || header === 'TMT CPNS' || header === 'TMT PNS') && values[i] instanceof Date) {
-        rowData[header] = Utilities.formatDate(values[i], "UTC", "yyyy-MM-dd");
-      } else {
-        rowData[header] = displayValues[i];
-      }
-    });
-    return rowData;
-  } catch (e) {
-    return handleError('getPtkSdDataByRow', e);
-  }
-}
-
-function updatePtkSdData(formData) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_CONFIG.PTK_SD_DB.id);
-    let sheet;
-    const source = formData.source;
-    if (source === 'SDN') {
-      sheet = ss.getSheetByName("PTK SDN");
-    } else if (source === 'SDS') {
-      sheet = ss.getSheetByName("PTK SDS");
-    } else {
-      throw new Error("Sumber data tidak valid.");
-    }
-
-    if (!sheet) throw new Error(`Sheet '${source}' tidak ditemukan.`);
-    const rowIndex = formData.rowIndex;
-    if (!rowIndex) throw new Error("Nomor baris (rowIndex) tidak ditemukan.");
-
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
-    const range = sheet.getRange(rowIndex, 1, 1, headers.length);
-    const oldValues = range.getValues()[0]; // Ambil nilai mentah (termasuk Date objects)
-
-    formData['Update'] = new Date(); // Tambahkan stempel waktu update
-
-    const newRowValues = headers.map((header, index) => {
-      // Cek jika data baru ada di formData
-      if (formData.hasOwnProperty(header)) {
-        
-        let value = formData[header];
-        
-        // --- PERBAIKAN LOGIKA PENYIMPANAN ---
-        // 1. Ubah string tanggal "yyyy-mm-dd" kembali ke Objek Date
-        if (header === 'TMT' && value) {
-          return new Date(value); 
-        }
-        // 2. Tambahkan petik (') untuk NUPTK
-        if (header === 'NUPTK' && value) {
-          return "'" + value;
-        }
-        // 3. Jika input Pangkat/Gol untuk Non ASN (yang di-disabled)
-        if (header === 'Pangkat, Gol./Ruang' && value === '— Tidak Perlu Diisi —') {
-            return ""; // Simpan sebagai string kosong
-        }
-        
-        return value; // Ambil data baru
-      }
-      
-      // Jika tidak ada di formData (karena disabled, dll), pertahankan data lama
-      return oldValues[index]; 
-    });
-    
-    range.setValues([newRowValues]); // 1. Simpan datanya
-
-    // 2. Format Ulang Tanggal
-    const tmtIndex = headers.indexOf('TMT');
-    if (tmtIndex !== -1) {
-      sheet.getRange(rowIndex, tmtIndex + 1).setNumberFormat("dd-MM-yyyy");
-    }
-
-    return "Data PTK berhasil diperbarui.";
-  } catch (e) {
-    throw new Error(`Gagal memperbarui data: ${e.message}`);
-  }
-}
-
-function getKebutuhanGuruData() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SD_DATA); // ID "1u4tNL3uqt5xHITXYwHnytK6Kul9Siam-vNYuzmdZB4s"
-    
-    // 1. Ambil data Negeri
-    const sheetSdn = ss.getSheetByName("Kebutuhan Guru SDN");
-    if (!sheetSdn) throw new Error("Sheet 'Kebutuhan Guru SDN' tidak ditemukan.");
-    // Kita gunakan getDisplayValues() agar angka yang kosong terbaca '-' atau string
-    const dataSdn = sheetSdn.getDataRange().getDisplayValues(); 
-
-    // 2. Ambil data Swasta
-    const sheetSds = ss.getSheetByName("Kebutuhan Guru SDS");
-    if (!sheetSds) throw new Error("Sheet 'Kebutuhan Guru SDS' tidak ditemukan.");
-    const dataSds = sheetSds.getDataRange().getDisplayValues();
-
-    // 3. Kembalikan keduanya dalam satu objek
-    return { 
-      negeri: dataSdn, 
-      swasta: dataSds 
-    };
-    
-  } catch (e) {
-    return handleError('getKebutuhanGuruData', e);
-  }
-}
-
-function deletePtkSdData(rowIndex, source, deleteCode, alasan) {
-  try {
-    // 1. Validasi Kode Hapus
-    const todayCode = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyyMMdd");
-    if (String(deleteCode).trim() !== todayCode) throw new Error("Kode Hapus salah.");
-    if (!alasan || String(alasan).trim() === "") throw new Error("Alasan tidak boleh kosong.");
-
-    // 2. Buka Spreadsheet (ID yang sama untuk semua sheet PTK SD)
-    const config = SPREADSHEET_CONFIG.PTK_SD_DB; //
-    const ss = SpreadsheetApp.openById(config.id);
-    
-    // 3. Tentukan Sheet Sumber berdasarkan 'source'
-    let sheetSumber;
-    if (source === 'SDN') {
-      sheetSumber = ss.getSheetByName("PTK SDN");
-    } else if (source === 'SDS') {
-      sheetSumber = ss.getSheetByName("PTK SDS");
-    } else {
-      throw new Error("Sumber data tidak valid: " + source);
-    }
-    
-    // 4. Tentukan Sheet Target
-    const sheetTarget = ss.getSheetByName("PTK Tidak Aktif");
-    
-    if (!sheetSumber || !sheetTarget) throw new Error("Sheet 'PTK SDN/SDS' atau 'PTK Tidak Aktif' tidak ditemukan.");
-
-    // 5. Ambil Headers dari kedua sheet (bersihkan spasi)
-    const headersSumber = sheetSumber.getRange(1, 1, 1, sheetSumber.getLastColumn()).getDisplayValues()[0].map(h => String(h).trim());
-    const headersTarget = sheetTarget.getRange(1, 1, 1, sheetTarget.getLastColumn()).getDisplayValues()[0].map(h => String(h).trim());
-
-    // 6. Ambil data baris yang akan 'dihapus' (mentah, untuk menjaga format tanggal)
-    const dataBarisSumber = sheetSumber.getRange(rowIndex, 1, 1, headersSumber.length).getValues()[0];
-
-    // 7. Bangun baris baru untuk sheet "Tidak Aktif"
-    const barisBaruTarget = headersTarget.map(headerTarget => {
-        if (headerTarget === 'Alasan') {
-            return alasan; // Masukkan alasan
-        }
-        if (headerTarget === 'Update') {
-            return new Date(); // Masukkan waktu pemindahan
-        }
-        
-        // Cari data yang cocok dari sheet sumber
-        const indexDiSumber = headersSumber.indexOf(headerTarget);
-        if (indexDiSumber !== -1) {
-            return dataBarisSumber[indexDiSumber]; // Salin data
-        }
-        return ""; // Kolom ada di target tapi tidak di sumber
-    });
-
-    // 8. Tambahkan baris baru ke sheet target (di baris 2, di bawah header)
-    sheetTarget.insertRowAfter(1);
-    sheetTarget.getRange(2, 1, 1, barisBaruTarget.length).setValues([barisBaruTarget]);
-
-    // 9. (Opsional tapi Direkomendasikan) Format Ulang Tanggal di Baris 2
-    const tmtIndex = headersTarget.indexOf('TMT');
-    const tglInputIndex = headersTarget.indexOf('Input'); // Ganti 'Tanggal Input' jika namanya beda
-    const updateIndex = headersTarget.indexOf('Update');
-    
-    if (tmtIndex !== -1) sheetTarget.getRange(2, tmtIndex + 1).setNumberFormat("dd-MM-yyyy");
-    if (tglInputIndex !== -1) sheetTarget.getRange(2, tglInputIndex + 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
-    if (updateIndex !== -1) sheetTarget.getRange(2, updateIndex + 1).setNumberFormat("dd/MM/yyyy HH:mm:ss");
-
-    // 10. Hapus baris asli dari sheet sumber ("PTK SDN" atau "PTK SDS")
-    sheetSumber.deleteRow(rowIndex);
-    
-    return "Data PTK berhasil dinonaktifkan dan dipindah ke arsip.";
-  } catch (e) {
-    // Kirim pesan error yang spesifik ke client
-    return handleError('deletePtkSdData', e);
-  }
+function getDataKeadaanGTKPAUD() {
+  var id = "1XetGkBymmN2NZQlXpzZ2MQyG0nhhZ0sXEPcNsLffhEU"; 
+  var ss = SpreadsheetApp.openById(id);
+  var sheet = ss.getSheetByName("Keadaan GTK PAUD");
+  if (!sheet) return [];
+  
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 3) return []; // Header 2 baris
+  
+  // Ambil Range A3:AB (A=1, AB=28)
+  var data = sheet.getRange(3, 1, lastRow - 2, 28).getDisplayValues();
+  return data;
 }

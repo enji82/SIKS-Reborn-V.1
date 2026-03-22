@@ -1,13 +1,12 @@
 <style>
   :root { --maroon: #4a0404; --maroon-nav: #800000; --gold: #ffc107; }
   
-  /* ANTI-BLANK */
   #gerbang-login {
-    display: flex !important;
-    position: fixed; inset: 0; z-index: 9999;
-    align-items: center; justify-content: center;
-    background: var(--maroon);
-  }
+  width: 100vw;
+  height: 100vh;
+  background: #7a0c0c;
+}
+
 
   /* SIDEBAR LUXURY */
   .main-sidebar, .brand-link, .sidebar-custom { background: var(--maroon) !important; border-right: none !important; }
@@ -39,7 +38,7 @@
   /* =================================================================== */
 
   /* --- 0. ANIMASI & RESET --- */
-  .nav-sidebar .nav-link, .nav-icon {
+  .nav-sidebar .nav-link {
     transition: all 0.2s ease-in-out !important;
     border-left: 4px solid transparent; /* Border lebih tebal biar jelas */
   }
@@ -603,96 +602,426 @@
   }
 
   /* ============================================================
-     3. GAYA TABEL PREMIUM (ENTERPRISE LOOK)
+     3. GAYA TABEL PREMIUM (CLEAN GRID)
      ============================================================ */
   
-  /* Reset Border Tebal DataTables (Garis Merah yg Boss tanya tadi) */
-  table.dataTable.no-footer {
-    border-bottom: 1px solid #dee2e6 !important; /* Jadi tipis elegan */
-  }
 
-  /* Font Tabel Proporsional (14px - Standar Aplikasi Modern) */
+  /* 2. Style Sel (Garis Vertikal Diperjelas) */
   .table-premium td, 
   .table-premium th {
-    font-size: 14px !important; /* Lebih besar & terbaca */
-    padding: 10px 12px !important; /* Spasi napas yang pas */
+    font-size: 14px !important;
+    padding: 12px 10px !important; /* Spasi lega */
     vertical-align: middle !important;
     white-space: nowrap;
-    border-color: #f4f6f9 !important; /* Garis pemisah super halus */
+    border-right: 1px solid #dee2e6 !important; /* Garis Vertikal Ada */
+    border-bottom: 1px solid #dee2e6 !important; /* Garis Horizontal Ada */
   }
 
-  /* 1. Header Lebih Berisi (Visible) */
-  .table-premium thead th {
-    background-color: #dfe4ea !important; /* Abu-abu Cool (Jelas tapi Soft) */
-    color: #2f3542 !important;            /* Teks Gelap */
-    font-weight: 700 !important;          /* Tebal */
-    border-bottom: 2px solid #a4b0be !important; /* Garis batas tegas */
-    text-transform: uppercase;
-    font-size: 12px !important;
-    letter-spacing: 0.5px;
-    height: 45px; /* Tinggi Header Tetap */
-    vertical-align: middle !important;
-  }
-
-  /* 2. Fix Masalah Kolom Tidak Lurus */
-  .table-premium {
-    table-layout: auto !important; /* Biarkan browser hitung otomatis */
-    width: 100% !important;
+  /* 4. Background Putih (Hapus Zebra) & Hover Effect */
+  .table-premium tbody tr {
+    background-color: #fff !important; /* Dasar Putih */
+    transition: background-color 0.2s;
   }
   
-  /* 3. Baris Belang (Zebra) yang Halus */
-  .table-premium tbody tr:nth-of-type(odd) {
-    background-color: rgba(0,0,0,.015); /* Belang super tipis */
+  /* Efek Hover: Berlaku untuk sel biasa DAN sel sticky */
+  .table-premium tbody tr:hover td {
+    background-color: #f1f2f6 !important; /* Abu-abu muda saat disorot */
+    cursor: default;
   }
 
-  /* Freeze Column 1 (Kolom Nama SD Nempel) */
+  /* 5. Freeze Column 1 (Kolom Nama SD Nempel) */
   .table-sticky-first th:first-child,
   .table-sticky-first td:first-child {
     position: sticky !important;
     left: 0;
     z-index: 10;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.05); /* Bayangan halus */
-    border-right: 1px solid #dee2e6; /* Garis pemisah vertikal */
+    border-right: 2px solid #ced4da !important; /* Pemisah kolom beku lebih tebal sedikit */
   }
 
-  /* WARNA HEADER FREEZE (Disamakan dengan Header Utama) */
+  /* Fix Header Freeze */
   .table-sticky-first thead th:first-child {
-    background-color: #dfe4ea !important; /* SAMA PERSIS dengan header lain */
-    color: #2f3542 !important;
-    z-index: 11; /* Harus lebih tinggi dari body */
+    background-color: #dfe4ea !important;
+    z-index: 11;
   }
 
-  /* WARNA BODY FREEZE (Tetap Putih) */
+  /* Fix Body Freeze (Default Putih) */
   .table-sticky-first tbody td:first-child {
-    background-color: #fff !important;
+    background-color: #fff !important; 
+  }
+  
+  /* Fix Hover pada Freeze Column (PENTING!) */
+  .table-sticky-first tbody tr:hover td:first-child {
+    background-color: #f1f2f6 !important; /* Harus sama dengan hover baris lain */
   }
 
-  /* Kontrol Bar Satu Baris */
-  .control-bar {
-    display: flex;
-    justify-content: space-between; /* Kiri & Kanan mentok */
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    background: #fff;
-    padding: 10px 0;
-  }
-
-  /* Custom Search Box (Biar terlihat mahal) */
-  .search-premium {
-    border: 1px solid #ced4da;
-    border-radius: 20px; /* Bulat lonjong modern */
-    padding: 5px 15px;
+  /* A. CONTROL BAR UNIFORMITY (Semua Kotak Sama Tinggi & Bentuk) */
+  .control-bar .form-control, 
+  .control-bar .btn, 
+  .control-bar input.search-premium {
+    height: 38px !important;       /* Tinggi Seragam */
+    border-radius: 4px !important; /* Sudut sedikit melengkung (standar) */
     font-size: 14px;
-    width: 250px;
-    transition: all 0.3s;
-    background-color: #f8f9fa;
   }
-  .search-premium:focus {
-    background-color: #fff;
-    border-color: #800000; /* Fokus warna Maroon */
+  
+  /* Hapus bentuk bulat pada tombol refresh agar sama dengan filter */
+  .btn-square-sultan {
+    border-radius: 4px !important; 
+    width: 40px; /* Lebar sedikit lebih kotak */
+  }
+
+  /* B. HEADER TABEL LEBIH PADAT */
+  .table-premium thead th {
+    height: 35px !important;       /* Tinggi Header Dikurangi */
+    padding: 8px 10px !important;  /* Spasi dalam dikurangi */
+    vertical-align: middle !important;
+    font-size: 14px !important;    /* Font diperkecil sedikit agar muat */
+    white-space: nowrap;
+    border-bottom: 1px solid #b2bec3 !important; /* Garis bawah tipis saja */
+  }
+
+  /* C. HAPUS GHOST HEADER (RUANG KOSONG DI BAWAH HEADER) */
+  /* DataTables sering membuat header ganda saat scrollX aktif */
+  .dataTables_scrollHeadInner {
+    width: 100% !important;
+  }
+  .dataTables_scrollHead {
+    margin-bottom: -1px !important; /* Tarik ke bawah agar nempel */
+  }
+  table.dataTable.no-footer {
+    border-bottom: 1px solid #dee2e6 !important; /* Garis penutup bawah tabel */
+  }
+
+  /* ============================================================
+     4. PERBAIKAN BORDER FILTER (AGAR KELIHATAN)
+     ============================================================ */
+  
+  /* Kelas khusus untuk Filter & Tombol Refresh */
+  .border-tegas {
+    border: 1px solid #ced4da !important; /* Garis abu-abu terlihat */
+    background-color: #fff !important;    /* Latar putih */
+    color: #495057 !important;
+  }
+
+  /* Efek saat diklik/fokus jadi Maroon */
+  .border-tegas:focus, 
+  .border-tegas:hover {
+    border-color: #800000 !important; 
     box-shadow: 0 0 0 0.2rem rgba(128, 0, 0, 0.1);
     outline: none;
+  }
+
+  /* ============================================================
+     10. FIX FINAL: UNIVERSAL TABLE STYLE (AUTO APPLY)
+     Cukup tambah class="table-premium" di HTML, otomatis ganteng.
+     Tidak perlu edit CSS lagi untuk halaman baru.
+     ============================================================ */
+
+  /* A. HILANGKAN HEADER BAYANGAN & GAP (Untuk Semua DataTables) */
+  .dataTables_scrollBody thead { visibility: collapse !important; height: 0 !important; }
+  .dataTables_scrollBody thead th, .dataTables_scrollBody thead tr { height: 0 !important; padding: 0 !important; border: none !important; line-height: 0 !important; }
+  .dataTables_scrollHead { margin-bottom: 0 !important; border-bottom: none !important; }
+  .dataTables_scrollBody { margin-top: 0 !important; border-top: none !important; }
+
+  /* B. STYLE HEADER UNIVERSAL (Target Class .table-premium) */
+  /* Selector ini berlaku untuk SEMUA tabel yang punya class table-premium */
+  table.table-premium thead th,
+  .dataTables_scrollHeadInner table.table-premium thead th {
+      background-color: #dfe6e9 !important;   /* Abu Premium */
+      color: #2d3436 !important;              /* Teks Hitam */
+      text-transform: uppercase !important;   /* HURUF KAPITAL */
+      
+      /* --- FONT COMMANDING --- */
+      font-size: 13px !important;             
+      font-weight: 700 !important;            
+      letter-spacing: 0.3px !important;       
+      
+      /* --- LOGIKA WRAPPING --- */
+      white-space: normal !important;         
+      vertical-align: middle !important;      
+      
+      /* --- PADDING PRESISI --- */
+      padding: 8px 10px !important;            
+      
+      /* Border */
+      border-bottom: 2px solid #b2bec3 !important;
+      border-right: 1px solid #b2bec3 !important; 
+  }
+
+  /* C. STYLE BODY UNIVERSAL */
+  /* Berlaku untuk semua isi tabel di dalam DataTables */
+  .dataTables_scrollBody table tbody td,
+  table.table-premium tbody td {
+      white-space: nowrap !important;         
+      font-size: 13px !important;             
+      vertical-align: middle !important;      
+      padding: 6px 10px !important;           
+      border-right: 1px solid #b2bec3 !important; 
+  }
+
+  /* D. CLEANING (Hapus garis ujung kanan) */
+  .dataTables_scrollHeadInner table thead th:last-child,
+  .dataTables_scrollBody table tbody td:last-child,
+  table.table-premium tbody td:last-child { 
+      border-right: none !important; 
+  }
+  
+  .dataTables_scrollHeadInner { width: 100% !important; }
+
+  /* ============================================================
+     11. FITUR GLOBAL: FREEZE KOLOM PERTAMA (FIXED & STRONG)
+     Mengatasi masalah sticky tidak jalan & layer menghalangi
+     ============================================================ */
+  
+  /* A. FIX "LAYER MENGHALANGI" (Header Bayangan) */
+  .dataTables_scrollBody thead {
+      visibility: collapse !important;
+      height: 0 !important;
+      /* PENTING: Matikan interaksi mouse agar tidak menghalangi klik/drag di bawahnya */
+      pointer-events: none !important; 
+  }
+
+  /* B. LOGIKA STICKY (TARGET SPESIFIK DATATABLES) */
+  /* Target Header (Z-Index Tinggi) */
+  .dataTables_scrollHead .table-sticky-first th:first-child {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 20 !important; /* Paling atas */
+      background-color: #dfe6e9 !important; /* Warna Abu Header */
+      border-right: 2px solid #b2bec3 !important;
+  }
+
+  /* Target Body (Z-Index Sedang) */
+  .dataTables_scrollBody .table-sticky-first td:first-child {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 10 !important; /* Di atas sel biasa, di bawah header */
+      background-color: #fff !important; /* Warna Putih Body (Wajib) */
+      border-right: 2px solid #b2bec3 !important;
+      box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); /* Bayangan */
+  }
+
+  /* C. EFEK HOVER (Agar kolom beku juga berubah warna saat dihover) */
+  .dataTables_scrollBody .table-sticky-first tbody tr:hover td:first-child {
+      background-color: #f1f2f6 !important; /* Samakan dengan warna hover baris */
+  }
+
+  /* FIX FINAL: ICON LEVEL 1 HARUS PUTIH */
+.nav-sidebar > .nav-item > .nav-link > .nav-icon {
+  color: rgba(255,255,255,0.95) !important;
+}
+
+/* Saat aktif -> ikut emas */
+.nav-sidebar > .nav-item.menu-open > .nav-link > .nav-icon,
+.nav-sidebar > .nav-item > .nav-link.active > .nav-icon {
+  color: #ffc107 !important;
+}
+
+/* ================================
+   SIMPLIFY SIDEBAR HIERARCHY
+   ================================ */
+
+/* LEVEL 2 & 3: HILANGKAN ICON */
+.nav-sidebar .nav-treeview .nav-icon {
+  display: none !important;
+}
+
+/* LEVEL 2 */
+.nav-sidebar .nav-treeview > .nav-item > .nav-link {
+  padding-left: 2.2rem !important;
+  font-size: 0.88rem;
+  position: relative;
+}
+
+/* Garis penanda Level 2 */
+.nav-sidebar .nav-treeview > .nav-item > .nav-link::before {
+  content: '';
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  width: 6px;
+  height: 1px;
+  background: rgba(255,255,255,0.4);
+}
+
+/* LEVEL 3 (PALING BAWAH) */
+.nav-sidebar .nav-treeview .nav-treeview > .nav-item > .nav-link {
+  padding-left: 3rem !important;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+/* Garis putus-putus Level 3 */
+.nav-sidebar .nav-treeview .nav-treeview > .nav-item > .nav-link::before {
+  content: '';
+  position: absolute;
+  left: 1.6rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  border-left: 1px dashed rgba(255,255,255,0.3);
+}
+
+/* =========================================================
+   3. SIDEBAR MINI: SUBMENU DISEMBUNYIKAN
+   ========================================================= */
+
+/* Saat sidebar diciutkan, sembunyikan semua submenu */
+.sidebar-collapse .nav-treeview {
+  display: none !important;
+}
+
+/* =========================================================
+   4. SCROLLBAR SIDEBAR HILANG TOTAL
+   ========================================================= */
+
+#sidebar-container > nav {
+  scrollbar-width: none;        /* Firefox */
+}
+
+#sidebar-container > nav::-webkit-scrollbar {
+  display: none;                /* Chrome, Edge, Safari */
+}
+
+.nav-sidebar .nav-treeview .nav-treeview > .nav-item:last-child > .nav-link {
+  margin-bottom: 6px;
+}
+
+.nav-sidebar .nav-link:hover {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+#menuTrashSK .nav-link {
+  color: #ef4444 !important;
+  font-weight: 600;
+}
+
+/* =========================================================
+   16. FIX DATATABLES CONTROL FONT SIZE (GLOBAL)
+   Mengecilkan font "Show Entries", "Search", "Info", "Paging"
+   agar proporsional dengan tabel .table-premium
+   ========================================================= */
+
+.dataTables_wrapper .dataTables_length, 
+.dataTables_wrapper .dataTables_filter, 
+.dataTables_wrapper .dataTables_info, 
+.dataTables_wrapper .dataTables_paginate {
+    font-size: 0.85rem !important; /* Font lebih kecil */
+    color: #555 !important;
+}
+
+/* Kecilkan Input Search & Select Entries */
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    height: 30px !important;
+    padding: 2px 10px !important;
+    font-size: 0.85rem !important;
+}
+
+/* Tombol Pagination Lebih Ramping */
+.dataTables_wrapper .page-item .page-link {
+    padding: 0.25rem 0.6rem !important;
+    font-size: 0.85rem !important;
+}
+
+/* 1. Fix Lebar Select DataTables & Select2 */
+    .dataTables_wrapper .dataTables_length select { min-width: 65px !important; padding-right: 25px !important; }
+    .select2-container { width: auto !important; min-width: 100px; }
+    .select2-selection { width: auto !important; }
+    
+    /* 2. Fix Dropdown Tertutup Tabel (Z-Index) */
+    .dropdown-menu { z-index: 9999 !important; }
+    
+    /* 3. Warna Font Jenis Presensi */
+    .text-jenis-datang { color: #fd7e14 !important; font-weight: bold; } /* Orange */
+  .text-jenis-pulang { color: #6f42c1 !important; font-weight: bold; } /* Ungu */
+
+/* --- ATURAN GLOBAL TOMBOL MAROON --- */
+.btn-maroon {
+    background-color: #800000 !important;  /* Warna Merah Maroon */
+    border-color: #800000 !important;      /* Garis Tepi Maroon */
+    color: #ffffff !important;             /* Teks/Icon Putih */
+}
+
+/* Efek saat mouse diarahkan (Hover) atau diklik */
+.btn-maroon:hover, 
+.btn-maroon:active, 
+.btn-maroon:focus {
+    background-color: #600000 !important;  /* Menjadi lebih gelap */
+    border-color: #600000 !important;
+    color: #ffffff !important;
+}
+
+/* --- UI FORM SULTAN --- */
+.form-control-sultan {
+    border: 1px solid #ced4da;
+    border-radius: 0; /* Kotak tegas */
+    border-left: 4px solid #800000; /* Aksen Maroon di kiri */
+    padding: 10px 15px;
+    height: auto;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #fcfcfc;
+}
+
+.form-control-sultan:focus {
+    border-color: #800000;
+    box-shadow: 0 0 0 0.2rem rgba(128, 0, 0, 0.15);
+    background-color: #fff;
+}
+
+.form-label-sultan {
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 5px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Style khusus untuk Select agar panahnya rapi */
+select.form-control-sultan {
+    cursor: pointer;
+}
+
+/* Tombol Lihat File ala Sultan */
+  .btn-lihat-sultan {
+      color: #800000;
+      border: 1px solid #800000;
+      background-color: transparent;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-block;
+      cursor: pointer;
+  }
+  .btn-lihat-sultan:hover {
+      background-color: #800000;
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(128, 0, 0, 0.3);
+  }
+  
+  /* Animasi Baris Tabel */
+  @keyframes slideInRow {
+    from {
+      opacity: 0;
+      transform: translateY(-20px); /* Mulai dari posisi agak atas */
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0); /* Ke posisi normal */
+    }
+  }
+
+  .tr-animasi {
+    /* Set awal transparan agar tidak "kedip" sebelum animasi mulai */
+    opacity: 0; 
+    /* Jalankan animasi 'slideInRow' selama 0.4 detik */
+    animation: slideInRow 0.4s ease-out forwards; 
   }
 
 </style>

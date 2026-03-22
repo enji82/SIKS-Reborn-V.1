@@ -1,147 +1,532 @@
-<header>
-  <h2>DATA MURID SD MENURUT KELAS</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterStatus">Status:</label>
-    <select id="filterStatus"></select>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-users text-maroon mr-2"></i>Jumlah Murid SD Menurut Kelas
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  <div id="loadingStatus" class="loading-container">
-      <div class="spinner-container">
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#sdkelas_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="sdkelas_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Data bersumber dari laporan bulan yang terakhir diunggah.</li>
+                  <li class="mb-1">Agar data Anda valid, unggah laporan bulan tepat waktu.</li>
+                  <li>Kolom <b>Jumlah</b> di ujung kanan adalah total murid dari Kelas 1 sampai Kelas 6.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="sdkelas_filterStatus" class="form-control form-control-sultan input-auto-width min-w-150 border-maroon">
+                    <option value="SEMUA">- Semua Status -</option>
+                </select>
+
+                <div id="sdkelas_filterContainer" style="display: none;" class="d-flex align-items-center">
+                    <select id="sdkelas_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                        <option value="">- Memvalidasi Akses... -</option>
+                    </select>
+                </div>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="sdkelas_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server">
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+
+                <button type="button" id="sdkelas_btnExport" class="btn btn-success text-white font-weight-bold shadow-sm" title="Unduh data dalam format Microsoft Excel">
+                    <i class="fas fa-file-excel mr-1"></i> Unduh Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            
+            <div id="sdkelas_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold mt-3" id="sdkelas_loadingText">Mempersiapkan Akses Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sdkelas_tableState" style="display: none;">
+                <table id="sdkelas_tabelUtama" class="table table-bordered table-hover table-sm table-premium table-sultan-compact text-nowrap mb-0 w-100 text-center" style="font-size: 0.85rem;">
+                    
+                    <thead class="font-weight-bold text-dark bg-light text-nowrap">
+                      <tr>
+                        <th rowspan="2" class="align-middle bg-white text-maroon text-left pl-3 py-1" style="position:sticky; left:0; z-index:50; min-width:250px; border-right: 2px solid #dee2e6; border-bottom: 2px solid #800000 !important;">Unit Kerja</th>
+                        
+                        <th rowspan="2" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">NPSN</th>
+                        <th rowspan="2" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Status</th>
+                        <th rowspan="2" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Bln</th>
+                        <th rowspan="2" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Thn</th>
+                        <th rowspan="2" class="align-middle bg-white py-1" style="border-bottom: 2px solid #800000 !important;">Rombel</th>
+
+                        <th colspan="3" class="align-middle py-1" style="background-color: #e3f2fd; border-bottom: 1px solid #90caf9;">Kelas 1</th>
+                        <th colspan="3" class="align-middle py-1" style="background-color: #e8f5e9; border-bottom: 1px solid #a5d6a7;">Kelas 2</th>
+                        <th colspan="3" class="align-middle py-1" style="background-color: #fff3e0; border-bottom: 1px solid #ffcc80;">Kelas 3</th>
+                        <th colspan="3" class="align-middle py-1" style="background-color: #f3e5f5; border-bottom: 1px solid #ce93d8;">Kelas 4</th>
+                        <th colspan="3" class="align-middle py-1" style="background-color: #fce4ec; border-bottom: 1px solid #f48fb1;">Kelas 5</th>
+                        <th colspan="3" class="align-middle py-1" style="background-color: #e0f2f1; border-bottom: 1px solid #80cbc4;">Kelas 6</th>
+                        
+                        <th colspan="3" class="align-middle py-1" style="background-color: #ffecb3; border-bottom: 2px solid #800000; border-left: 2px solid #ffecb3;">JUMLAH TOTAL</th>
+                      </tr>
+
+                      <tr class="small text-nowrap">
+                        <th class="py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000 !important;">L</th>
+                        <th class="py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000 !important; font-weight:bold;">Jml</th>
+                        
+                        <th class="py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000 !important;">L</th>
+                        <th class="py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000 !important; font-weight:bold;">Jml</th>
+                        
+                        <th class="py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000 !important;">L</th>
+                        <th class="py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000 !important; font-weight:bold;">Jml</th>
+                        
+                        <th class="py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000 !important;">L</th>
+                        <th class="py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #f3e5f5; border-bottom: 2px solid #800000 !important; font-weight:bold;">Jml</th>
+                        
+                        <th class="py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000 !important;">L</th>
+                        <th class="py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000 !important; font-weight:bold;">Jml</th>
+                        
+                        <th class="py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000 !important;">L</th>
+                        <th class="py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000 !important; font-weight:bold;">Jml</th>
+                        
+                        <th class="py-1" style="background-color: #ffecb3; border-bottom: 2px solid #800000 !important; border-left: 2px solid #ffecb3;">L</th>
+                        <th class="py-1" style="background-color: #ffecb3; border-bottom: 2px solid #800000 !important;">P</th>
+                        <th class="py-1" style="background-color: #ffecb3; border-bottom: 2px solid #800000 !important;">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                    
+                    <tfoot class="bg-light font-weight-bold text-nowrap" style="border-top: 3px solid #800000;">
+                        <tr>
+                            <th class="border-right text-right bg-white text-maroon pr-3 align-middle py-2" style="position:sticky; left:0; z-index:40; border-right: 2px solid #dee2e6;">TOTAL KESELURUHAN</th>
+                            <th class="py-2"></th><th class="py-2"></th><th class="py-2"></th><th class="py-2"></th>
+                            <th class="text-center text-dark py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                            <th class="text-center py-2"></th><th class="text-center py-2"></th><th class="text-center py-2"></th>
+                        </tr>
+                    </tfoot>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
     </div>
-      <p>Memuat data, mohon tunggu...</p>
   </div>
-  
-  <div id="tableWrapper" style="display:none;">
-    <div class="table-container">
-        <table id="muridSdKelasTable" class="data-table">
-          <thead></thead>
-          <tbody></tbody>
-          <tfoot></tfoot> 
-        </table>
-    </div>
-    <div class="table-footer-note">
-      Sumber data: laporan bulan terakhir.
-    </div>
-  </div>
-</main>
+</section>
 
-<style>
-  /* Mengatur layout dan scrollbar internal */
-  .main-content {
-    overflow-y: hidden;
-  }
-  main.table-view-container, #tableWrapper {
-    flex-grow: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  #tableWrapper .table-container {
-    overflow-y: auto;
-    flex-grow: 1;
-  }
+<script>
+// ======================================================================
+// ISOLASI VARIABEL GLOBAL (MASTER BLUEPRINT V8 - BAB I)
+// ======================================================================
+var SDKELAS_CACHE_DATA = [];
+var SDKELAS_TABEL_INSTANCE = null;
 
-  /* =================================================================== */
-  /* ====== PENGATURAN TAMPILAN & FREEZE PANE ====== */
-  /* =================================================================== */
+var SDKELAS_USER_AKTIF = "";
+var SDKELAS_IS_ADMIN = false;
+var SDKELAS_UNIT_TERKUNCI = "";
+var SDKELAS_NPSN_TERKUNCI = "";
 
-  /* 1. Atur perataan teks dan lebar otomatis */
-  #muridSdKelasTable th,
-  #muridSdKelasTable td {
-    text-align: center;
-    vertical-align: middle;
-  }
-  #muridSdKelasTable td:nth-child(2),
-  #muridSdKelasTable td:nth-child(4) {
-    text-align: left; /* Kolom Nama Sekolah & NPSN rata kiri */
-  }
-  #muridSdKelasTable th {
-    white-space: normal; /* Izinkan header turun baris */
-  }
+// =================================================================
+// 1. INITIALIZATION & SPA VACCINE DELEGATION
+// =================================================================
+$(document).ready(function() {
+    SDKELAS_TABEL_INSTANCE = null;
+    $('#sdkelas_tableState').hide();
+    $('#sdkelas_loadingState').show();
+    $('#sdkelas_filterContainer').hide();
 
-  /* 2. Atur font bold untuk kolom terakhir */
-  #muridSdKelasTable th:last-child,
-  #muridSdKelasTable td:last-child {
-    color: var(--color-orange);
-    font-weight: bold;
-  }
+    try {
+        var user = typeof getSesiUser === 'function' ? getSesiUser() : {};
+        SDKELAS_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        SDKELAS_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        SDKELAS_NPSN_TERKUNCI = user.npsn || user.username || ""; 
+    } catch(e) { SDKELAS_NPSN_TERKUNCI = ""; SDKELAS_IS_ADMIN = false; }
 
-  /* 3. Pengaturan Freeze Pane (Header, Footer, Kolom 1 & 2) */
-  #muridSdKelasTable thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  #muridSdKelasTable tfoot td {
-    position: sticky;
-    bottom: 0;
-    background-color: #101E26; /* Warna solid untuk footer */
-    z-index: 2;
-    border-top: 2px solid rgba(0, 195, 255, 0.5); 
-  }
-  #muridSdKelasTable thead th { top: 0; }
-  #muridSdKelasTable tfoot td { bottom: 0; }
+    $(document).off('click', '#sdkelas_btnRefresh').on('click', '#sdkelas_btnRefresh', sdkelas_tarikDataServer);
+    $(document).off('change', '#sdkelas_filterStatus').on('change', '#sdkelas_filterStatus', sdkelas_updateFilterUnit);
+    $(document).off('change', '#sdkelas_filterUnit').on('change', '#sdkelas_filterUnit', sdkelas_terapkanFilterLokal);
+    
+    // VAKSINASI DELEGASI: Tombol Unduh Excel
+    $(document).off('click', '#sdkelas_btnExport').on('click', '#sdkelas_btnExport', sdkelas_exportExcel);
 
-  #muridSdKelasTable tbody td:nth-child(1),
-  #muridSdKelasTable tbody td:nth-child(2) {
-    position: sticky;
-    background-color: #1c2e3a;
-  }
-  #muridSdKelasTable thead th:nth-child(1),
-  #muridSdKelasTable tbody td:nth-child(1),
-  #muridSdKelasTable tfoot td:nth-child(1) {
-    left: 0;
-  }
-  #muridSdKelasTable thead th:nth-child(2),
-  #muridSdKelasTable tbody td:nth-child(2),
-  #muridSdKelasTable tfoot td:nth-child(2) {
-    left: 50px; /* Lebar kolom No. */
-  }
+    sdkelas_validasiAksesUser();
+});
 
-  /* 4. Hirarki z-index untuk mencegah tumpang tindih */
-  #muridSdKelasTable tbody td { z-index: 1; }
-  #muridSdKelasTable thead th, #muridSdKelasTable tfoot td { z-index: 2; }
-  #muridSdKelasTable thead th:nth-child(1), #muridSdKelasTable thead th:nth-child(2),
-  #muridSdKelasTable tfoot td:nth-child(1), #muridSdKelasTable tfoot td:nth-child(2) {
-    z-index: 3;
-  }
-  
-  /* 5. Efek hover untuk kolom beku */
-  #muridSdKelasTable tbody tr:hover td:nth-child(1),
-  #muridSdKelasTable tbody tr:hover td:nth-child(2) {
-    background-color: #2a4152;
-  }
-  
-  /* =================================================================== */
-  /* ====== TAMBAHAN BARU: PEWARNAAN ISI KOLOM ====== */
-  /* =================================================================== */
-  
-  /* 6. Beri warna pada grup kolom Kelas (Biru) */
-  #muridSdKelasTable tbody td:nth-child(n+7):nth-child(-n+12) { 
-    background-color: rgba(52, 152, 219, 0.1); 
-  }
-  
-  /* 7. Beri warna pada grup kolom Jumlah (Hijau) */
-  #muridSdKelasTable tbody td:nth-child(13) { 
-    background-color: rgba(46, 204, 113, 0.1); 
-  }
+// =================================================================
+// 2. GATEKEEPER & FETCH DATA
+// =================================================================
+function sdkelas_validasiAksesUser() {
+    if (SDKELAS_IS_ADMIN) {
+        $('#sdkelas_filterContainer').show();
+        $('#sdkelas_loadingText').html('Mempersiapkan Akses Admin...');
+        $('#sdkelas_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>').prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        sdkelas_tarikDataServer(); 
+    } else {
+        if (!SDKELAS_NPSN_TERKUNCI) {
+            $('#sdkelas_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#sdkelas_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
 
-  /* 8. Pastikan efek hover tetap berfungsi di atas warna latar */
-  #muridSdKelasTable tbody tr:hover td {
-    background-color: rgba(255, 255, 255, 0.15) !important;
-  }
-  #muridSdKelasTable tbody tr:hover td:nth-child(1),
-  #muridSdKelasTable tbody tr:hover td:nth-child(2) {
-    background-color: #2a4152 !important;
-  }
-  
-</style>
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#sdkelas_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#sdkelas_loadingText').html(`<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>${sdkelas_escapeHtml(dataUnit.error)}</span>`);
+                    return;
+                }
+
+                SDKELAS_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#sdkelas_filterUnit').empty().append($('<option>', {value: SDKELAS_UNIT_TERKUNCI, text: SDKELAS_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                sdkelas_tarikDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#sdkelas_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#sdkelas_loadingText').html(`<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ${sdkelas_escapeHtml(err.message)}</span>`);
+            })
+            .getUnitKerjaByNpsnPTK(SDKELAS_NPSN_TERKUNCI);
+    }
+}
+
+function sdkelas_tarikDataServer() {
+    var btn = $('#sdkelas_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+
+    if (!$.fn.DataTable.isDataTable('#sdkelas_tabelUtama')) {
+        $('#sdkelas_tableState').hide();
+        $('#sdkelas_loadingText').html('Mengambil Laporan Kelas SD Server...');
+        $('#sdkelas_loadingState').show();
+    }
+
+    google.script.run.withSuccessHandler(function(dataArray) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        
+        if (!Array.isArray(dataArray)) {
+            $('#sdkelas_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses struktur JSON Server.</span>');
+            return;
+        }
+
+        try {
+            SDKELAS_CACHE_DATA = dataArray;
+
+            if (SDKELAS_IS_ADMIN) {
+                var uniqueStatus = new Set();
+                SDKELAS_CACHE_DATA.forEach(function(row) {
+                    var s = String(row[2] || "").trim(); // Index 2 = Status (Negeri/Swasta)
+                    if(s) uniqueStatus.add(s);
+                });
+                
+                var selStatus = $('#sdkelas_filterStatus'); var curS = selStatus.val();
+                selStatus.empty().append('<option value="SEMUA">- Semua Status -</option>');
+                Array.from(uniqueStatus).sort().forEach(function(s) { selStatus.append($('<option>', {value: s, text: s})); });
+                if(curS && uniqueStatus.has(curS)) selStatus.val(curS);
+
+                sdkelas_updateFilterUnit();
+            }
+
+            if (!$.fn.DataTable.isDataTable('#sdkelas_tabelUtama')) {
+                sdkelas_initDataTables();
+            }
+
+            sdkelas_terapkanFilterLokal();
+
+            $('#sdkelas_loadingState').hide();
+            $('#sdkelas_tableState').show();
+            if(SDKELAS_TABEL_INSTANCE) { setTimeout(function() { SDKELAS_TABEL_INSTANCE.columns.adjust(); }, 150); }
+
+        } catch (e) {
+            $('#sdkelas_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>Gagal merakit tabel: ' + sdkelas_escapeHtml(e.message) + '</span>');
+        }
+
+    }).withFailureHandler(function(e) {
+        btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+        $('#sdkelas_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Server Terputus.</span>');
+    }).getDataMuridSDKelas(); 
+}
+
+function sdkelas_updateFilterUnit() {
+    if(!SDKELAS_IS_ADMIN) return;
+
+    var selStatus = $('#sdkelas_filterStatus').val();
+    var uniqueUnit = new Set();
+    
+    SDKELAS_CACHE_DATA.forEach(function(row) {
+        var u = String(row[0] || "").trim(); 
+        var s = String(row[2] || "").trim(); 
+        
+        if (selStatus === "SEMUA" || s === selStatus) {
+            if(u) uniqueUnit.add(u);
+        }
+    });
+
+    var selUnit = $('#sdkelas_filterUnit'); var curU = selUnit.val();
+    selUnit.empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    Array.from(uniqueUnit).sort().forEach(function(u) { selUnit.append($('<option>', {value: u, text: u})); });
+    
+    if(curU && uniqueUnit.has(curU)) selUnit.val(curU);
+    else selUnit.val('SEMUA');
+
+    sdkelas_terapkanFilterLokal();
+}
+
+// =================================================================
+// 3. INISIALISASI DATATABLES
+// =================================================================
+
+function sdkelas_getColColor(i) {
+    if (i >= 6 && i <= 8) return "#e3f2fd"; 
+    if (i >= 9 && i <= 11) return "#e8f5e9"; 
+    if (i >= 12 && i <= 14) return "#fff3e0"; 
+    if (i >= 15 && i <= 17) return "#f3e5f5"; 
+    if (i >= 18 && i <= 20) return "#fce4ec"; 
+    if (i >= 21 && i <= 23) return "#e0f2f1"; 
+    if (i >= 24 && i <= 26) return "#ffecb3"; 
+    return "#ffffff";
+}
+
+function sdkelas_initDataTables() {
+    SDKELAS_TABEL_INSTANCE = $('#sdkelas_tabelUtama').DataTable({
+        "destroy": true, 
+        "ordering": false, 
+        "pageLength": 15, 
+        "autoWidth": false,
+        "deferRender": true, 
+        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        "columnDefs": [ 
+            { "targets": 0, "width": "auto", "className": "col-sticky-left bg-white align-middle border-right text-left font-weight-bold text-dark text-nowrap" }, 
+            { "targets": [1,3,4], "width": "1%", "className": "text-center align-middle text-nowrap" },
+            { "targets": 2, "width": "1%", "className": "text-center align-middle font-weight-bold text-maroon text-nowrap" },
+            { "targets": 5, "width": "1%", "className": "text-center align-middle font-weight-bold text-dark text-nowrap" },
+            { "targets": Array.from({length: 21}, (_, i) => i + 6), "width": "1%", "className": "text-center align-middle text-nowrap" }
+        ],
+        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada data Murid SD untuk filter yang dipilih." },
+        
+        "createdRow": function(row, data, dataIndex) {
+             var tds = row.children;
+             for (var i = 0; i < tds.length; i++) {
+                 var cell = tds[i];
+                 var rawVal = cell.textContent.trim();
+
+                 if (i === 0) {
+                     cell.style.position = 'sticky'; cell.style.left = '0'; cell.style.zIndex = '2'; cell.style.backgroundColor = '#ffffff';
+                 } 
+                 else if (i >= 6) { 
+                     var bgColor = sdkelas_getColColor(i);
+                     cell.style.backgroundColor = bgColor;
+                     if (i === 24) cell.style.borderLeft = '2px solid #ffecb3'; 
+
+                     if (rawVal === "0" || rawVal === "-" || rawVal === "") {
+                         cell.innerHTML = '<span class="text-muted opacity-50">-</span>';
+                     } else {
+                         cell.classList.add('font-weight-bold', 'text-dark');
+                         if ((i - 8) % 3 === 0) {
+                             cell.classList.replace('text-dark', 'text-maroon'); 
+                         }
+                     }
+                 }
+             }
+        },
+
+        "footerCallback": function(row, data, start, end, display) {
+            var api = this.api();
+            if (api.data().length === 0) return;
+
+            var extractNumber = function (str) { 
+                if (typeof str === 'number') return str;
+                if (!str) return 0;
+                var cleanStr = String(str).replace(/(<([^>]+)>)/gi, ""); 
+                var num = parseInt(cleanStr.replace(/[^0-9]/g, ''), 10); 
+                return isNaN(num) ? 0 : num; 
+            };
+            
+            for (var i = 5; i <= 26; i++) {
+                var total = api.column(i, {page: 'current'}).data().reduce(function(a, b) {
+                    return extractNumber(a) + extractNumber(b);
+                }, 0);
+
+                var cell = $(api.column(i).footer());
+                cell.html(total === 0 ? '-' : total.toLocaleString('id-ID'));
+                
+                var cellDom = cell[0];
+                if(cellDom && i >= 6) {
+                    var bgColor = sdkelas_getColColor(i);
+                    cellDom.style.backgroundColor = bgColor;
+                    if (i === 24) cellDom.style.borderLeft = '2px solid #ffecb3'; 
+                    
+                    if ((i - 8) % 3 === 0) {
+                        cellDom.classList.add('text-maroon');
+                    } else {
+                        cellDom.classList.add('text-dark');
+                    }
+                }
+            }
+        }
+    });
+}
+
+// =================================================================
+// 4. FILTER LOKAL & INJEKSI DATA
+// =================================================================
+function sdkelas_terapkanFilterLokal() {
+    if (!SDKELAS_TABEL_INSTANCE) return;
+
+    var fStatus = $('#sdkelas_filterStatus').val() || "SEMUA";
+    var fUnit = SDKELAS_IS_ADMIN ? String($('#sdkelas_filterUnit').val() || "SEMUA").trim().toUpperCase() : String(SDKELAS_UNIT_TERKUNCI).trim().toUpperCase();
+    
+    var hasil = SDKELAS_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim().toUpperCase(); 
+        var rStatus = String(row[2] || "").trim();
+
+        if (SDKELAS_IS_ADMIN) {
+            if (fUnit !== "SEMUA" && fUnit !== "" && rUnit !== fUnit) return false;
+        } else {
+            if (rUnit !== fUnit) return false;
+        }
+
+        if (fStatus !== "SEMUA" && fStatus !== "" && rStatus !== fStatus) return false;
+
+        return true;
+    });
+    
+    sdkelas_renderTabel(hasil);
+}
+
+function sdkelas_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+        
+        arrRow.push(sdkelas_escapeHtml(row[0] || "-")); 
+        arrRow.push(sdkelas_escapeHtml(row[1] || "-"));
+        arrRow.push(sdkelas_escapeHtml(row[2] || "-"));
+        arrRow.push(sdkelas_escapeHtml(row[3] || "-"));
+        arrRow.push(sdkelas_escapeHtml(row[4] || "-"));
+        
+        var rombelVal = (row[5] === undefined || row[5] === null || String(row[5]).trim() === "" || String(row[5]).trim() === "-") ? "0" : String(row[5]).trim();
+        arrRow.push(sdkelas_escapeHtml(rombelVal));
+
+        for (var c = 6; c <= 26; c++) {
+            var val = (row[c] === undefined || row[c] === null || String(row[c]).trim() === "" || String(row[c]).trim() === "-") ? "0" : String(row[c]).trim();
+            arrRow.push(sdkelas_escapeHtml(val));
+        }
+
+        dtArray.push(arrRow);
+    });
+
+    SDKELAS_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+}
+
+// =================================================================
+// 5. API EKSPOR EXCEL (NATIVE HTML TO XLS)
+// =================================================================
+function sdkelas_exportExcel() {
+    if (!SDKELAS_TABEL_INSTANCE) {
+        Sultan.alert('warning', 'Belum Ada Data', 'Silakan tunggu data dimuat terlebih dahulu.');
+        return;
+    }
+
+    var btn = $('#sdkelas_btnExport');
+    var txt = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Mengekspor...');
+
+    setTimeout(function() {
+        // 1. Simpan State Halaman & Tarik Semua Data ke DOM (Bypass Pagination)
+        var info = SDKELAS_TABEL_INSTANCE.page.info();
+        var currLen = info.length;
+        var currPage = info.page;
+        SDKELAS_TABEL_INSTANCE.page.len(-1).draw('page');
+
+        // 2. Kloning Tabel Utama yang sedang tampil penuh
+        var tableClone = document.getElementById('sdkelas_tabelUtama').cloneNode(true);
+        
+        // 3. Kembalikan Paginasi seperti semula (Zero-Blink UX)
+        SDKELAS_TABEL_INSTANCE.page.len(currLen).page(currPage).draw('page');
+
+        // 4. Proses Styling Clone Table untuk Format Excel
+        $(tableClone).find('th, td').css({
+            'border': '1px solid #000000',
+            'border-collapse': 'collapse',
+            'font-family': 'Arial, sans-serif'
+        });
+        
+        // Buang elemen yang bersembunyi atau span yang hanya dekoratif (jika ada)
+        $(tableClone).find('.opacity-50').css('color', '#cccccc'); 
+
+        // 5. Rakit String URI Microsoft Excel XML-HTML Format
+        var htmlData = tableClone.outerHTML;
+        var template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body>' + htmlData + '</body></html>';
+        
+        // 6. Konversi ke Blob untuk Bypass Browser Limit
+        var blob = new Blob([template], { type: 'application/vnd.ms-excel' });
+        var url = URL.createObjectURL(blob);
+        
+        // 7. Eksekusi Unduhan Auto-Click
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'Rekap_Jumlah_Murid_SD_Kelas.xls';
+        document.body.appendChild(a);
+        a.click();
+        
+        // 8. Cleanup Memori
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        btn.prop('disabled', false).html(txt);
+        Sultan.notif.sukses('Data berhasil diunduh ke Excel.');
+    }, 200); // Sedikit delay agar DOM painting DataTables page(-1) terselesaikan
+}
+
+// =================================================================
+// 6. HELPER UTILITIES: PEMBERSIH XSS
+// =================================================================
+function sdkelas_escapeHtml(text) { 
+    if (!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+</script>

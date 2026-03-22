@@ -1,159 +1,1118 @@
-<header>
-  <h2>DATA CUTI</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterTahunData">Tahun:</label>
-    <select id="filterTahunData"></select>
-  </div>
-  <div class="filter-group">
-    <label for="filterUnitData">Unit Kerja:</label>
-    <select id="filterUnitData"></select>
-  </div>
-  
-  <div class="filter-group" style="margin-left: auto;">
-    <label for="searchDataCuti" class="search-icon-label"><i class="fas fa-search"></i></label>
-    <input type="search" id="searchDataCuti" class="search-input" placeholder="Cari Nama/NIP...">
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-calendar-alt text-maroon mr-2"></i>Data Pengajuan Cuti
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  
-  <div id="tableWrapperDataCuti" style="display:flex; position: relative;"> 
-    
-    <div id="tableOverlayLoaderDataCuti" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; flex-direction: column; border-radius: 8px; backdrop-filter: blur(2px);">
-        <div class="spinner-container">
-            <div class="spinner-bar" style="background-color: #e74c3c;"></div>
-            <div class="spinner-bar" style="background-color: #2ecc71;"></div>
-            <div class="spinner-bar" style="background-color: #f1c40f;"></div>
-            <div class="spinner-bar" style="background-color: #3498db;"></div>
-        </div>
-        <p style="margin-top: 15px; color: white; font-weight: bold; letter-spacing: 1px;">Memuat Data...</p>
-    </div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
 
-    <div class="table-container">
-      <table id="dataCutiTable" class="data-table freeze-pane-table">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#cuti_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="cuti_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Untuk mengajukan cuti silakan klik tombol <b><i class="fas fa-plus mr-1"></i>Ajukan Cuti</b>.</li>
+                  <li class="mb-1">Formulir Permintaan dan Pemberian Cuti dapat diunduh apabila status sudah <span class="badge badge-sultan badge-sultan-light-success">Disetujui</span>.</li>
+                  <li>Klik tombol <span class="badge badge-outline-danger">💬 Baca Catatan</span> untuk melihat alasan dari admin jika status ditolak/revisi.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+                
+                <select id="cuti_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250 font-weight-bold text-maroon bg-light" disabled>
+                    <option value="">- Memvalidasi Akses... -</option>
+                </select>
+                
+                <select id="cuti_filterTahun" class="form-control form-control-sultan input-auto-width min-w-80"></select>
+                
+                <select id="cuti_filterBulan" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Bulan -</option>
+                    <option value="Januari">Januari</option><option value="Februari">Februari</option><option value="Maret">Maret</option>
+                    <option value="April">April</option><option value="Mei">Mei</option><option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option><option value="Agustus">Agustus</option><option value="September">September</option>
+                    <option value="Oktober">Oktober</option><option value="November">November</option><option value="Desember">Desember</option>
+                </select>
+                
+                <select id="cuti_filterStatus" class="form-control form-control-sultan input-auto-width">
+                    <option value="">- Semua Status -</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Disetujui">Disetujui</option>
+                    <option value="Revisi">Revisi</option>
+                    <option value="Ditolak">Ditolak</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+                
+                <button type="button" id="cuti_btnRefresh" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+
+                <div class="ml-auto d-none d-md-block"></div>
+                
+                <button type="button" class="btn btn-maroon text-white font-weight-bold shadow-sm" id="cuti_btnTambahModal" disabled>
+                    <i class="fas fa-plus mr-1"></i> Ajukan Cuti
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan">
+            <div class="card-body p-3">
+              
+              <div id="cuti_loadingState">
+                  <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                      <div class="sultan-loading-container text-center">
+                          <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                          <h6 class="text-muted font-weight-bold mt-3" id="cuti_loadingText">Mempersiapkan Akses Server...</h6>
+                      </div>
+                  </div>
+              </div>
+
+              <div id="cuti_tableState" style="display: none;">
+                  <table id="cuti_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact mb-0 w-100">
+                    <thead class="bg-light">
+                      <tr>
+                        <th class="col-sticky-left border-right text-center align-middle" style="z-index: 5;">Aksi</th>
+                        <th class="text-left align-middle">Nama ASN</th>
+                        <th class="text-center align-middle">Jenis</th>
+                        <th class="text-center align-middle">Tgl Mulai</th>
+                        <th class="text-center align-middle">Tgl Selesai</th>
+                        <th class="text-center align-middle">Hari</th>
+                        <th class="text-center align-middle">Unduh Form</th>
+                        <th class="text-left align-middle">Status</th>
+                        <th class="text-left align-middle">Dikirim</th>
+                        <th class="text-left align-middle">Diubah</th>
+                        <th class="text-left align-middle">Verifikasi</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+              </div>
+
+            </div>
+        </div>
+
+      </div>
     </div>
   </div>
-</main>
+</section>
 
-<style>
-  /* --- 1. LAYOUT WRAPPER (Spesifik Halaman) --- */
-  #main-content { overflow-y: hidden !important; }
-  
-  main.table-view-container { 
-      flex-grow: 1 !important; 
-      min-height: 0 !important; 
-      display: flex !important; 
-      flex-direction: column !important; 
-  }
-  
-  #tableWrapperDataCuti { 
-      flex-grow: 1 !important; 
-      min-height: 0 !important; 
-      display: flex !important; 
-      flex-direction: column !important; 
-      margin-bottom: 0; 
-  }
-  
-  #tableWrapperDataCuti .table-container { 
-      flex-grow: 1 !important; 
-      overflow: auto !important; 
-      border-radius: 10px; 
-      border-bottom: none; 
-  }
-  #tableWrapperDataCuti .table-container::-webkit-scrollbar { display: none !important; }
+<div class="modal fade" id="cuti_modalForm" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content modal-content-sultan border-0 shadow-lg">
+      <div class="modal-header bg-maroon text-white" id="cuti_headerModalForm">
+        <h5 class="modal-title font-weight-bold" id="cuti_judulModalForm">
+          <i class="fas fa-plus-circle mr-2"></i>Form Pengajuan Cuti
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" id="cuti_closeModalForm"><span>&times;</span></button>
+      </div>
 
-  /* --- 2. OVERRIDE GLOBAL SEPERLUNYA --- */
-  
-  /* Kita menimpa padding global (.data-table) hanya untuk tabel ini */
-  /* agar barisnya lebih tinggi sesuai keinginan Anda */
-  #dataCutiTable th, #dataCutiTable td { 
-      padding: 10px 10px !important; /* Override Global (biasanya 8px) */
-      box-sizing: border-box;
-  }
+      <form id="cuti_formUtama" novalidate>
+      <div class="modal-body bg-light p-4">
+          <input type="hidden" id="cuti_editRowId" value="">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Unit Kerja <span class="text-danger">*</span></label>
+              <select id="cuti_inputUnit" class="form-control form-control-sultan font-weight-bold text-maroon bg-light" disabled>
+                <option value="">- Pilih Unit -</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Nama ASN <span class="text-danger">*</span></label>
+              <select id="cuti_inputNama" class="form-control form-control-sultan border-maroon" disabled required>
+                <option value="">- Pilih Unit Dulu -</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">NIP</label>
+              <select id="cuti_inputNIP" class="form-control form-control-sultan" disabled required>
+                <option value="">- Otomatis -</option>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Status Kepegawaian</label>
+              <input type="text" id="cuti_inputStatusPegawai" class="form-control form-control-sultan bg-white font-weight-bold" readonly placeholder="-">
+            </div>
+          </div>
+          <hr class="style-sultan-solid my-3">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+                <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Jenis Cuti <span class="text-danger">*</span></label>
+                <select id="cuti_inputJenisCuti" class="form-control form-control-sultan border-maroon" required>
+                   <option value="">- Pilih Jenis Cuti -</option>
+                </select>
+                <small class="text-muted font-italic mt-1 d-block"><i class="fas fa-info-circle mr-1"></i> Pilihan cuti menyesuaikan status kepegawaian.</small>
+            </div>
+            <div class="form-group col-md-6">
+                <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tgl Pengajuan <span class="text-danger">*</span></label>
+                <input type="date" id="cuti_inputTglPengajuan" class="form-control form-control-sultan border-maroon" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tgl Mulai <span class="text-danger">*</span></label>
+              <input type="date" id="cuti_inputTglMulai" class="form-control form-control-sultan border-maroon" required>
+            </div>
+            <div class="form-group col-md-4">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Tgl Selesai <span class="text-danger">*</span></label>
+              <input type="date" id="cuti_inputTglSelesai" class="form-control form-control-sultan border-maroon" required>
+            </div>
+            <div class="form-group col-md-4">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Jumlah Hari <span class="text-danger">*</span></label>
+              <input type="number" id="cuti_inputJumlahHari" class="form-control form-control-sultan bg-light font-weight-bold text-maroon" placeholder="0" readonly required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Alasan Cuti <span class="text-danger">*</span></label>
+            <textarea id="cuti_inputAlasan" class="form-control form-control-sultan border-maroon" rows="2" placeholder="Tulis alasan lengkap..." style="resize:none;" required></textarea>
+          </div>
+          <div class="form-row mb-0">
+            <div class="form-group col-md-6 mb-0">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Alamat Selama Cuti</label>
+              <textarea id="cuti_inputAlamat" class="form-control form-control-sultan border-maroon" rows="4" style="min-height: 110px !important; height: auto !important; resize: vertical;" placeholder="Isikan alamat selama menjalankan cuti." required></textarea>
+            </div>
+            <div class="form-group col-md-6 mb-0">
+              <label class="form-label-sultan small font-weight-bold text-muted text-uppercase">Nomor HP / WhatsApp <span class="text-danger">*</span></label>
+              <input type="text" id="cuti_inputHP" class="form-control form-control-sultan border-maroon" placeholder="08xxx" required>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer bg-white p-3 justify-content-between border-top">
+        <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4" data-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-maroon text-white font-weight-bold shadow-sm px-4" id="cuti_btnSimpanForm">
+          <i class="fas fa-paper-plane mr-2"></i>Kirim Pengajuan
+        </button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
 
-  /* --- 3. KONFIGURASI FREEZE PANE (HEADER 2 BARIS) --- */
-  /* CSS Global hanya menangani header 1 baris, jadi kita harus atur baris ke-2 disini */
+<div class="modal fade" id="cuti_modalHapus" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Konfirmasi Hapus Cuti</h6>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="cuti_formHapus" novalidate>
+            <div class="modal-body bg-white p-4">
+                <input type="hidden" id="cuti_hapusRowId">
+                <div class="alert alert-warning text-dark border-warning shadow-sm mb-3">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle mt-1 mr-3 fa-lg"></i>
+                        <div>
+                            <strong>Peringatan!</strong><br>
+                            Anda akan menghapus data pengajuan cuti milik:<br>
+                            <span id="cuti_hapusViewNama" class="font-weight-bold text-uppercase" style="font-size: 1.1em; color: #000;">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-0">
+                    <label class="form-label-sultan small font-weight-bold text-uppercase text-muted">Kode Keamanan <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-key text-danger"></i></span></div>
+                        <input type="password" id="cuti_inputKodeHapus" class="form-control form-control-sultan border-left-0 text-center font-weight-bold letter-spacing-2" placeholder="Ketik kode hapus..." required autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between bg-light p-3">
+                <button type="button" class="btn btn-default border shadow-sm px-4 font-weight-bold" data-dismiss="modal">Batal</button>
+                <button type="submit" id="cuti_btnEksekusiHapus" class="btn btn-danger shadow-sm font-weight-bold px-4">
+                    <i class="fas fa-trash mr-1"></i> Hapus Permanen
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-  /* Baris 1 (Ikut Global, cuma pastikan tinggi) */
-  #dataCutiTable thead tr:first-child th { 
-      height: 40px; 
-      z-index: 20; 
-  }
+<div class="modal fade" id="cuti_modalVerifikasi" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-sultan-verif" role="document">
+        <div class="modal-content border-0 shadow-lg modal-content-sultan-verif" style="height: 90vh;">
+            <div class="modal-header bg-primary text-white py-2 flex-shrink-0">
+                <h5 class="modal-title font-weight-bold h6 mb-0">
+                    <i class="fas fa-clipboard-check mr-2"></i>Panel Verifikasi Cuti
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
 
-  /* Baris 2 (Sub-Header - Perlu diatur manual posisinya) */
-  #dataCutiTable thead tr:nth-child(2) th { 
-      position: sticky; 
-      top: 40px; /* Menempel di bawah Baris 1 */
-      height: 40px;
-      z-index: 20; 
-      background-color: #101E26; /* Wajib definisikan ulang agar tidak transparan */
-      border-bottom: 2px solid rgba(0, 195, 255, 0.5);
-  }
+            <form id="cuti_formVerifikasi" class="d-flex flex-column flex-grow-1 overflow-hidden m-0 p-0" novalidate>
+            <div class="modal-body p-0 bg-light flex-grow-1 overflow-hidden">
+                <div class="row no-gutters h-100">
+                    <div class="col-md-7 border-right d-flex flex-column bg-dark position-relative h-100">
+                        <iframe id="cuti_iframePreviewVerif" class="iframe-sultan-verif d-none w-100 h-100 border-0" src=""></iframe>
+                        
+                        <div id="cuti_loadingPreviewVerif" class="d-none h-100 flex-column justify-content-center align-items-center text-white-50 w-100 position-absolute" style="top:0; left:0; z-index: 10; pointer-events: none;">
+                            <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-4x mb-3"></i><p>Memuat Dokumen...</p></div>
+                        </div>
 
-  /* --- 4. KONFIGURASI KOLOM BEKU (KIRI) --- */
+                        <div id="cuti_noFilePreviewVerif" class="d-flex h-100 flex-column justify-content-center align-items-center text-white-50 w-100 position-absolute" style="top:0; left:0; z-index: 10;">
+                            <i class="fas fa-file-pdf fa-4x mb-3 text-white-50"></i>
+                            <p class="mb-0 text-center">Dokumen PDF belum digenerate.<br>Sistem akan membuat PDF saat data disetujui.</p>
+                        </div>
+                        
+                        <a href="#" id="cuti_btnUnduhVerif" class="btn btn-sm btn-success shadow-sm position-absolute font-weight-bold px-3" style="bottom: 15px; left: 15px; z-index: 20; display: none;" target="_blank">
+                            <i class="fas fa-download mr-1"></i> Unduh PDF
+                        </a>
+                    </div>
 
-  /* Kolom 1 (No) */
-  #dataCutiTable tbody td:nth-child(1) { 
-      position: sticky; left: 0; z-index: 10; 
-      background-color: #1c2e3a; 
-      width: 50px; min-width: 50px; max-width: 50px;
-  }
+                    <div class="col-md-5 d-flex flex-column bg-white h-100">
+                        <div class="p-4 flex-grow-1 overflow-auto">
+                            <input type="hidden" id="cuti_verifRowId">
+                            
+                            <h5 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-user-circle mr-2"></i> Detail Pengajuan
+                            </h5>
+                            
+                            <table class="table table-borderless text-sm mb-4">
+                                <tr><td class="text-muted font-weight-bold align-middle py-1" style="width: 35%;">Nama ASN</td><td class="font-weight-bold text-dark py-1" id="cuti_verifNama" style="font-size: 16px; text-transform: uppercase;">-</td></tr>
+                                <tr><td class="text-muted font-weight-bold align-middle py-1">Jenis Cuti</td><td class="font-weight-bold text-primary py-1" id="cuti_verifJenis">-</td></tr>
+                                <tr><td colspan="2" class="py-1"><hr class="my-0 dashed"></td></tr>
+                                <tr><td class="text-muted font-weight-bold align-middle py-1">Tgl Ajuan</td><td class="py-1" id="cuti_verifTglAjuan">-</td></tr>
+                                <tr><td class="text-muted font-weight-bold align-middle py-1">Pelaksanaan</td><td class="py-1"><span id="cuti_verifTglMulai" class="font-weight-bold text-dark"></span> s/d <span id="cuti_verifTglSelesai" class="font-weight-bold text-dark"></span></td></tr>
+                                <tr><td class="text-muted font-weight-bold align-middle py-1">Lama Cuti</td><td class="py-1"><span class="badge badge-sultan badge-sultan-light-info" id="cuti_verifLama">- Hari</span></td></tr>
+                                <tr><td class="text-muted font-weight-bold py-1">Alasan</td><td class="py-1 font-italic text-dark" id="cuti_verifAlasan" style="white-space: normal;">-</td></tr>
+                            </table>
 
-  /* Kolom 2 (Nama ASN) */
-  #dataCutiTable tbody td:nth-child(2) { 
-      position: sticky; left: 50px; z-index: 10; 
-      background-color: #1c2e3a; 
-      text-align: left !important; min-width: 200px;
-  }
+                            <div class="card bg-light border-0 shadow-sm mb-0 mt-3">
+                                <div class="card-body p-3">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Keputusan Admin <span class="text-danger">*</span></label>
+                                        <select class="form-control form-control-sultan font-weight-bold text-dark border-primary" id="cuti_verifStatus" required style="font-size: 16px; height: auto !important; padding: 10px 15px;">
+                                            <option value="">-- Pilih Status --</option>
+                                            <option value="Disetujui">Disetujui (OK)</option>
+                                            <option value="Revisi">Revisi</option>
+                                            <option value="Ditolak">Ditolak</option>
+                                        </select>
+                                    </div>
 
-  /* --- 5. SUDUT MATI (HEADER KIRI ATAS) --- */
-  /* Pertemuan Header & Kolom Kiri (Wajib paling atas) */
-  
-  #dataCutiTable thead tr:first-child th:nth-child(1) { 
-      position: sticky !important; left: 0 !important; top: 0 !important; 
-      z-index: 40 !important; width: 50px; min-width: 50px; max-width: 50px;
-  }
-  
-  #dataCutiTable thead tr:first-child th:nth-child(2) { 
-      position: sticky !important; left: 50px !important; top: 0 !important; 
-      z-index: 40 !important; min-width: 200px;
-  }
+                                    <div class="form-group mb-0">
+                                        <label class="form-label-sultan font-weight-bold text-muted text-uppercase" style="font-size:12px; letter-spacing: 0.5px;">Catatan (Alasan) <span class="text-danger" id="cuti_reqCatatanVerif" style="display:none;">*</span></label>
+                                        <textarea class="form-control form-control-sultan border-primary" id="cuti_verifCatatan" rows="3" placeholder="Wajib diisi jika Ditolak/Revisi..." style="font-size: 15px; padding: 10px 15px; resize:none;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-  /* --- 6. PEWARNAAN KOLOM (Fitur Unik Halaman Ini) --- */
-  
-  /* Pasangan Warna */
-  #dataCutiTable tbody td:nth-child(4), #dataCutiTable tbody td:nth-child(5) {
-      background-color: rgba(52, 152, 219, 0.1); color: #3498db;
-  }
-  #dataCutiTable tbody td:nth-child(6), #dataCutiTable tbody td:nth-child(7) {
-      background-color: rgba(46, 204, 113, 0.1); color: #2ecc71;
-  }
-  #dataCutiTable tbody td:nth-child(8), #dataCutiTable tbody td:nth-child(9) {
-      background-color: rgba(241, 196, 15, 0.1); color: #f1c40f;
-  }
-  #dataCutiTable tbody td:nth-child(10), #dataCutiTable tbody td:nth-child(11) {
-      background-color: rgba(155, 89, 182, 0.1); color: #9b59b6;
-  }
-  #dataCutiTable tbody td:nth-child(12), #dataCutiTable tbody td:nth-child(13) {
-      background-color: rgba(231, 76, 60, 0.1); color: #e74c3c; font-weight: bold;
-  }
+                        <div class="p-3 bg-white border-top shadow-lg d-flex justify-content-between z-index-10 flex-shrink-0">
+                            <button type="button" class="btn btn-default shadow-sm font-weight-bold px-4 py-2" style="font-size:16px;" data-dismiss="modal">Tutup</button>
+                            <button type="submit" id="cuti_btnVerifEksekusi" class="btn btn-primary font-weight-bold shadow-sm px-4 py-2" style="font-size:16px;">
+                                <i class="fas fa-check-double mr-2"></i> Eksekusi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-  /* Rata Kiri Default */
-  #dataCutiTable tbody td:nth-child(2),
-  #dataCutiTable tbody td:nth-child(3) { text-align: left; }
+<div class="modal fade" id="cuti_modalPreviewDokumen" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-full" role="document">
+        <div class="modal-content modal-content-full-height border-0 shadow-lg bg-dark">
+            <div class="modal-header bg-dark text-white py-2 border-bottom-0">
+                <h6 class="modal-title font-weight-bold"><i class="fas fa-file-pdf text-danger mr-2"></i>Pratinjau Dokumen Formulir Cuti</h6>
+                <div class="ml-auto d-flex align-items-center">
+                    
+                    <a href="#" id="cuti_btnUnduhDirect" class="btn btn-xs btn-success font-weight-bold shadow-sm mr-2 rounded-pill px-3" target="_blank">
+                        <i class="fas fa-download mr-1"></i> Unduh
+                    </a>
+                    
+                    <a href="#" id="cuti_btnDownloadDokumen" target="_blank" class="btn btn-xs btn-outline-light font-weight-bold shadow-sm mr-2 rounded-pill px-3">
+                        <i class="fas fa-external-link-alt mr-1"></i> Tab Baru
+                    </a>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+            </div>
+            <div class="modal-body p-0 position-relative d-flex align-items-center justify-content-center bg-secondary" style="height:calc(100vh - 50px);" id="cuti_previewContainer">
+                <iframe id="cuti_framePreview" class="iframe-full w-100 h-100 border-0 d-none" src=""></iframe>
+                
+                <div id="cuti_loadingPreviewPDF" class="d-flex h-100 align-items-center justify-content-center text-white-50 position-absolute w-100" style="top:0; left:0; z-index: 10; pointer-events: none;">
+                    <div class="text-center"><i class="fas fa-circle-notch fa-spin fa-3x mb-3"></i><p>Memuat Dokumen...</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-  /* Hover Effect (Wajib !important untuk menembus warna kolom) */
-  #dataCutiTable tbody tr:hover td { background-color: rgba(255, 255, 255, 0.15) !important; }
-  
-  /* Hover Konsisten Kolom Beku */
-  #dataCutiTable tbody tr:hover td:nth-child(1), 
-  #dataCutiTable tbody tr:hover td:nth-child(2) { 
-      background-color: #2a4152 !important; 
-  }
-</style>
+<script>
+// ======================================================================
+// BAB I: ISOLASI VARIABEL GLOBAL & PENGAMAN SINTAKSIS
+// ======================================================================
+var CUTI_DATA_MASTER = [];        
+var CUTI_CACHE_KEY = "";        
+var CUTI_ROW_DATA = {};         
+var CUTI_DB_PEGAWAI = [];       
+var CUTI_DB_PEGAWAI_CUTI = [];  
+var CUTI_TABEL_INSTANCE = null;
+
+var CUTI_USER_AKTIF = "";
+var CUTI_IS_ADMIN = false;
+var CUTI_UNIT_TERKUNCI = ""; 
+var CUTI_USER_NPSN = "";
+
+// =================================================================
+// 1. INISIALISASI & DELEGASI EVENT JQUERY (ANTI-BUG SPA)
+// =================================================================
+$(document).ready(function() {
+    CUTI_TABEL_INSTANCE = null;
+    $('#cuti_tableState').hide();
+    $('#cuti_loadingState').show();
+
+    try {
+        var user = (typeof getSesiUser === 'function') ? getSesiUser() : {};
+        CUTI_USER_AKTIF = user.nama_lengkap || user.fullname || user.nama || user.username || "User Web";
+        CUTI_IS_ADMIN = (user.role || "").toLowerCase().includes("admin");
+        CUTI_USER_NPSN = user.npsn || user.username || "";
+    } catch(e) { CUTI_USER_NPSN = ""; CUTI_IS_ADMIN = false; }
+
+    var thn = new Date().getFullYear();
+    var $selThn = $('#cuti_filterTahun').empty();
+    for(var i = thn - 3; i <= thn + 1; i++){ $selThn.append('<option value="'+i+'">'+i+'</option>'); }
+    $selThn.val(thn); 
+    
+    $('#cuti_filterBulan, #cuti_filterStatus').val('');
+
+    // VAKSIN MEMORI IFRAME & RESET KELAS CSS (Menyembuhkan Bug CSS d-flex)
+    $('#cuti_modalPreviewDokumen').on('hidden.bs.modal', function () { 
+        $('#cuti_framePreview').addClass('d-none').attr('src', '');
+        // Bersihkan d-none, kembalikan d-flex murni
+        $('#cuti_loadingPreviewPDF').removeClass('d-none').addClass('d-flex');
+    });
+    $('#cuti_modalVerifikasi').on('hidden.bs.modal', function () { 
+        $('#cuti_iframePreviewVerif').addClass('d-none').attr('src', ''); 
+        $('#cuti_noFilePreviewVerif').removeClass('d-none').addClass('d-flex');
+        $('#cuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+        $('#cuti_btnUnduhVerif').hide();
+    });
+
+    // =========================================================
+    // EVENT DELEGATION
+    // =========================================================
+    $(document).off('click', '#cuti_btnRefresh').on('click', '#cuti_btnRefresh', cuti_loadDataServer); 
+    $(document).off('click', '#cuti_btnTambahModal').on('click', '#cuti_btnTambahModal', cuti_bukaModalTambah);
+    
+    $(document).off('change', '#cuti_filterStatus, #cuti_filterBulan, #cuti_filterTahun, #cuti_filterUnit').on('change', '#cuti_filterStatus, #cuti_filterBulan, #cuti_filterTahun, #cuti_filterUnit', cuti_applyFilter);
+
+    $(document).off('change', '#cuti_inputUnit').on('change', '#cuti_inputUnit', cuti_filterNamaByUnit);
+    $(document).off('change', '#cuti_inputNama').on('change', '#cuti_inputNama', cuti_filterNipByNama);
+    $(document).off('change', '#cuti_inputNIP').on('change', '#cuti_inputNIP', cuti_setPegawaiDetails);
+    $(document).off('change', '#cuti_inputJenisCuti').on('change', '#cuti_inputJenisCuti', cuti_cekStatusReadOnlyHari);
+    $(document).off('change', '#cuti_inputTglMulai, #cuti_inputTglSelesai').on('change', '#cuti_inputTglMulai, #cuti_inputTglSelesai', cuti_hitungHariCuti);
+    
+    $(document).off('change', '#cuti_verifStatus').on('change', '#cuti_verifStatus', function() {
+        var s = $(this).val();
+        if (s === "Revisi" || s === "Ditolak") { $('#cuti_reqCatatanVerif').show(); $('#cuti_verifCatatan').prop('required', true); } 
+        else { $('#cuti_reqCatatanVerif').hide(); $('#cuti_verifCatatan').prop('required', false); }
+    });
+
+    $(document).off('submit', '#cuti_formUtama').on('submit', '#cuti_formUtama', cuti_submitFormUtama);
+    $(document).off('submit', '#cuti_formHapus').on('submit', '#cuti_formHapus', cuti_submitHapus);
+    $(document).off('submit', '#cuti_formVerifikasi').on('submit', '#cuti_formVerifikasi', cuti_submitVerifikasi);
+
+    $(document).off('click', '.cuti-btn-edit').on('click', '.cuti-btn-edit', function(){ cuti_bukaModalEdit($(this).attr('data-id')); });
+    $(document).off('click', '.cuti-btn-hapus').on('click', '.cuti-btn-hapus', function(){ cuti_bukaModalHapus($(this).attr('data-id'), $(this).attr('data-nama')); });
+    $(document).off('click', '.cuti-btn-verif').on('click', '.cuti-btn-verif', function(){ cuti_bukaModalVerif($(this).attr('data-id')); });
+    $(document).off('click', '.cuti-btn-preview').on('click', '.cuti-btn-preview', function(){ cuti_previewDokumenByRow($(this).attr('data-id')); });
+    $(document).off('click', '.cuti-btn-catatan').on('click', '.cuti-btn-catatan', function(){ cuti_lihatCatatanSultan($(this).attr('data-pesan')); });
+
+    google.script.run.withSuccessHandler(function(json){
+        try { 
+            CUTI_DB_PEGAWAI_CUTI = JSON.parse(json); 
+            cuti_jalankanGatekeeper(); 
+        } catch(e){}
+    }).getDatabaseCutiOptions();
+
+    google.script.run.withSuccessHandler(function(data){
+        if(Array.isArray(data)) CUTI_DB_PEGAWAI = data;
+    }).getDatabasePegawai();
+});
+
+// =================================================================
+// 2. GATEKEEPER (VALIDASI AKSES)
+// =================================================================
+function cuti_jalankanGatekeeper() {
+    if (CUTI_IS_ADMIN) {
+        $('#cuti_loadingText').html('Mempersiapkan Database Admin...');
+        
+        var unikUnit = [...new Set(CUTI_DB_PEGAWAI_CUTI.map(function(item) { return String(item.unit).trim(); } ))].filter(Boolean).sort();
+        var $inUnit = $('#cuti_inputUnit').empty().append('<option value="">- Pilih Unit -</option>');
+        var $filUnit = $('#cuti_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+        
+        unikUnit.forEach(function(u) {
+            $inUnit.append($('<option>', {value: u, text: u}));
+            $filUnit.append($('<option>', {value: u, text: u}));
+        });
+        
+        $filUnit.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $inUnit.prop('disabled', false).removeClass('bg-light text-maroon font-weight-bold');
+        $('#cuti_btnRefresh, #cuti_btnTambahModal').prop('disabled', false);
+        
+        cuti_loadDataServer();
+        
+    } else {
+        if (!CUTI_USER_NPSN) {
+            $('#cuti_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+            $('#cuti_loadingText').html('<span class="text-danger"><i class="fas fa-ban mb-2"></i><br>Akses ditolak: Sesi login tidak valid.</span>');
+            return;
+        }
+
+        google.script.run
+            .withSuccessHandler(function(resUnit) {
+                var dataUnit = JSON.parse(resUnit);
+                if (dataUnit.error) {
+                    $('#cuti_filterUnit').empty().append('<option value="">AKSES DITOLAK</option>');
+                    $('#cuti_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>'+cuti_escapeHtml(dataUnit.error)+'</span>');
+                    return;
+                }
+
+                CUTI_UNIT_TERKUNCI = dataUnit.unitKerja;
+                $('#cuti_filterUnit').empty().append($('<option>', {value: CUTI_UNIT_TERKUNCI, text: CUTI_UNIT_TERKUNCI})).prop('disabled', true);
+                $('#cuti_inputUnit').empty().append($('<option>', {value: CUTI_UNIT_TERKUNCI, text: CUTI_UNIT_TERKUNCI})).prop('disabled', true);
+                
+                $('#cuti_btnRefresh, #cuti_btnTambahModal').prop('disabled', false);
+                cuti_loadDataServer();
+            })
+            .withFailureHandler(function(err) {
+                $('#cuti_filterUnit').empty().append('<option value="">ERROR SERVER</option>');
+                $('#cuti_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: '+cuti_escapeHtml(err.message)+'</span>');
+            })
+            .getUnitKerjaByNPSN(CUTI_USER_NPSN);
+    }
+}
+
+// =================================================================
+// 3. FETCH DATA & RENDER TABEL (TURBO SEAMLESS)
+// =================================================================
+function cuti_applyFilter() {
+    var valTahun = $('#cuti_filterTahun').val(); 
+    if (!valTahun) { Sultan.alert('warning', 'Perhatian', 'Pilih Tahun terlebih dahulu.'); return; }
+    
+    if (valTahun === CUTI_CACHE_KEY && CUTI_DATA_MASTER.length > 0) { 
+        cuti_jalankanFilterLokal(); 
+    } else { 
+        cuti_loadDataServer(); 
+    }
+}
+
+function cuti_loadDataServer() {
+    var thn = $('#cuti_filterTahun').val(); 
+    if (!thn) return;
+    
+    var btn = $('#cuti_btnRefresh');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    
+    if (!$.fn.DataTable.isDataTable('#cuti_tabelUtama')) {
+        $('#cuti_tableState').hide();
+        $('#cuti_loadingText').html('Mengambil data pengajuan cuti...');
+        $('#cuti_loadingState').show();
+    }
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            var resData;
+            try { resData = (typeof response === 'string') ? JSON.parse(response) : response; } 
+            catch(e) { $('#cuti_loadingText').html('<span class="text-danger"><i class="fas fa-times-circle mb-2"></i><br>Gagal memproses JSON.</span>'); return; }
+
+            if (resData && resData.error) {
+                $('#cuti_loadingText').html('<span class="text-danger"><i class="fas fa-exclamation-triangle mb-2"></i><br>' + cuti_escapeHtml(resData.error) + '</span>');
+                return;
+            }
+            
+            try {
+                CUTI_DATA_MASTER = Array.isArray(resData) ? resData : [];
+                CUTI_CACHE_KEY = thn; 
+                
+                if (!$.fn.DataTable.isDataTable('#cuti_tabelUtama')) {
+                    CUTI_TABEL_INSTANCE = $('#cuti_tabelUtama').DataTable({
+                        "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+                        "deferRender": true, 
+                        "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                               "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                               "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                        "columnDefs": [ 
+                            { "targets": 0, "width": "1%", "className": "col-sticky-left bg-white align-middle border-right text-center text-nowrap" },
+                            { "targets": [2,3,4,5,6,7], "width": "1%", "className": "text-center align-middle text-nowrap" },
+                            { "targets": [8,9,10], "width": "12%", "className": "text-left align-middle text-nowrap" },
+                            { "targets": 1, "width": "auto", "className": "text-left align-middle text-nowrap" }
+                        ],
+                        "language": { "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", "emptyTable": "Tidak ada data Pengajuan Cuti." }
+                    });
+                }
+
+                cuti_jalankanFilterLokal();
+                
+                $('#cuti_loadingState').hide();
+                $('#cuti_tableState').show();
+                if(CUTI_TABEL_INSTANCE) { setTimeout(function(){ CUTI_TABEL_INSTANCE.columns.adjust(); }, 100); }
+
+            } catch (e) {
+                $('#cuti_loadingText').html('<span class="text-danger">Gagal merakit tabel: ' + cuti_escapeHtml(e.message) + '</span>');
+            }
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            $('#cuti_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus.</span>');
+        }).getDataCuti(thn, "", ""); 
+}
+
+function cuti_jalankanFilterLokal() {
+    if (!CUTI_TABEL_INSTANCE) return;
+
+    var fStatus = $('#cuti_filterStatus').val();
+    var tStat = (fStatus && fStatus !== "") ? String(fStatus).trim().toUpperCase() : "";
+    
+    var fBulan = $('#cuti_filterBulan').val();
+    var tBulan = (fBulan && fBulan !== "") ? String(fBulan).trim().toLowerCase() : "";
+
+    var tAdminUnit = CUTI_IS_ADMIN ? $('#cuti_filterUnit').val().toUpperCase() : "";
+    var tNpsnUser = String(CUTI_USER_NPSN).trim().toUpperCase(); 
+    var tUnitUser = String(CUTI_UNIT_TERKUNCI).trim().toUpperCase();
+
+    var filteredData = CUTI_DATA_MASTER.filter(function(row) {
+        var rNpsn = String(row.npsn || "").trim().toUpperCase(); 
+        var rUnit = String(row.unit || "").trim().toUpperCase(); 
+        var rStat = String(row.status || "").trim().toUpperCase();
+        
+        var rBulanRaw = "";
+        var rawTgl = String(row.tglMulai || "").replace(/'/g, "").trim().toLowerCase(); 
+        var mNames = ["januari", "februari", "maret", "april", "mei", "juni", "juli", "agustus", "september", "oktober", "november", "desember"];
+        
+        for(var m=0; m<mNames.length; m++) {
+            if(rawTgl.indexOf(mNames[m]) > -1) { rBulanRaw = mNames[m]; break; }
+        }
+        if(rBulanRaw === "") {
+            var pDate = rawTgl.split(/[-/]/);
+            if (pDate.length === 3) {
+                var mIdx = pDate[0].length === 4 ? pDate[1] : pDate[1];
+                rBulanRaw = mNames[parseInt(mIdx, 10) - 1] || "";
+            }
+        }
+
+        var passSekolah = false;
+        if (CUTI_IS_ADMIN) {
+            if (tAdminUnit === "SEMUA" || rUnit === tAdminUnit) passSekolah = true;
+        } else {
+            if (tNpsnUser !== "" && rNpsn === tNpsnUser) passSekolah = true;
+            else if (tUnitUser !== "" && rUnit === tUnitUser) passSekolah = true;
+        }
+        
+        var passStatus = true;
+        if (tStat !== "") {
+            if (tStat === "DIPROSES") passStatus = (rStat === "" || rStat === "DIPROSES");
+            else if (tStat === "DISETUJUI") passStatus = (rStat.includes("SETUJU") || rStat.includes("ACC") || rStat.includes("OK"));
+            else passStatus = rStat.includes(tStat);
+        }
+
+        var passBulan = true;
+        if (tBulan !== "") {
+            passBulan = (rBulanRaw === tBulan);
+        }
+        
+        return passSekolah && passStatus && passBulan;
+    });
+
+    cuti_renderTabel(filteredData);
+}
+
+function cuti_renderTabel(data) {
+    CUTI_ROW_DATA = {}; var dtArray = [];
+    
+    data.forEach(function(row) {
+        CUTI_ROW_DATA[row.rowBaris] = row; 
+        var safeId = String(row.rowBaris);
+        
+        var j = String(row.jenis || "").toLowerCase();
+        var jenisSingkat = `<span class="badge badge-cuti-ct">CT</span>`;
+        if(j.includes("sakit")) jenisSingkat = `<span class="badge badge-cuti-cs">CS</span>`;
+        else if(j.includes("penting")) jenisSingkat = `<span class="badge badge-cuti-cap">CAP</span>`;
+        else if(j.includes("melahirkan")) jenisSingkat = `<span class="badge badge-cuti-cm">CM</span>`;
+        else if(j.includes("besar")) jenisSingkat = `<span class="badge badge-cuti-cb">CB</span>`;
+        else if(j.includes("luar")||j.includes("tanggungan")) jenisSingkat = `<span class="badge badge-cuti-cltn">CLTN</span>`;
+
+        var stButton = String(row.status || "").toLowerCase();
+        var isApproved = (stButton.includes("setuju") || stButton.includes("ok") || stButton.includes("acc"));
+        
+        var badgeStatus = cuti_renderBadgeSultan(row.status, row.ket);
+        var attrDis = isApproved ? 'disabled style="cursor:not-allowed; opacity:0.6; filter: grayscale(100%);"' : '';
+
+        var btnFile = '-';
+        if (row.fileUrl && row.fileUrl.length > 5) {
+            if (isApproved) { btnFile = `<button type="button" class="btn btn-sm btn-outline-danger font-weight-bold shadow-sm cuti-btn-preview" data-id="${safeId}" title="Pratinjau & Unduh PDF"><i class="fas fa-file-pdf mr-1"></i> Dokumen</button>`; } 
+            else if (CUTI_IS_ADMIN) { btnFile = `<button type="button" class="btn btn-sm btn-outline-info font-weight-bold shadow-sm cuti-btn-preview" data-id="${safeId}" title="Preview Dokumen"><i class="fas fa-eye mr-1"></i> Preview</button>`; }
+        }
+
+        var txtVerif = CUTI_IS_ADMIN ? "" : " Verif";
+        var txtEdit  = CUTI_IS_ADMIN ? "" : " Edit";
+        var txtHapus = CUTI_IS_ADMIN ? "" : " Hapus";
+        var marginIcon = CUTI_IS_ADMIN ? "" : "mr-1";
+
+        var btnVerif = CUTI_IS_ADMIN ? `<button type="button" class="btn btn-sm btn-primary font-weight-bold shadow-sm cuti-btn-verif" data-id="${safeId}" title="Verifikasi"><i class="fas fa-clipboard-check ${marginIcon}"></i>${txtVerif}</button>` : '';
+        var btnDetail = `<button type="button" class="btn btn-sm btn-warning text-dark font-weight-bold shadow-sm cuti-btn-edit" data-id="${safeId}" title="Edit" ${attrDis}><i class="fas fa-pencil-alt ${marginIcon}"></i>${txtEdit}</button>`;
+        var btnHapus = `<button type="button" class="btn btn-sm btn-danger font-weight-bold shadow-sm cuti-btn-hapus" data-id="${safeId}" data-nama="${cuti_escapeHtml(row.nama)}" title="Hapus" ${attrDis}><i class="fas fa-trash-alt ${marginIcon}"></i>${txtHapus}</button>`;
+        var groupAksi = `<div class="d-flex flex-nowrap justify-content-center" style="gap:5px;">${btnVerif}${btnDetail}${btnHapus}</div>`;
+
+        var txtUnitHtml = CUTI_IS_ADMIN ? `<div class="small text-danger font-weight-bold mt-1">${cuti_escapeHtml(row.unit) || '-'}</div>` : '';
+        var uiNama = `<div class="font-weight-bold text-dark text-nowrap text-uppercase">${cuti_escapeHtml(row.nama)}</div><div class="small text-muted text-nowrap">${cuti_escapeHtml(row.nip)}</div>${txtUnitHtml}`;
+
+        var metaKirim = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${cuti_escapeHtml(row.tglInput)||'-'}</span><span class="d-block text-muted text-nowrap">${cuti_escapeHtml(row.userInput)||'-'}</span></div>`;
+        var metaEdit = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${cuti_escapeHtml(row.tglEdit)||'-'}</span><span class="d-block text-muted text-nowrap">${cuti_escapeHtml(row.userEdit)||'-'}</span></div>`;
+        var metaVerif = `<div style="line-height:1.2; font-size:11px;"><span class="d-block font-weight-bold text-dark text-nowrap">${cuti_escapeHtml(row.tglVerif)||'-'}</span><span class="d-block text-muted text-nowrap">${cuti_escapeHtml(row.verifikator)||'-'}</span></div>`;
+
+        dtArray.push([ 
+            groupAksi, uiNama, jenisSingkat, 
+            cuti_escapeHtml(row.tglMulai), cuti_escapeHtml(row.tglSelesai), 
+            `<span class="badge badge-sultan badge-sultan-light-dark px-2">${row.jumlah || '0'}</span>`, 
+            btnFile, badgeStatus, metaKirim, metaEdit, metaVerif 
+        ]);
+    });
+
+    CUTI_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+    setTimeout(function(){ CUTI_TABEL_INSTANCE.columns.adjust(); }, 50);
+}
+
+// =================================================================
+// 4. PREVIEW DOKUMEN MODAL (VAKSINASI KELAS CSS & IFRAME SHIELD)
+// =================================================================
+function cuti_previewDokumenByRow(rowId) {
+    try {
+        var row = CUTI_ROW_DATA[rowId];
+        if(row && row.fileUrl) { 
+            var url = row.fileUrl;
+            var finalUrl = url;
+            var directDownloadUrl = url;
+            
+            var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                var fileId = match[1];
+                finalUrl = 'https://drive.google.com/file/d/' + fileId + '/preview';
+                directDownloadUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+            }
+
+            // VAKSIN SHIELD: Hapus d-none, gunakan d-flex murni
+            $('#cuti_loadingPreviewPDF').removeClass('d-none').addClass('d-flex');
+            $('#cuti_framePreview').addClass('d-none').attr('src', finalUrl);
+            
+            $('#cuti_btnDownloadDokumen').attr('href', url); 
+            $('#cuti_btnUnduhDirect').attr('href', directDownloadUrl); 
+
+            $('#cuti_modalPreviewDokumen').modal('show');
+
+            $('#cuti_framePreview').off('load').on('load', function() {
+                // Hapus mutlak d-flex sebelum menambahkan d-none
+                $('#cuti_loadingPreviewPDF').removeClass('d-flex').addClass('d-none');
+                $(this).removeClass('d-none');
+            });
+
+            // Fallback 3.0 Detik toleransi 503 Error Google Drive
+            setTimeout(function() {
+                $('#cuti_loadingPreviewPDF').removeClass('d-flex').addClass('d-none');
+                $('#cuti_framePreview').removeClass('d-none');
+            }, 3000);
+
+        } else { 
+            Sultan.alert('error', 'Error', 'Tautan file tidak valid.'); 
+        }
+    } catch(e) {
+        console.error(e);
+        Sultan.alert('error', 'Gagal', 'Terjadi kesalahan sistem saat memuat dokumen.');
+    }
+}
+
+// =================================================================
+// 5. CRUD FORM & API 
+// =================================================================
+function cuti_resetModal() {
+    if ($('#cuti_formUtama').length > 0) {
+        $('#cuti_formUtama')[0].reset();
+        $('#cuti_formUtama').removeClass('was-validated');
+    }
+}
+
+function cuti_bukaModalTambah() {
+    try {
+        $('#cuti_editRowId').val(""); 
+        $('#cuti_headerModalForm').removeClass('bg-warning').addClass('bg-maroon');
+        $('#cuti_judulModalForm').html('<i class="fas fa-plus-circle mr-2"></i>Form Pengajuan Cuti').css('color', '#fff'); 
+        $('#cuti_closeModalForm').removeClass('text-dark').addClass('text-white');
+        $('#cuti_btnSimpanForm').removeClass('btn-warning text-dark').addClass('btn-maroon text-white').html('<i class="fas fa-paper-plane mr-2"></i>Kirim Pengajuan');
+        
+        cuti_resetModal();
+        
+        if (CUTI_IS_ADMIN) {
+            $('#cuti_inputUnit').val('').prop('disabled', false); 
+            $('#cuti_inputNama').empty().append('<option value="">- Pilih Unit Dulu -</option>').prop('disabled', true);
+        } else {
+            $('#cuti_inputUnit').val(CUTI_UNIT_TERKUNCI).prop('disabled', true); 
+            cuti_filterNamaByUnit(); 
+        }
+        
+        $('#cuti_inputNIP').empty().append('<option value="">- Otomatis -</option>').prop('disabled', true);
+        $('#cuti_inputJenisCuti').html('<option value="">- Pilih -</option>').prop('disabled', true);
+        cuti_cekStatusReadOnlyHari(); 
+        $('#cuti_modalForm').modal('show');
+    } catch(e) { console.error("Error modal tambah:", e); }
+}
+
+function cuti_bukaModalEdit(rowIdx) {
+    try {
+        var data = CUTI_ROW_DATA[rowIdx]; if (!data) return;
+        cuti_resetModal(); $('#cuti_editRowId').val(rowIdx);
+        
+        $('#cuti_headerModalForm').removeClass('bg-maroon').addClass('bg-warning');
+        $('#cuti_judulModalForm').html('<i class="fas fa-pencil-alt mr-2"></i>Edit Pengajuan Cuti').css('color', '#343a40'); 
+        $('#cuti_closeModalForm').removeClass('text-white').addClass('text-dark');
+        $('#cuti_btnSimpanForm').removeClass('btn-maroon text-white').addClass('btn-warning text-dark').html('<i class="fas fa-save mr-2"></i>Simpan Perubahan');
+        
+        var tUnit = String(data.unit).trim();
+        if ($('#cuti_inputUnit option').filter(function() { return $(this).val() === tUnit; }).length === 0) { $('#cuti_inputUnit').append($('<option>', {value: tUnit, text: tUnit})); }
+        $('#cuti_inputUnit').val(tUnit).prop('disabled', true); 
+
+        setTimeout(() => { 
+            var tNama = String(data.nama).trim(); var tNip = String(data.nip).trim();
+            $('#cuti_inputNama').empty().append($('<option>', {value: cuti_escapeHtml(tNama), text: cuti_escapeHtml(tNama)})).prop('disabled', true); 
+            $('#cuti_inputNIP').empty().append($('<option>', {value: cuti_escapeHtml(tNip), text: cuti_escapeHtml(tNip)})).prop('disabled', true); 
+            cuti_setPegawaiDetails(); 
+        }, 200);
+
+        setTimeout(() => { 
+            $('#cuti_inputJenisCuti').val(data.jenis); 
+            cuti_cekStatusReadOnlyHari(); 
+        }, 400);
+
+        $('#cuti_inputTglPengajuan').val(cuti_indoDateToIso(data.tanggal));
+        $('#cuti_inputTglMulai').val(cuti_indoDateToIso(data.tglMulai)); 
+        $('#cuti_inputTglSelesai').val(cuti_indoDateToIso(data.tglSelesai));
+        $('#cuti_inputJumlahHari').val(data.jumlah); 
+        $('#cuti_inputAlasan').val(data.alasan); 
+        $('#cuti_inputAlamat').val(data.alamat); 
+        $('#cuti_inputHP').val(data.telepon);
+        $('#cuti_modalForm').modal('show');
+    } catch(e) { console.error("Error modal edit:", e); }
+}
+
+function cuti_submitFormUtama(e) {
+    e.preventDefault();
+    var formAktif = $(e.target);
+
+    if (!formAktif[0].checkValidity()) {
+        formAktif.addClass('was-validated');
+        Sultan.alert('warning', 'Perhatian', 'Harap lengkapi semua kolom wajib!');
+        return;
+    }
+
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Proses...');
+    
+    var finalNpsn = CUTI_USER_NPSN; 
+    if (CUTI_IS_ADMIN) {
+        var inputNama = formAktif.find('#cuti_inputNama').val();
+        var inputNip = formAktif.find('#cuti_inputNIP').val();
+        var pgw = CUTI_DB_PEGAWAI.find(p => String(p.nama).trim() === String(inputNama).trim() && String(p.nip).trim() === String(inputNip).trim());
+        if(pgw) finalNpsn = pgw.npsn;
+    }
+
+    var payload = {
+        rowBaris: formAktif.find('#cuti_editRowId').val(), unit: formAktif.find('#cuti_inputUnit').val(), nama: formAktif.find('#cuti_inputNama').val(), nip: formAktif.find('#cuti_inputNIP').val(),
+        jenisCuti: formAktif.find('#cuti_inputJenisCuti').val(), tglPengajuan: formAktif.find('#cuti_inputTglPengajuan').val(), tglMulai: formAktif.find('#cuti_inputTglMulai').val(), tglSelesai: formAktif.find('#cuti_inputTglSelesai').val(),
+        jumlahHari: formAktif.find('#cuti_inputJumlahHari').val(), alasan: formAktif.find('#cuti_inputAlasan').val(), alamat: formAktif.find('#cuti_inputAlamat').val(), hp: formAktif.find('#cuti_inputHP').val(), 
+        userInput: CUTI_USER_AKTIF, npsn: finalNpsn
+    };
+    
+    var runner = google.script.run.withSuccessHandler(function(res){
+        btn.prop('disabled', false).html(txt);
+        if (res === "Sukses") {
+            formAktif.closest('.modal').modal('hide'); Sultan.notif.sukses('Pengajuan cuti tersimpan.'); cuti_loadDataServer(); 
+        } else { Sultan.alert('error', 'Gagal', res); }
+    }).withFailureHandler(function(err){ btn.prop('disabled', false).html(txt); Sultan.alert('error', 'Error Server', err.toString()); });
+    
+    if (payload.rowBaris && payload.rowBaris !== "") runner.updatePengajuanCuti(payload); else runner.simpanPengajuanCuti(payload);
+}
+
+function cuti_bukaModalHapus(rowBaris, namaAsn) {
+    try {
+        $('#cuti_hapusRowId').val(rowBaris); $('#cuti_hapusViewNama').text(namaAsn); $('#cuti_inputKodeHapus').val(''); $('#cuti_modalHapus').modal('show');
+    } catch(e) { console.error("Error modal hapus:", e); }
+}
+
+function cuti_submitHapus(e) {
+    e.preventDefault();
+    var formAktif = $(e.target);
+    var rowBaris = formAktif.find('#cuti_hapusRowId').val(); var kodeInput = formAktif.find('#cuti_inputKodeHapus').val().trim();
+    var d = new Date(); var kd = d.getFullYear()+""+String(d.getMonth()+1).padStart(2,'0')+""+String(d.getDate()).padStart(2,'0');
+    if (kodeInput !== kd) { Sultan.alert('error', 'Gagal', 'Kode keamanan salah!'); return; }
+    
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menghapus...');
+    
+    google.script.run.withSuccessHandler(function(res){
+        btn.prop('disabled', false).html(txt);
+        if(res === 'Sukses') { formAktif.closest('.modal').modal('hide'); Sultan.notif.sukses('Cuti dihapus permanen.'); cuti_loadDataServer(); } 
+        else { Sultan.alert('error', 'Gagal', res); }
+    }).hapusPengajuanCuti(rowBaris, kodeInput, CUTI_USER_AKTIF);
+}
+
+function cuti_bukaModalVerif(rowIdx) {
+    try {
+        var data = CUTI_ROW_DATA[rowIdx]; if (!data) return;
+        $('#cuti_verifRowId').val(rowIdx); $('#cuti_verifStatus').val(""); $('#cuti_verifCatatan').val(data.ket || ""); 
+        $('#cuti_reqCatatanVerif').hide();
+        $('#cuti_verifNama').text(data.nama || '-'); $('#cuti_verifJenis').text(data.jenis || '-');
+        var tglAjuanDisplay = data.tanggal ? data.tanggal : (data.tglInput ? data.tglInput.split(' ')[0] : '-'); $('#cuti_verifTglAjuan').text(tglAjuanDisplay);
+        $('#cuti_verifTglMulai').text(data.tglMulai || '-'); $('#cuti_verifTglSelesai').text(data.tglSelesai || '-');
+        $('#cuti_verifLama').text((data.jumlah || '0') + ' Hari'); $('#cuti_verifAlasan').text(data.alasan || '-');
+        
+        var url = data.fileUrl || "";
+        $('#cuti_iframePreviewVerif').addClass('d-none').attr('src', '');
+        $('#cuti_noFilePreviewVerif').addClass('d-none').removeClass('d-flex');
+        $('#cuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+        $('#cuti_btnUnduhVerif').hide();
+
+        if (url.length > 5) {
+            var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                var fileId = match[1];
+                var previewUrl = 'https://drive.google.com/file/d/' + fileId + '/preview';
+                var directDownloadUrl = 'https://drive.google.com/uc?export=download&id=' + fileId;
+                
+                // VAKSIN SHIELD: Hapus d-none, pasang d-flex murni
+                $('#cuti_loadingPreviewVerif').removeClass('d-none').addClass('d-flex');
+                $('#cuti_iframePreviewVerif').attr('src', previewUrl);
+                
+                $('#cuti_btnUnduhVerif').attr('href', directDownloadUrl).show();
+                
+                $('#cuti_iframePreviewVerif').off('load').on('load', function() {
+                    $('#cuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+                    $(this).removeClass('d-none');
+                });
+                
+                setTimeout(function() {
+                    $('#cuti_loadingPreviewVerif').removeClass('d-flex').addClass('d-none');
+                    $('#cuti_iframePreviewVerif').removeClass('d-none');
+                }, 3000);
+            } else {
+                $('#cuti_noFilePreviewVerif').removeClass('d-none').addClass('d-flex');
+            }
+        } else {
+            $('#cuti_noFilePreviewVerif').removeClass('d-none').addClass('d-flex');
+        }
+        $('#cuti_modalVerifikasi').modal('show');
+    } catch(e) { console.error("Error modal verif:", e); }
+}
+
+function cuti_submitVerifikasi(e) {
+    e.preventDefault();
+    var formAktif = $(e.target);
+    var rowId = formAktif.find('#cuti_verifRowId').val(); var status = formAktif.find('#cuti_verifStatus').val(); var catatan = formAktif.find('#cuti_verifCatatan').val(); 
+    
+    if(!status) { Sultan.alert('warning','Pilih Status', 'Tentukan status keputusan.'); return; }
+    if ((status === 'Ditolak' || status === 'Revisi') && !catatan.trim()) { Sultan.alert('warning', 'Catatan Wajib', 'Wajib mengisi catatan jika ditolak/revisi.'); return; }
+
+    var btn = formAktif.find('button[type="submit"]'); var txt = btn.html(); 
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Eksekusi...');
+    
+    var payload = { recId: rowId, status: status, keterangan: catatan, user_verif: CUTI_USER_AKTIF };
+    
+    google.script.run.withSuccessHandler(function(res){
+        btn.prop('disabled', false).html(txt);
+        if (res === "Sukses") { 
+            formAktif.closest('.modal').modal('hide'); Sultan.notif.sukses('Verifikasi: ' + status + ' tersimpan.'); cuti_loadDataServer(); 
+        } else { Sultan.alert('error','Gagal', res); }
+    }).verifikasiPengajuan(rowId, status, catatan, CUTI_USER_AKTIF);
+}
+
+// =================================================================
+// 6. LOGIKA DROPDOWN CASCADING (MENGGUNAKAN DB CUTI)
+// =================================================================
+function cuti_filterNamaByUnit() { 
+    var valUnit = String($('#cuti_inputUnit').val() || "").trim(); 
+    var $selNama = $('#cuti_inputNama').empty().append('<option value="">- Pilih Nama -</option>').prop('disabled', true); 
+    $('#cuti_inputNIP').empty().append('<option value="">- Otomatis -</option>').prop('disabled', true); 
+    $('#cuti_inputStatusPegawai').val(''); 
+    $('#cuti_inputJenisCuti').html('<option value="">- Pilih -</option>').prop('disabled', true);
+    
+    if (!valUnit) return; 
+
+    var filtered = CUTI_DB_PEGAWAI_CUTI.filter(function(x) { 
+        return String(x.unit).trim().toUpperCase() === valUnit.toUpperCase(); 
+    });
+
+    var unikNama = [...new Set(filtered.map(function(x) { return String(x.nama).trim(); }))].filter(Boolean).sort(); 
+    unikNama.forEach(function(n) { $selNama.append($('<option>', {value: n, text: n})); }); 
+    $selNama.prop('disabled', false); 
+}
+
+function cuti_filterNipByNama() { 
+    var valUnit = String($('#cuti_inputUnit').val() || "").trim(); 
+    var valNama = String($('#cuti_inputNama').val() || "").trim(); 
+    var $selNip = $('#cuti_inputNIP').empty().prop('disabled', true); 
+    $('#cuti_inputStatusPegawai').val(''); 
+    $('#cuti_inputJenisCuti').html('<option value="">- Pilih -</option>').prop('disabled', true);
+
+    if (valNama) { 
+        var pegawai = CUTI_DB_PEGAWAI_CUTI.filter(function(x) { 
+            return String(x.unit).trim().toUpperCase() === valUnit.toUpperCase() && String(x.nama).trim() === valNama; 
+        }); 
+        
+        if (pegawai.length === 1) { 
+            var cNip = String(pegawai[0].nip).trim();
+            $selNip.append($('<option>', {value: cNip, text: cNip})); 
+            cuti_setPegawaiDetails(); 
+        } else if (pegawai.length > 1) { 
+            $selNip.append('<option value="">- Pilih NIP -</option>'); 
+            pegawai.forEach(function(p) { 
+                var mNip = String(p.nip).trim();
+                $selNip.append($('<option>', {value: mNip, text: mNip})); 
+            }); 
+            $selNip.prop('disabled', false); 
+        } 
+    } 
+}
+
+function cuti_setPegawaiDetails() { 
+    var valNip = $('#cuti_inputNIP').val(); if (!valNip) return; 
+    
+    var p = CUTI_DB_PEGAWAI_CUTI.find(function(x) { return String(x.nip).trim() === String(valNip).trim(); }); 
+    var defStatus = p && p.status ? p.status : "PNS/PPPK"; 
+    
+    $('#cuti_inputStatusPegawai').val(defStatus); 
+    if(p && p.alamat) $('#cuti_inputAlamat').val(p.alamat);
+    if(p && p.hp) $('#cuti_inputHP').val(p.hp);
+    
+    cuti_populateJenisCuti(defStatus); 
+}
+
+function cuti_populateJenisCuti(status) { 
+    var s = String(status || "").trim().toUpperCase(); 
+    var opsi = [];
+
+    if (s === "PNS" || s === "CPNS") {
+        opsi = ["Cuti Tahunan", "Cuti Sakit", "Cuti Alasan Penting", "Cuti Melahirkan", "Cuti Besar", "Cuti di Luar Tanggungan Negara", "Cuti Umroh"];
+    } else {
+        opsi = ["Cuti Tahunan", "Cuti Sakit", "Cuti Melahirkan", "Cuti Umroh"];
+    }
+
+    var h = '<option value="">- Pilih Jenis Cuti -</option>'; 
+    opsi.forEach(function(o) { h += `<option value="${o}">${o}</option>`; }); 
+    
+    $('#cuti_inputJenisCuti').html(h).prop('disabled', false); 
+    cuti_cekStatusReadOnlyHari(); 
+}
+
+function cuti_cekStatusReadOnlyHari() {
+    var jenis = $('#cuti_inputJenisCuti').val() || "";
+    var canEdit = (jenis === "Cuti Tahunan" || jenis === "Cuti Melahirkan" || jenis === "Cuti Umroh");
+    
+    if (canEdit) {
+        $('#cuti_inputJumlahHari').prop('readonly', false).removeClass('bg-light').addClass('bg-white');
+    } else {
+        $('#cuti_inputJumlahHari').prop('readonly', true).removeClass('bg-white').addClass('bg-light');
+        cuti_hitungHariCuti(); 
+    }
+}
+
+function cuti_hitungHariCuti() { 
+    var tgl1 = $('#cuti_inputTglMulai').val(); 
+    var tgl2 = $('#cuti_inputTglSelesai').val(); 
+    if (tgl1 && tgl2) { 
+        var d1 = new Date(tgl1); 
+        var d2 = new Date(tgl2); 
+        if (d2 < d1) { 
+            Sultan.alert('error', 'Error', 'Tanggal Selesai tidak valid!'); 
+            $('#cuti_inputTglSelesai').val(''); $('#cuti_inputJumlahHari').val(''); 
+            return; 
+        } 
+        var diffTime = Math.abs(d2 - d1); 
+        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+        
+        $('#cuti_inputJumlahHari').val(diffDays); 
+    } 
+}
+
+function cuti_indoDateToIso(str) { 
+    if(!str) return ""; 
+    str = String(str).trim();
+    if (str.match(/^\d{4}-\d{2}-\d{2}$/)) return str; 
+    if (str.includes("/") || (str.includes("-") && str.split("-")[0].length <= 2)) {
+        var sep = str.includes("/") ? "/" : "-";
+        var p = str.split(sep);
+        if (p.length === 3) return p[2] + "-" + p[1].padStart(2,'0') + "-" + p[0].padStart(2,'0');
+    }
+    var months = ["januari","februari","maret","april","mei","juni","juli","agustus","september","oktober","november","desember"]; 
+    var parts = str.split(" "); 
+    if (parts.length >= 3) { 
+        var d = parts[0].padStart(2,'0'); 
+        var mIndex = months.indexOf(parts[1].toLowerCase()); 
+        if (mIndex > -1) {
+            var m = String(mIndex + 1).padStart(2,'0'); 
+            return parts[2] + "-" + m + "-" + d; 
+        }
+    } 
+    return ""; 
+}
+
+// =================================================================
+// HELPER UTILITIES: PEMBERSIH XSS & BADGE STATUS (BAB IV & VI)
+// =================================================================
+function cuti_escapeHtml(text) { if (!text) return ""; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+function cuti_escapeJs(str) { if (!str) return ""; return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/(\r\n|\n|\r)/gm, "<br>"); }
+
+function cuti_lihatCatatanSultan(pesan) {
+    Swal.fire({
+        title: '<i class="fas fa-comment-dots text-maroon mb-2"></i><br>Catatan Verifikasi',
+        html: '<div class="text-left bg-light p-3 rounded border text-dark" style="font-size:15px; line-height:1.5;">' + pesan + '</div>',
+        showConfirmButton: true,
+        confirmButtonText: 'Saya Mengerti',
+        confirmButtonColor: '#85144b',
+        width: '400px'
+    });
+}
+
+function cuti_renderBadgeSultan(status, ket) { 
+    var s = String(status || "Diproses").toLowerCase(); 
+    var style = 'badge-sultan-light-warning'; 
+    var icon = 'clock'; 
+    var labelStatus = status || 'Diproses';
+    
+    if (s.includes('ok') || s.includes('setuju') || s.includes('acc')) { 
+        style = 'badge-sultan-light-success'; icon = 'check-circle'; 
+    } else if (s.includes('revisi')) { 
+        style = 'badge-sultan-light-info'; icon = 'sync-alt'; 
+    } else if (s.includes('tolak')) { 
+        style = 'badge-sultan-light-danger'; icon = 'times-circle'; 
+    } 
+    
+    var badgeHtml = `<span class="badge badge-sultan ${style}"><i class="fas fa-${icon} mr-1"></i>${cuti_escapeHtml(labelStatus)}</span>`;
+
+    if (ket && ket.trim().length > 2 && (s.includes('revisi') || s.includes('tolak'))) {
+        var safeKet = cuti_escapeJs(ket);
+        var btnCatatan = `<div class="mt-2"><button type="button" class="btn btn-xs btn-outline-danger font-weight-bold shadow-sm cuti-btn-catatan" style="font-size:10px; border-radius:4px;" data-pesan="${safeKet}"><i class="fas fa-comment-dots mr-1"></i> Baca Catatan</button></div>`;
+        return badgeHtml + btnCatatan;
+    }
+    return badgeHtml; 
+}
+</script>

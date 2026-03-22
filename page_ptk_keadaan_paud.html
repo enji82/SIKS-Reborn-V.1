@@ -1,80 +1,381 @@
-<header>
-  <h2>KEADAAN PTK PAUD</h2>
-</header>
-
-<div class="filter-container">
-  <div class="filter-group">
-    <label for="filterJenjang">Jenjang:</label>
-    <select id="filterJenjang"></select>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-shapes text-maroon mr-2"></i>Keadaan PTK PAUD
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
   </div>
 </div>
 
-<main class="table-view-container">
-  <div id="loadingStatus" class="loading-container">
-      <div class="spinner-container">
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
-        <div class="spinner-bar"></div>
+<section class="content">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12">
+
+        <div class="card-sultan mb-3">
+          <div class="card-body py-2 px-3 border-left-dark">
+            <div class="d-flex align-items-center justify-content-between cursor-pointer" data-toggle="collapse" data-target="#keadaanptkpaud_infoCollapse" aria-expanded="false">
+              <div class="d-flex align-items-center text-maroon font-weight-bold">
+                <i class="fas fa-info-circle mr-2"></i> Informasi
+              </div>
+              <i class="fas fa-chevron-down text-muted icon-sm"></i>
+            </div>
+            <div id="keadaanptkpaud_infoCollapse" class="collapse">
+              <div class="mt-2 pt-2 border-top small text-muted">
+                <ul class="mb-0 pl-3">
+                  <li class="mb-1">Halaman ini bersifat <b>Read-Only (Hanya Tampil)</b>.</li>
+                  <li class="mb-1">Data bersumber dari perhitungan otomatis menu Daftar Nama PTK PAUD.</li>
+                  <li class="mb-1">Perbaiki data pada Daftar Nama PTK apabila ada ketidaksesuaian jumlah matriks di bawah ini.</li>
+                  <li>Gunakan Filter <b>Jenjang</b> untuk memfokuskan rekapitulasi pada tingkat TK, KB, SPS, atau TPA.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-sultan p-3 mb-3">
+            <div class="d-flex-gap align-items-center flex-wrap">
+
+                <select id="keadaanptkpaud_filterJenjang" class="form-control form-control-sultan input-auto-width min-w-150">
+                    <option value="SEMUA">- Memuat Jenjang... -</option>
+                </select>
+
+                <select id="keadaanptkpaud_filterUnit" class="form-control form-control-sultan input-auto-width min-w-250">
+                    <option value="SEMUA">- Memuat Unit Kerja... -</option>
+                </select>
+
+                <div class="divider-vertical d-none d-md-block"></div>
+
+                <button type="button" id="keadaanptkpaud_btnSync" class="btn bg-white border shadow-sm text-secondary" title="Segarkan Data dari Server" disabled>
+                    <i class="fas fa-sync-alt text-maroon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-sultan w-100 overflow-hidden">
+          <div class="card-body p-3 w-100">
+            
+            <div id="keadaanptkpaud_loadingState">
+                <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 50vh;">
+                    <div class="sultan-loading-container text-center">
+                        <i class="fas fa-spinner fa-spin fa-3x text-maroon mb-3"></i>
+                        <h6 class="text-muted font-weight-bold" id="keadaanptkpaud_loadingText">Mengambil Rekapitulasi Server...</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div id="keadaanptkpaud_tableState" style="display:none;">
+              <table id="keadaanptkpaud_tabelUtama" class="table table-bordered table-hover table-premium table-sultan-compact table-header-compact text-nowrap mb-0 w-100" style="font-size: 0.85rem; border: none !important;">
+                
+                <thead class="font-weight-bold text-dark bg-light">
+                  <tr>
+                    <th rowspan="2" class="th-main align-middle bg-white text-maroon text-left px-3 py-1 col-sticky-left" style="z-index:50; min-width:250px; border-right: 2px solid #dee2e6; border-bottom: 2px solid #800000;">Unit Kerja</th>
+                    
+                    <th rowspan="2" class="th-main align-middle text-center px-2 py-1" style="border-bottom: 2px solid #800000;">Jenjang</th>
+                    
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e3f2fd; border-bottom: 1px solid #90caf9;">Kepala Sekolah</th>
+                    <th colspan="3" class="th-main align-middle text-center px-2 py-1" style="background-color: #e8f5e9; border-bottom: 1px solid #a5d6a7;">Guru Kelas</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #fff3e0; border-bottom: 1px solid #ffcc80;">Guru Ekstra</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #fce4ec; border-bottom: 1px solid #f48fb1;">Pengasuh</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e0f2f1; border-bottom: 1px solid #80cbc4;">Guru Lainnya</th>
+
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #e0f7fa; border-bottom: 1px solid #80deea;">Penjaga</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #efebe9; border-bottom: 1px solid #bcaaa4;">Admin</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0;">Perpus</th>
+                    <th colspan="2" class="th-main align-middle text-center px-2 py-1" style="background-color: #f9fbe7; border-bottom: 1px solid #e6ee9c;">Tendik Lain</th>
+                    
+                    <th colspan="6" class="th-main align-middle text-center px-2 py-1" style="background-color: #fff8e1; border-bottom: 1px solid #ffe082;">REKAPITULASI JUMLAH PTK</th>
+                  </tr>
+
+                  <tr class="small text-center">
+                    <th class="th-sub px-2 py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #e3f2fd; border-bottom: 2px solid #800000;">PNS</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">PNS</th><th class="th-sub px-2 py-1" style="background-color: #e8f5e9; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #fff3e0; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #fce4ec; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #e0f2f1; border-bottom: 2px solid #800000;">GTT</th>
+                    
+                    <th class="th-sub px-2 py-1" style="background-color: #e0f7fa; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #e0f7fa; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #efebe9; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #efebe9; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f5f5f5; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #f5f5f5; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #f9fbe7; border-bottom: 2px solid #800000;">GTY</th><th class="th-sub px-2 py-1" style="background-color: #f9fbe7; border-bottom: 2px solid #800000;">GTT</th>
+                    
+                    <th class="th-sub px-2 py-1" style="background-color: #fff8e1; border-bottom: 2px solid #800000;">GTY</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff8e1; border-bottom: 2px solid #800000;">PNS</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff8e1; border-bottom: 2px solid #800000;">GTT</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff8e1; border-bottom: 2px solid #800000;">PTY</th>
+                    <th class="th-sub px-2 py-1" style="background-color: #fff8e1; border-bottom: 2px solid #800000;">PTT</th>
+                    <th class="th-sub px-2 py-1 text-dark font-weight-bold" style="background-color: #ffecb3; border-bottom: 2px solid #800000; border-left: 2px solid #ffecb3;">TOTAL</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+
+                <tfoot class="bg-light font-weight-bold" style="border-top: 3px solid #800000;">
+                    <tr>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                        <th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                    </tr>
+                </tfoot>
+
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-      <p>Memuat data, mohon tunggu...</p>
   </div>
-  
-  <div id="tableWrapper" style="display:none;">
+</section>
+
+<script>
+// =================================================================
+// BAB I: ISOLASI VARIABEL GLOBAL & PENGAMAN SINTAKSIS
+// =================================================================
+var KEADAANPTKPAUD_CACHE_DATA = [];
+var KEADAANPTKPAUD_TABEL_INSTANCE = null;
+
+$(document).ready(function() {
+    KEADAANPTKPAUD_TABEL_INSTANCE = null;
+    $('#keadaanptkpaud_tableState').hide();
+    $('#keadaanptkpaud_loadingState').show();
+
+    // VAKSIN DELEGASI EVENT JQUERY (Anti Memory Leak)
+    $(document).off('change', '#keadaanptkpaud_filterJenjang').on('change', '#keadaanptkpaud_filterJenjang', keadaanptkpaud_updateFilterUnit);
+    $(document).off('change', '#keadaanptkpaud_filterUnit').on('change', '#keadaanptkpaud_filterUnit', keadaanptkpaud_terapkanFilterLokal);
+    $(document).off('click', '#keadaanptkpaud_btnSync').on('click', '#keadaanptkpaud_btnSync', keadaanptkpaud_tarikDataServer);
+
+    // HALAMAN TERBUKA: Langsung tarik data dari Server
+    keadaanptkpaud_tarikDataServer(); 
+});
+
+// =================================================================
+// 2. GATEKEEPER & FETCH SERVER (BAB VIII)
+// =================================================================
+function keadaanptkpaud_tarikDataServer() {
+    KEADAANPTKPAUD_CACHE_DATA = [];
     
-    <div class="table-container">
-        <table id="keadaanPtkPaudTable" class="data-table freeze-pane-table">
-          <thead></thead>
-          <tbody></tbody>
-          <tfoot></tfoot> 
-        </table>
-    </div>
-    <div class="table-footer-note">
-      Sumber data: laporan bulan terakhir.
-    </div>
-  </div>
-</main>
+    var btn = $('#keadaanptkpaud_btnSync');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin text-maroon"></i>');
+    $('#keadaanptkpaud_filterJenjang, #keadaanptkpaud_filterUnit').prop('disabled', true);
+    
+    $('#keadaanptkpaud_tableState').hide();
+    $('#keadaanptkpaud_loadingText').html('Mengambil Rekapitulasi Server...');
+    $('#keadaanptkpaud_loadingState').show();
 
-<style>
-  /* 1. Paksa halaman (#main-content) untuk TIDAK scroll */
-  #main-content {
-    overflow-y: hidden !important;
-  }
+    google.script.run
+        .withSuccessHandler(function(data) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-maroon"></i>');
+            KEADAANPTKPAUD_CACHE_DATA = data || [];
+            
+            keadaanptkpaud_populateFilterAwal();
+            keadaanptkpaud_terapkanFilterLokal();
+        })
+        .withFailureHandler(function(err) {
+            btn.prop('disabled', false).html('<i class="fas fa-sync-alt text-danger"></i>');
+            $('#keadaanptkpaud_loadingText').html('<span class="text-danger"><i class="fas fa-wifi mb-2"></i><br>Koneksi Terputus: ' + keadaanptkpaud_escapeHtml(err.message) + '</span>');
+            Sultan.alert('error', 'Koneksi Terputus', err.message);
+        })
+        .getDataKeadaanGTKPAUD(); 
+}
 
-  /* 2. Paksa <main> (pembungkus halaman) untuk mengisi sisa ruang */
-  main.table-view-container {
-    flex-grow: 1 !important;
-    min-height: 0 !important; 
-    display: flex !important;
-    flex-direction: column !important;
-  }
+function keadaanptkpaud_populateFilterAwal() {
+    var uniqueJenjang = new Set();
+    KEADAANPTKPAUD_CACHE_DATA.forEach(function(row) {
+        var j = String(row[2] || "").trim(); // Col C = Jenjang
+        if(j) uniqueJenjang.add(j);
+    });
 
-  /* 3. Paksa #tableWrapper untuk mengisi sisa ruang di dalam <main> */
-  #tableWrapper {
-    flex-grow: 1 !important;
-    min-height: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
+    var currentJenjang = $('#keadaanptkpaud_filterJenjang').val();
+    var $selJenjang = $('#keadaanptkpaud_filterJenjang').empty().append('<option value="SEMUA">- Semua Jenjang -</option>');
+    
+    Array.from(uniqueJenjang).sort().forEach(function(j) {
+        $selJenjang.append($('<option>', {value: j, text: j}));
+    });
+    
+    if (currentJenjang && uniqueJenjang.has(currentJenjang)) $selJenjang.val(currentJenjang);
+    $selJenjang.prop('disabled', false);
+    
+    keadaanptkpaud_updateFilterUnit(false); 
+}
 
-  /* 4. INTI: Perintahkan .table-container untuk mengisi sisa ruang DAN SCROLL */
-  #tableWrapper .table-container {
-    flex-grow: 1 !important;
-    overflow-y: auto !important; /* Aktifkan scrollbar vertikal HANYA di sini */
-  }
+function keadaanptkpaud_updateFilterUnit(triggerFilter = true) {
+    var selectedJenjang = $('#keadaanptkpaud_filterJenjang').val() || "SEMUA";
+    var uniqueUnit = new Set();
+    
+    KEADAANPTKPAUD_CACHE_DATA.forEach(function(row) {
+        var rUnit = String(row[0] || "").trim();
+        var rJenjang = String(row[2] || "").trim();
+        
+        if (selectedJenjang === "SEMUA" || rJenjang === selectedJenjang) {
+            if(rUnit) uniqueUnit.add(rUnit);
+        }
+    });
+    
+    var currentUnit = $('#keadaanptkpaud_filterUnit').val();
+    var $selUnit = $('#keadaanptkpaud_filterUnit').empty().append('<option value="SEMUA">- Semua Unit Kerja -</option>');
+    
+    Array.from(uniqueUnit).sort().forEach(function(u) {
+        $selUnit.append($('<option>', {value: u, text: u}));
+    });
+    
+    if (currentUnit && uniqueUnit.has(currentUnit)) $selUnit.val(currentUnit);
+    $selUnit.prop('disabled', false);
+    
+    if (triggerFilter) {
+        keadaanptkpaud_terapkanFilterLokal();
+    }
+}
 
-  /* 5. PERBAIKAN Z-INDEX: Paksa header pojok (Kolom 1 & 2) ke lapisan paling atas */
-  #keadaanPtkPaudTable thead th:nth-child(1),
-  #keadaanPtkPaudTable thead th:nth-child(2) {
-    z-index: 7 !important;
-  }
+function keadaanptkpaud_terapkanFilterLokal() {
+    var fJenjang = $('#keadaanptkpaud_filterJenjang').val() || "SEMUA";
+    var fUnit = $('#keadaanptkpaud_filterUnit').val() || "SEMUA";
 
-  /* 6. PERBAIKAN SCROLLBAR: Sembunyikan scrollbar */
-  #tableWrapper .table-container::-webkit-scrollbar {
-    display: none !important; 
-  }
-  #tableWrapper .table-container {
-    scrollbar-width: none !important; 
-    -ms-overflow-style: none !important; 
-  }
-</style>
+    var filteredData = KEADAANPTKPAUD_CACHE_DATA.filter(function(row) {
+        var rUnit = String(row[0] || "").trim();
+        var rJenjang = String(row[2] || "").trim();
+        
+        var passJenjang = (fJenjang === "SEMUA" || rJenjang === fJenjang);
+        var passUnit = (fUnit === "SEMUA" || rUnit === fUnit);
+        return passJenjang && passUnit;
+    });
+
+    keadaanptkpaud_renderTabel(filteredData);
+}
+
+// =================================================================
+// 3. RENDER ENGINE MATRIKS: EXCEL SOLID COLOR (BAB VII)
+// =================================================================
+function keadaanptkpaud_getColumnColor(index) {
+    if (index >= 3 && index <= 4) return "#e3f2fd";   
+    if (index >= 5 && index <= 7) return "#f1f8e9";   
+    if (index >= 8 && index <= 9) return "#fff8e1";   
+    if (index >= 10 && index <= 11) return "#fce4ec"; 
+    if (index >= 12 && index <= 13) return "#e0f2f1"; 
+    if (index >= 14 && index <= 15) return "#e0f7fa"; 
+    if (index >= 16 && index <= 17) return "#efebe9"; 
+    if (index >= 18 && index <= 19) return "#f5f5f5"; 
+    if (index >= 20 && index <= 21) return "#f9fbe7"; 
+    if (index >= 22 && index <= 26) return "#fff8e1"; 
+    if (index === 27) return "#ffecb3"; 
+    return "#ffffff";
+}
+
+function keadaanptkpaud_escapeHtml(text) {
+    if (!text) return "";
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+function keadaanptkpaud_renderTabel(dataRows) {
+    var dtArray = [];
+
+    dataRows.forEach(function(row) {
+        var arrRow = [];
+
+        // KEPATUHAN: NPSN Dimusnahkan. Kolom 1 (Index 0 di DT): HANYA Unit Kerja
+        var uiUnit = '<div class="font-weight-bold text-dark text-left text-wrap" style="min-width: 250px;">' + (keadaanptkpaud_escapeHtml(row[0]) || '-') + '</div>';
+        arrRow.push(uiUnit);
+        
+        // Kolom 2 (Index 1 di DT): Jenjang
+        arrRow.push('<span class="font-weight-bold text-maroon">' + (keadaanptkpaud_escapeHtml(row[2]) || '-') + '</span>');
+
+        // Kolom Data Numerik (Index 2 s/d 26 di DT, dari backend Index 3 s/d 27)
+        for (var c = 3; c <= 27; c++) {
+            var val = parseInt(row[c]) || 0;
+            // VAKSIN EXCEL: Teks dicetak telanjang agar class padding/pewarnaan pada <td> merapat sempurna
+            if (val === 0) {
+                arrRow.push('<span class="text-muted opacity-50">-</span>');
+            } else {
+                arrRow.push('<span class="font-weight-bold text-dark">' + val + '</span>');
+            }
+        }
+        dtArray.push(arrRow);
+    });
+
+    if (!$.fn.DataTable.isDataTable('#keadaanptkpaud_tabelUtama')) {
+        KEADAANPTKPAUD_TABEL_INSTANCE = $('#keadaanptkpaud_tabelUtama').DataTable({
+            "data": dtArray, 
+            "destroy": true, "ordering": false, "pageLength": 10, "autoWidth": false,
+            "deferRender": true, 
+            "dom": "<'row mb-2'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                   "<'row'<'col-sm-12'<'table-responsive sultan-scroll'tr>>>" +
+                   "<'row mt-2'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+            // VAKSIN RESOLUSI: Spesifikasikan Indeks
+            "columnDefs": [
+                { "targets": 0, "className": "col-sticky-left bg-white align-middle border-right text-left px-3 py-1" },
+                { "targets": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26], "className": "text-center align-middle p-0" } 
+            ],
+            "language": { 
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json", 
+                "emptyTable": '<div class="py-4 text-center text-muted"><i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3" style="opacity: 0.6;"></i><br><h6 class="font-weight-bold text-dark mb-1">Belum Ada Data</h6><p class="small mb-0">Tidak ada keadaan PTK PAUD untuk filter terpilih.</p></div>' 
+            },
+            // VAKSIN EXCEL: Mewarnai tag dasar <td> agar solid penuh tanpa ada rongga
+            "createdRow": function(row, data, dataIndex) {
+                // Background Putih untuk Jenjang
+                $('td', row).eq(1).css('background-color', '#ffffff').addClass('text-dark py-1');
+
+                // Loop index array dari DT (Index 2 sampai 26)
+                for (var i = 2; i <= 26; i++) {
+                    var colIndexBackend = i + 1; // Konversi index DT ke referensi warna backend (3 s/d 27)
+                    var bgColor = keadaanptkpaud_getColumnColor(colIndexBackend);
+                    var td = $('td', row).eq(i);
+                    
+                    td.css('background-color', bgColor).addClass('py-1');
+                    if (colIndexBackend === 27) {
+                        td.css('border-left', '2px solid #ffecb3');
+                    }
+                }
+            },
+            "footerCallback": function (row, data, start, end, display) {
+                var api = this.api();
+                // KALIBRASI MUTLAK LOOPING: Index 2 s/d 26 -> 25 elemen total
+                var totalArr = new Array(25).fill(0); 
+
+                // Hitung total angka murni
+                api.rows({ search: 'applied' }).data().each(function(rowData) {
+                    for (var i = 2; i <= 26; i++) {
+                        var rawStr = String(rowData[i]);
+                        var val = parseInt(rawStr.replace(/<[^>]*>?/gm, '').replace(/,/g, '')) || 0;
+                        totalArr[i-2] += val;
+                    }
+                });
+
+                var footHtml = '<th class="bg-light text-maroon text-left font-weight-bold px-3 py-1 align-middle col-sticky-left" style="z-index:40; border-right: 2px solid #dee2e6;">TOTAL JUMLAH</th>';
+                footHtml += '<th class="bg-light py-1"></th>'; 
+
+                for (var i = 0; i < 25; i++) {
+                    var colIndex = i + 3; // Ke Index Warna
+                    var bgColor = keadaanptkpaud_getColumnColor(colIndex); 
+                    var style = 'background-color: ' + bgColor + ' !important; vertical-align: middle; height: 35px;';
+                    if (colIndex === 27) style += ' border-left: 2px solid #ffecb3 !important;'; 
+                    
+                    footHtml += '<th class="text-center px-2 py-1 font-weight-bold text-maroon" style="' + style + '">' + totalArr[i] + '</th>';
+                }
+
+                // Injeksi mutlak ke tag pancingan dummy <tr> di dalam <tfoot>
+                $(api.table().footer()).find('tr').html(footHtml);
+            }
+        });
+
+        $('#keadaanptkpaud_loadingState').hide();
+        $('#keadaanptkpaud_tableState').show();
+        
+        // VAKSIN MICRO-BLINK: Jeda render DataTables
+        setTimeout(function(){ KEADAANPTKPAUD_TABEL_INSTANCE.columns.adjust(); }, 50);
+    } 
+    else {
+        KEADAANPTKPAUD_TABEL_INSTANCE.clear().rows.add(dtArray).draw(false);
+        
+        if ($('#keadaanptkpaud_tableState').is(':hidden')) {
+            $('#keadaanptkpaud_loadingState').hide();
+            $('#keadaanptkpaud_tableState').show();
+            setTimeout(function(){ KEADAANPTKPAUD_TABEL_INSTANCE.columns.adjust(); }, 50);
+        }
+    }
+}
+</script>

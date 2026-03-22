@@ -1,7 +1,15 @@
+/* ======================================================================
+   CODE.GS - KONFIGURASI GLOBAL & SISTEM UTAMA
+   Berisi: ID Database, ID Folder, Login, & Routing Halaman
+   ====================================================================== */
+
+// 1. DATABASE CONFIG (Digunakan oleh semua file .gs lainnya)
 const SPREADSHEET_IDS = {
   DATABASE_USER: "1wiDKez4rL5UYnpP2-OZjYowvmt1nRx-fIMy9trJlhBA",
   SHEET_USER_NAME: "Data User",
-  SK_DATA: "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4",
+  SK_DATA: "1AmvOJAhOfdx09eT54x62flWzBZ1xNQ8Sy5lzvT9zJA4", // ID Database SK
+  
+  // ID Lainnya (Biarkan saja jika nanti dipakai modul lain)
   DROPDOWN_DATA: "1wiDKez4rL5UYnpP2-OZjYowvmt1nRx-fIMy9trJlhBA", 
   PAUD_DATA: "1an0oQQPdMh6wrUJIAzTGYk3DKFvYprK5SU7RmRXjIgs",
   SD_DATA: "1u4tNL3uqt5xHITXYwHnytK6Kul9Siam-vNYuzmdZB4s",
@@ -10,9 +18,8 @@ const SPREADSHEET_IDS = {
   PTK_SD_DB: "1HlyLv3Ai3_vKFJu3EKznqI9v8g0tfqiNg0UbIojNMQ0",
   DATA_SEKOLAH: "1qeOYVfqFQdoTpysy55UIdKwAJv3VHo4df3g6u6m72Bs",   
   FORM_OPTIONS_DB: "1prqqKQBYzkCNFmuzblNAZE41ag9rZTCiY2a0WvZCTvU",
-  SIABA_REKAP: "1x3b-yzZbiqP2XfJNRC3XTbMmRTHLd8eEdUqAlKY3v9U",
-  SIABA_TIDAK_PRESENSI: "1mjXz5l_cqBiiR3x9qJ7BU4yQ3f0ghERT9ph8CC608Zc",
   SIABA_DB: "1sfbvyIZurU04gictep8hI-NnvicGs0wrDqANssVXt6o",
+  SIABA_TA_PA: "1tQsQY1-Ny1ie66GOZPTLtvZ7BiYCgFdNrX-AVGCtaHA",
   SIABA_SALAH_DB: "1TZGrMiTuyvh2Xbo44RhJuWlQnOC5LzClsgIoNKtRFkY",
   SIABA_DINAS_DB: "1I_2yUFGXnBJTCSW6oaT3D482YCs8TIRkKgQVBbvpa1M",
   SIABA_CUTI_DB: "1DhBjmLHFMuJqWM6yJHsm-1EKvHzG8U4zK2GuU-dIgn8",
@@ -23,8 +30,12 @@ const SPREADSHEET_IDS = {
   SIABA_PAK_DB: "1mAXwf7cHaOqIj2uf51Fup5tyyBzijTeIxVS8uO1E4dM",
 };
 
+// 2. FOLDER CONFIG (Digunakan oleh semua file .gs lainnya)
 const FOLDER_CONFIG = {
-  MAIN_SK: "1GwIow8B4O1OWoq3nhpzDbMO53LXJJUKs", 
+  MAIN_SK: "1GwIow8B4O1OWoq3nhpzDbMO53LXJJUKs", // Folder Utama SK
+  TRASH_SK: "1OB2Mxa_zvpYl7Vru9NEddYmBlU5SfYHL", // Folder Sampah SK
+  
+  // Folder Lainnya
   LAPBUL_KB: "18CxRT-eledBGRtHW1lFd2AZ8Bub6q5ra",
   LAPBUL_TK: "1WUNz_BSFmcwRVlrG67D2afm9oJ-bVI9H",
   LAPBUL_SD: "1I8DRQYpBbTt1mJwtD1WXVD6UK51TC8El",
@@ -36,251 +47,461 @@ const FOLDER_CONFIG = {
   SIABA_PAK_DOCS: "1cvn-pOufs-OIbFQfqhmxc3fcmFuox4Sc",
 };
 
-function doGet() {
-  return HtmlService.createTemplateFromFile('index')
-    .evaluate()
-    .setTitle('SIKS - REBORN')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+// ==========================================
+// 2. CORE WEB APP (DoGet & Routing)
+// ==========================================
+function doGet(e) {
+  var template = HtmlService.createTemplateFromFile('index');
+  return template.evaluate()
+      .setTitle('SIKS - REBORN')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
-// PERBAIKAN VITAL: Menggunakan Template agar kode <?!= di dalam file diproses server
 function include(filename) {
-  return HtmlService.createTemplateFromFile(filename).evaluate().getContent();
-}
-
-function checkLogin(username, password) {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
-  const sheet = ss.getSheetByName(SPREADSHEET_IDS.SHEET_USER_NAME);
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() == username && String(data[i][1]).trim() == password) {
-      const userObj = {
-        fullName: data[i][2], role: data[i][3], photo: data[i][4] || "", isLoggedIn: true
-      };
-      PropertiesService.getUserProperties().setProperty('currentUser', JSON.stringify(userObj));
-      return userObj;
-    }
-  }
-  return null;
-}
-
-function getCurrentUser() {
-  const user = PropertiesService.getUserProperties().getProperty('currentUser');
-  return user ? JSON.parse(user) : null;
-}
-
-function processLogin(formObject) {
-  // 1. Ambil ID dari konstanta yang sudah Anda buat di atas
-  var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER); 
-  
-  // 2. Ambil Nama Sheet dari konstanta (tadi tertulis "Users", harusnya "Data User")
-  var sheetName = SPREADSHEET_IDS.SHEET_USER_NAME; 
-  var sheet = ss.getSheetByName(sheetName);
-  
-  if (!sheet) {
-    return { status: "error", message: "Sheet '" + sheetName + "' tidak ditemukan!" };
-  }
-
-  var data = sheet.getDataRange().getValues();
-  
-  // Ambil input dari user (Pastikan name="username" di HTML ada)
-  var inputUser = formObject.username ? formObject.username.toString().trim() : "";
-  var inputPass = formObject.password ? formObject.password.toString().trim() : "";
-
-  for (var i = 1; i < data.length; i++) {
-    var row = data[i];
-    
-    // Sesuaikan kolom A=0 (User), B=1 (Pass)
-    var dbUser = row[0] ? row[0].toString().trim() : "";
-    var dbPass = row[1] ? row[1].toString().trim() : "";
-    
-    if (dbUser === inputUser && dbPass === inputPass) {
-      // Simpan juga ke PropertiesService agar fungsi checkSession() lama tetap jalan
-      var userObj = {
-        fullName: row[2], 
-        role: row[3], 
-        photo: row[4] || "", 
-        isLoggedIn: true
-      };
-      PropertiesService.getUserProperties().setProperty('currentUser', JSON.stringify(userObj));
-
-      return {
-        status: "success",
-        username: dbUser,
-        nama: row[2], // Nama Lengkap
-        role: row[3], 
-        foto: row[4]  // ID Foto Drive
-      };
-    }
-  }
-
-  return { status: "error", message: "Username atau Password salah" };
-}
-
-function processLogout() {
-  PropertiesService.getUserProperties().deleteProperty('currentUser');
-}
-
-function getHalaman(namaFile) {
-  try {
-    const prefix = "page_";
-    const realName = namaFile.startsWith(prefix) ? namaFile : prefix + namaFile;
-    return HtmlService.createTemplateFromFile(realName).evaluate().getContent();
-  } catch (err) {
-    return '<div class="p-4"><div class="alert alert-warning">File <b>' + namaFile + '</b> belum ada.</div></div>';
-  }
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 function getScriptUrl() {
   return ScriptApp.getService().getUrl();
 }
 
-function prosesUnggahSK(formData) {
+// Routing Halaman (KEMBALI KE NAMA ASLI 'getHalaman')
+function getHalaman(namaFile) {
   try {
-    // 1. TANGKAP USERNAME DARI BROWSER (Ini kuncinya!)
-    // Jika formData.username kosong, fallback ke email login
-    const usernameKirim = formData.username || Session.getActiveUser().getEmail();
-    const usernameCari = usernameKirim.toString().toLowerCase().trim();
+    const prefix = "page_";
+    const realName = namaFile.startsWith(prefix) ? namaFile : prefix + namaFile;
+    return HtmlService.createTemplateFromFile(realName).evaluate().getContent();
+  } catch (err) {
+    return '<div class="alert alert-danger p-3">Halaman <b>' + namaFile + '</b> belum dibuat atau nama file salah.</div>';
+  }
+}
 
-    // 2. Buka Database User untuk Mencari Nama Lengkap
-    const ssUser = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
-    const sheetUser = ssUser.getSheetByName(SPREADSHEET_IDS.SHEET_USER_NAME);
-    const dataUser = sheetUser.getDataRange().getValues();
+// Alias untuk loadPage (jaga-jaga jika ada script lain yang memanggil)
+function loadPage(namaFile) { return getHalaman(namaFile); }
+
+// ==========================================
+// 3. AUTH SYSTEM (MANUAL LOGIN)
+// ==========================================
+
+// A. PROSES CEK PASSWORD (SAAT TOMBOL LOGIN DITEKAN)
+function processLogin(formObj) {
+  try {
+    var inputUser = "";
+    var inputPass = "";
     
-    let namaLengkapFinal = usernameKirim; // Default nama user jika tidak ketemu
+    if (typeof formObj === 'object' && formObj.username) {
+      inputUser = String(formObj.username).trim();
+      inputPass = String(formObj.password).trim();
+    } else {
+      inputUser = String(arguments[0]).trim();
+      inputPass = String(arguments[1]).trim();
+    }
 
-    // 3. Loop Cari Username di Kolom A
-    for (let i = 1; i < dataUser.length; i++) {
-      // Pastikan kolom A ada isinya
-      if (dataUser[i][0]) {
-        let dbUsername = dataUser[i][0].toString().toLowerCase().trim(); 
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER); 
+    var sheet = ss.getSheetByName(SPREADSHEET_IDS.SHEET_USER_NAME);
+    var data = sheet.getDataRange().getValues();
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      // Kolom A=Username, B=Password, C=Nama Lengkap, D=Role, E=Foto
+      if (String(row[0]).trim().toLowerCase() == inputUser.toLowerCase() && String(row[1]).trim() == inputPass) {
         
-        // Jika Username Cocok
-        if (dbUsername === usernameCari) {
-          namaLengkapFinal = dataUser[i][2]; // AMBIL NAMA LENGKAP (KOLOM C)
+        var realName = row[2]; // Nama dari Excel
+        
+        // JIKA NAMA KOSONG DI EXCEL, PAKAI USERNAME AGAR TIDAK ERROR
+        if (!realName || realName === "") realName = row[0];
+
+        var userObj = {
+          username: row[0],
+          nama_lengkap: realName, // KUNCI UTAMA
+          nama: realName,         // KUNCI CADANGAN (Legacy Support)
+          role: row[3],     
+          photo: row[4] || "", 
+          unit: row[4] || "",     // Asumsi Unit ada di kolom E juga/sesuaikan
+          isLoggedIn: true
+        };
+        
+        return { 
+          status: 'success', 
+          message: 'Login Berhasil',
+          userData: userObj 
+        };
+      }
+    }
+    return { status: 'error', message: 'Username atau Password Salah.' };
+  } catch (e) {
+    return { status: 'error', message: 'Error Server: ' + e.toString() };
+  }
+}
+
+// FUNGSI INI SUDAH TIDAK DIPERLUKAN LAGI (BISA DIHAPUS ATAU BIARKAN KOSONG)
+// Karena pengecekan user sekarang dilakukan di sisi client (browser)
+function getCurrentUser() {
+  return null; 
+}
+
+function processLogout() {
+  // Tidak ada yang perlu dihapus di server
+  return { status: 'success' };
+}
+
+
+// ==========================================
+// 4. VISITOR COUNTER & SETTING
+// ==========================================
+function getVisitorStats() {
+  var props = PropertiesService.getScriptProperties();
+  var today = new Date().toLocaleDateString("id-ID"); 
+  
+  // Statistik Hits
+  var totalHits = Number(props.getProperty('TOTAL_HITS')) || 0;
+  var lastDate = props.getProperty('LAST_DATE_HIT');
+  var todayHits = Number(props.getProperty('TODAY_HITS')) || 0;
+  
+  // Ambil Data Online Terupdate
+  var onlineCount = Number(props.getProperty('ONLINE_COUNT')) || 0;
+
+  if (lastDate !== today) {
+    todayHits = 0;
+    props.setProperty('LAST_DATE_HIT', today);
+  }
+
+  totalHits++;
+  todayHits++;
+  props.setProperty('TOTAL_HITS', totalHits.toString());
+  props.setProperty('TODAY_HITS', todayHits.toString());
+
+  // Running Text & User Count
+  var totalUsers = 0;
+  var infoText = "Selamat Datang di SIKS-REBORN";
+
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
+    // Hitung User
+    var sheetUser = ss.getSheetByName(SPREADSHEET_IDS.SHEET_USER_NAME);
+    if(sheetUser) totalUsers = sheetUser.getLastRow() - 1;
+    // Ambil Running Text
+    var sheetSetting = ss.getSheetByName("SETTING");
+    if (sheetSetting) infoText = sheetSetting.getRange("B1").getValue();
+  } catch (e) {
+    infoText = "Maintenance Mode";
+  }
+
+  return { 
+    total: totalHits, 
+    today: todayHits, 
+    users: totalUsers, 
+    online: onlineCount, // <--- Data Baru dikirim ke sini
+    info: infoText 
+  };
+}
+
+function saveRunningText(textBaru) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
+    var sheet = ss.getSheetByName("SETTING");
+    if (!sheet) {
+      sheet = ss.insertSheet("SETTING");
+      sheet.getRange("A1").setValue("RUNNING_TEXT");
+    }
+    sheet.getRange("B1").setValue(textBaru);
+    return { status: 'success', message: 'Berhasil disimpan!' };
+  } catch (e) {
+    return { status: 'error', message: 'Gagal: ' + e.message };
+  }
+}
+
+// Untuk memuat halaman Setting di Sidebar
+function loadPageSetting() {
+  return HtmlService.createTemplateFromFile('page_setting').evaluate().getContent();
+}
+
+/* ======================================================================
+   MODUL: MONITORING AKTIVITAS (TURBO SPLIT)
+   ====================================================================== */
+
+// JALUR 1: STATISTIK & GRAFIK (Cepat)
+function getMonitoring_Charts() {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
+    var sheetLog = ss.getSheetByName("LOG_ACCESS");
+    if (!sheetLog) return { error: "Sheet LOG_ACCESS tidak ditemukan" };
+
+    // Ambil Data: Kolom A (Timestamp) & F (Jenis Hari)
+    // Kita tidak butuh nama user disini, jadi lebih ringan
+    var lastRow = sheetLog.getLastRow();
+    if (lastRow < 2) return { empty: true };
+    
+    // Ambil A sampai F
+    var data = sheetLog.getRange(2, 1, lastRow - 1, 6).getValues();
+
+    var stats = {
+      total: data.length, kerja: 0, libur: 0,
+      daily: {}, weekly: {}, monthly: {}
+    };
+
+    var months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      var rawTime = row[0]; // Timestamp
+      var jenis = String(row[5] || "").toLowerCase(); // Jenis Hari
+
+      // 1. Hitung Kerja vs Libur
+      if (jenis.includes("libur") || jenis.includes("minggu") || jenis.includes("sabtu")) {
+        stats.libur++;
+      } else {
+        stats.kerja++;
+      }
+
+      // 2. Olah Tanggal
+      var d = new Date(rawTime);
+      if (isNaN(d.getTime())) continue; // Skip jika tanggal error
+
+      // Harian (yyyy-mm-dd)
+      var tglKey = Utilities.formatDate(d, "Asia/Jakarta", "yyyy-MM-dd");
+      stats.daily[tglKey] = (stats.daily[tglKey] || 0) + 1;
+
+      // Bulanan (Nama Bulan)
+      var blnKey = months[d.getMonth()] + " " + d.getFullYear();
+      stats.monthly[blnKey] = (stats.monthly[blnKey] || 0) + 1;
+
+      // Mingguan (Week Number)
+      var weekNum = Utilities.formatDate(d, "Asia/Jakarta", "w");
+      var weekKey = "Minggu " + weekNum;
+      stats.weekly[weekKey] = (stats.weekly[weekKey] || 0) + 1;
+    }
+
+    return JSON.stringify(stats);
+
+  } catch (e) { return JSON.stringify({ error: e.toString() }); }
+}
+
+// JALUR 2: ANALISA USER (Ranking & Pasif)
+function getMonitoring_Users() {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
+    
+    // 1. Ambil Log User (Kolom D = Nama User)
+    var sheetLog = ss.getSheetByName("LOG_ACCESS");
+    var userActivityMap = {}; // Menghitung frekuensi login
+    
+    if (sheetLog && sheetLog.getLastRow() > 1) {
+      // Ambil hanya kolom D (Index 4)
+      var dataLog = sheetLog.getRange(2, 4, sheetLog.getLastRow() - 1, 1).getValues();
+      for (var i = 0; i < dataLog.length; i++) {
+        var uName = String(dataLog[i][0]).trim();
+        if (uName) {
+          userActivityMap[uName] = (userActivityMap[uName] || 0) + 1;
+        }
+      }
+    }
+
+    // 2. Hitung Top 10
+    var ranking = [];
+    for (var key in userActivityMap) {
+      ranking.push({ name: key, count: userActivityMap[key] });
+    }
+    // Sort Descending
+    ranking.sort(function(a, b) { return b.count - a.count; });
+    var top10 = ranking.slice(0, 10);
+
+    // 3. Cari User Pasif (Bandingkan dengan Database User)
+    var userPasif = [];
+    var sheetUser = ss.getSheetByName(SPREADSHEET_IDS.SHEET_USER_NAME); // Pastikan variable global ini benar
+    if (sheetUser && sheetUser.getLastRow() > 1) {
+      // Asumsi Nama User ada di Kolom C (Index 3) di sheet USER_DATA
+      // Sesuaikan index kolom ini dengan database user Anda!
+      var dataUser = sheetUser.getRange(2, 3, sheetUser.getLastRow() - 1, 1).getValues();
+      
+      for (var j = 0; j < dataUser.length; j++) {
+        var dbName = String(dataUser[j][0]).trim();
+        if (dbName && !userActivityMap[dbName]) {
+           userPasif.push(dbName);
+        }
+      }
+    }
+
+    return JSON.stringify({
+      topUsers: top10,
+      passiveUsers: userPasif
+    });
+
+  } catch (e) { return JSON.stringify({ error: e.toString() }); }
+}
+
+/* ======================================================================
+   MODUL: LOGGER PENGUNJUNG (REQUIRED FOR HOME & MONITORING)
+   ====================================================================== */
+
+function logUserVisit(userData) {
+  if (!userData) return;
+  
+  // 1. UPDATE STATUS ONLINE
+  updateOnlineStatus(userData.username || userData.nama); // Pakai Username untuk ID Unik
+
+  // 2. SIMPAN LOG
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
+    var sheet = ss.getSheetByName("LOG_ACCESS");
+    
+    if (!sheet) {
+        sheet = ss.insertSheet("LOG_ACCESS");
+        sheet.appendRow(["Timestamp", "Tanggal", "Bulan", "Nama User", "Role", "Jenis Hari"]);
+    }
+    
+    var now = new Date();
+    var timestamp = Utilities.formatDate(now, "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+    var tgalOnly  = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd");
+    var blnOnly   = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM");
+    
+    // LOGIC HARI LIBUR... (Sama seperti sebelumnya)
+    var dayIndex = now.getDay();
+    var jenisHari = (dayIndex === 0 || dayIndex === 6) ? "Hari Libur" : "Hari Efektif";
+    
+    // PRIORITAS NAMA: Cek nama_lengkap dulu, baru nama, baru username
+    var namaLog = userData.nama_lengkap || userData.nama || userData.username || "Unknown";
+
+    sheet.appendRow([
+        timestamp, 
+        tgalOnly, 
+        blnOnly, 
+        namaLog, // <--- INI SUDAH DIPERBAIKI
+        userData.role, 
+        jenisHari
+    ]);
+    
+  } catch (e) { console.log("Log Error: " + e.message); }
+}
+
+/* ======================================================================
+   MODUL: LOGGER PENGUNJUNG & ONLINE TRACKER (WAJIB ADA)
+   ====================================================================== */
+
+// 1. UPDATE STATUS ONLINE (Untuk menghitung User Online Realtime)
+function updateOnlineStatus(username) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var now = new Date().getTime();
+    var cutoff = now - (10 * 60 * 1000); // Batas aktif: 10 Menit terakhir
+    
+    // Ambil database user online dari memori script
+    var json = props.getProperty('ONLINE_USERS_DB');
+    var activeUsers = json ? JSON.parse(json) : {};
+    
+    // Masukkan user ini (Update waktu terakhir akses)
+    if (username) activeUsers[username] = now;
+    
+    // Bersihkan user yang sudah offline (lebih dari 10 menit tidak aktif)
+    var cleanList = {};
+    var count = 0;
+    for (var u in activeUsers) {
+      if (activeUsers[u] > cutoff) {
+        cleanList[u] = activeUsers[u];
+        count++;
+      }
+    }
+    
+    // Simpan Kembali ke Properti Script
+    props.setProperty('ONLINE_USERS_DB', JSON.stringify(cleanList));
+    props.setProperty('ONLINE_COUNT', count.toString());
+    
+  } catch (e) {
+    console.log("Online Tracker Error: " + e.message);
+  }
+}
+
+// 2. LOG VISITOR KE SPREADSHEET (Untuk Data Historis & Grafik)
+function logUserVisit(userData) {
+  // Cegah error jika data user kosong
+  if (!userData) return;
+  
+  // A. Update Status Online (Realtime)
+  updateOnlineStatus(userData.username || userData.nama);
+
+  // B. Simpan Log Permanen ke Spreadsheet
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER);
+    var sheet = ss.getSheetByName("LOG_ACCESS");
+    
+    // Jika sheet belum ada, buat baru otomatis
+    if (!sheet) {
+        sheet = ss.insertSheet("LOG_ACCESS");
+        sheet.appendRow(["Timestamp", "Tanggal", "Bulan", "Nama User", "Role", "Jenis Hari"]);
+    }
+    
+    var now = new Date();
+    var timestamp = Utilities.formatDate(now, "Asia/Jakarta", "dd/MM/yyyy HH:mm:ss");
+    var tgalOnly  = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd");
+    var blnOnly   = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM");
+    
+    // Cek Hari Libur (Sabtu/Minggu)
+    var dayIndex = now.getDay();
+    var jenisHari = "Hari Efektif";
+    var ketHari = "Reguler";
+
+    // 1. Cek Weekend
+    if (dayIndex === 0 || dayIndex === 6) {
+      jenisHari = "Hari Libur";
+      ketHari = (dayIndex === 0) ? "Minggu" : "Sabtu";
+    }
+
+    // 2. Cek Kalender Libur (Jika Anda punya sheet DATA_LIBUR)
+    var sheetLibur = ss.getSheetByName("DATA_LIBUR");
+    if (sheetLibur && sheetLibur.getLastRow() > 1) {
+      var dataLibur = sheetLibur.getRange(2, 1, sheetLibur.getLastRow()-1, 2).getValues();
+      for (var i = 0; i < dataLibur.length; i++) {
+        var tglLibur = Utilities.formatDate(new Date(dataLibur[i][0]), "Asia/Jakarta", "yyyy-MM-dd");
+        if (tglLibur === tgalOnly) {
+          jenisHari = "Hari Libur";
+          ketHari = dataLibur[i][1];
           break;
         }
       }
     }
 
-    // 4. Proses Simpan File ke Drive
-    const ssSK = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
-    const sheetSK = ssSK.getSheetByName("Unggah_SK");
-    const parentFolder = DriveApp.getFolderById(FOLDER_CONFIG.MAIN_SK);
-    
-    // Buat Folder Tahun & Semester jika belum ada
-    const folderTahun = getSubFolder_(parentFolder, formData.tahunAjaran.replace(/\//g, "-"));
-    const folderSemester = getSubFolder_(folderTahun, formData.semester);
-    
-    // Buat File PDF
-    const fileBlob = Utilities.newBlob(
-      Utilities.base64Decode(formData.fileData), 
-      "application/pdf", 
-      formData.namaSd + " - " + formData.kriteriaSk
-    );
-    const newFile = folderSemester.createFile(fileBlob);
-    const fileUrl = newFile.getUrl();
-
-    // 5. Masukkan Data ke Spreadsheet
-    // Urutan Kolom: A=Tanggal, B=NamaSD, C=Tahun, D=Semester, E=NoSK, F=TglSK, G=Kriteria, H=Link, I=UserInput
-    const rowData = [
-      new Date(),             
-      formData.namaSd,        
-      formData.tahunAjaran,   
-      formData.semester,      
-      formData.nomorSk,       
-      formData.tanggalSk,     
-      formData.kriteriaSk,    
-      fileUrl,                
-      namaLengkapFinal,       // <--- NAMA LENGKAP HASIL PENCARIAN
-      "Diproses",             
-      "", "", "", "", ""      
-    ];
-
-    sheetSK.appendRow(rowData);
-    return { success: true, message: "Dokumen berhasil disimpan atas nama: " + namaLengkapFinal };
+    // Simpan Baris Log
+    sheet.appendRow([
+        timestamp, 
+        tgalOnly, 
+        blnOnly, 
+        userData.nama || userData.username, 
+        userData.role, 
+        jenisHari + " (" + ketHari + ")"
+    ]);
     
   } catch (e) {
-    return { success: false, message: "Error Server: " + e.toString() };
+    console.log("Log Error: " + e.message);
   }
 }
 
-/**
- * FUNGSI BANTUAN: Handle Folder Drive
- */
-function getSubFolder_(parent, folderName) {
-  const folders = parent.getFoldersByName(folderName);
-  if (folders.hasNext()) {
-    return folders.next();
-  } else {
-    return parent.createFolder(folderName);
-  }
-}
+/* ======================================================================
+   MODUL: SELF-HEALING USER DATA (FIX NAMA "USER WEB")
+   ====================================================================== */
 
-function getDaftarSK() {
+function getUserProfileByName(username) {
   try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
-    const sheet = ss.getSheetByName("Unggah_SK");
-    const data = sheet.getDataRange().getValues();
-    
-    // Hapus header
-    if (data.length > 0) data.shift();
-    
-    // Kita format data di sini agar HTML terima bersih
-    return data.map((row, index) => {
-      return {
-        rowBaris: index + 2, // Untuk ID Hapus/Edit
-        
-        // DATA UTAMA
-        namaSd:    String(row[1]), 
-        tahun:     String(row[2]),
-        semester:  String(row[3]),
-        noSk:      String(row[4]),
-        // Format Tanggal SK jadi String (dd-MM-yyyy)
-        tglSk:     formatDate_(row[5]), 
-        kriteria:  String(row[6]),
-        fileUrl:   String(row[7]),
-        status:    String(row[9]),
-        
-        // DATA TAMBAHAN
-        // Format Tanggal Unggah jadi String
-        tglUnggah: formatDate_(row[0]), 
-        userInput: String(row[8]),
-        tglUpdate: formatDate_(row[10]), // Kolom K
-        userUpdate:String(row[11]),      // Kolom L
-        tglVerval: formatDate_(row[12]), // Kolom M
-        verifikator:String(row[13]),     // Kolom N
-        keterangan: String(row[14])      // Kolom O
-      };
-    }).reverse(); // Yang baru di atas
-    
-  } catch (e) {
-    // Log error di server agar ketahuan
-    console.error("Error getDaftarSK: " + e.toString()); 
-    return []; 
-  }
-}
+    var ss = SpreadsheetApp.openById(SPREADSHEET_IDS.DATABASE_USER); // Pastikan ID ini benar
+    var sheet = ss.getSheetByName(SPREADSHEET_IDS.SHEET_USER_NAME); // Pastikan Nama Sheet benar
+    var data = sheet.getDataRange().getValues();
 
-// FUNGSI BANTUAN FORMAT TANGGAL (PENTING AGAR DATA MUNCUL)
-function formatDate_(dateObj) {
-  if (!dateObj || dateObj === "") return "-";
-  try {
-    // Ubah objek tanggal jadi teks "05-01-2026"
-    return Utilities.formatDate(new Date(dateObj), "Asia/Jakarta", "dd-MM-yyyy");
+    // Loop cari username (Kolom A / Index 0)
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim().toLowerCase() === String(username).trim().toLowerCase()) {
+        // Asumsi Struktur Kolom Database User:
+        // A=Username, B=Password, C=Nama Lengkap, D=Role, E=Unit/Foto
+        return {
+          found: true,
+          username: data[i][0],
+          nama_lengkap: data[i][2], // Kolom C
+          role: data[i][3],         // Kolom D
+          unit: data[i][4]          // Kolom E
+        };
+      }
+    }
+    return { found: false };
   } catch (e) {
-    return String(dateObj); // Kalau gagal, kembalikan aslinya
-  }
-}
-
-function hapusDataSK(rowBaris) {
-  /* ... (Fungsi hapus tetap sama seperti sebelumnya) ... */
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_IDS.SK_DATA);
-    const sheet = ss.getSheetByName("Unggah_SK");
-    sheet.deleteRow(parseInt(rowBaris));
-    return { success: true, message: "Data berhasil dihapus!" };
-  } catch (e) {
-    return { success: false, message: "Gagal: " + e.toString() };
+    return { found: false, error: e.toString() };
   }
 }

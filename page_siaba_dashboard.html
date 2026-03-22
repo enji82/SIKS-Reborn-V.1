@@ -1,9 +1,607 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-  </head>
-  <body>
+<div class="content-header pb-0">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-12">
+        <h5 class="m-0 font-weight-bold">
+          <i class="fas fa-tachometer-alt text-maroon mr-2"></i>Dashboard SIABA
+        </h5>
+        <hr class="style-sultan-solid">
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
     
-  </body>
-</html>
+    <div class="row mb-3">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-maroon shadow-sm">
+                <div class="inner">
+                    <h3 id="dashsiaba_dashTotalCuti"><i class="fas fa-spinner fa-spin f-20"></i></h3>
+                    <p class="mb-0">Total Cuti</p>
+                    <div class="mt-2 text-white-50 small">Bulan Ini: <strong id="dashsiaba_dashBulanCuti">-</strong></div>
+                </div>
+                <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                <a href="#" class="small-box-footer dashsiaba-link-detail" data-target="page_siaba_cuti_data">Detail <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-primary shadow-sm">
+                <div class="inner">
+                    <h3 id="dashsiaba_dashTotalDinas"><i class="fas fa-spinner fa-spin f-20"></i></h3>
+                    <p class="mb-0">Perjalanan Dinas</p>
+                    <div class="mt-2 text-white-50 small">Bulan Ini: <strong id="dashsiaba_dashBulanDinas">-</strong></div>
+                </div>
+                <div class="icon"><i class="fas fa-car"></i></div>
+                <a href="#" class="small-box-footer dashsiaba-link-detail" data-target="page_siaba_perjalanan_dinas">Detail <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning shadow-sm">
+                <div class="inner text-white">
+                    <h3 id="dashsiaba_dashTotalLupa"><i class="fas fa-spinner fa-spin f-20"></i></h3>
+                    <p class="mb-0">Lupa Presensi</p>
+                    <div class="mt-2 text-white-50 small">Bulan Ini: <strong id="dashsiaba_dashBulanLupa">-</strong></div>
+                </div>
+                <div class="icon"><i class="fas fa-question-circle"></i></div>
+                <a href="#" class="small-box-footer text-white dashsiaba-link-detail" data-target="page_siaba_presensi_lupa">Detail <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger shadow-sm">
+                <div class="inner">
+                    <h3 id="dashsiaba_dashTotalSalah"><i class="fas fa-spinner fa-spin f-20"></i></h3>
+                    <p class="mb-0">Salah Presensi</p>
+                    <div class="mt-2 text-white-50 small">Bulan Ini: <strong id="dashsiaba_dashBulanSalah">-</strong></div>
+                </div>
+                <div class="icon"><i class="fas fa-times-circle"></i></div>
+                <a href="#" class="small-box-footer dashsiaba-link-detail" data-target="page_siaba_presensi_salah">Detail <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-dark"><i class="fas fa-chart-pie mr-1"></i> Akumulasi Status</h3>
+                </div>
+                <div class="card-body">
+                    <div style="height: 180px;" id="dashsiaba_dashWrapChartGabungan"><canvas id="dashsiaba_dashChartGabungan"></canvas></div>
+                    <hr>
+                    <div class="mt-2" id="dashsiaba_dashProgressContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-maroon"><i class="fas fa-list-alt mr-1"></i> Rincian Status</h3>
+                </div>
+                <div class="card-body p-3" style="overflow-y: auto; max-height: 500px;">
+                    <div id="dashsiaba_dashRincian-cuti" class="mb-2 pb-2 border-bottom text-center text-muted"><i class="fas fa-circle-notch fa-spin"></i> Memuat Cuti...</div>
+                    <div id="dashsiaba_dashRincian-dinas" class="mb-2 pb-2 border-bottom text-center text-muted"><i class="fas fa-circle-notch fa-spin"></i> Memuat Perjalanan Dinas...</div>
+                    <div id="dashsiaba_dashRincian-lupa" class="mb-2 pb-2 border-bottom text-center text-muted"><i class="fas fa-circle-notch fa-spin"></i> Memuat Lupa Presensi...</div>
+                    <div id="dashsiaba_dashRincian-salah" class="mb-2 pb-2 border-bottom text-center text-muted"><i class="fas fa-circle-notch fa-spin"></i> Memuat Salah Presensi...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center py-2">
+                    <h3 class="card-title font-weight-bold text-danger m-0" style="font-size:14px;"><i class="fas fa-exclamation-circle mr-1"></i> Presensi Tidak Lengkap</h3>
+                    <div class="card-tools d-flex">
+                        <select id="dashsiaba_dashFilterTahun" class="form-control form-control-sm form-control-sultan mr-1" style="width: 70px;"></select>
+                        <select id="dashsiaba_dashFilterBulan" class="form-control form-control-sm form-control-sultan" style="width: 110px;"></select>
+                    </div>
+                </div>
+                <div class="card-body p-0 border-top">
+                    <div class="table-responsive sultan-scroll" style="height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-striped table-head-fixed text-nowrap mb-0" id="dashsiaba_dashTableBelumLengkap">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="col-sticky-left bg-light border-right align-middle text-left px-3">Unit Kerja</th>
+                                    <th class="text-center align-middle px-2" style="width: 50px;">Jml</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashsiaba_dashBodyBelumLengkap">
+                                <tr><td colspan="2" class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin mr-2"></i>Memuat...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white p-2 text-center">
+                     <button type="button" id="dashsiaba_btnRefreshBelumLengkap" class="btn btn-xs btn-outline-danger font-weight-bold btn-block shadow-sm">
+                        <i class="fas fa-sync-alt mr-1"></i> Refresh Data
+                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-purple-sultan"><i class="fas fa-chart-bar mr-1"></i> Tren Kedisiplinan</h3>
+                </div>
+                <div class="card-body">
+                    <div style="height: 330px;" id="dashsiaba_dashWrapChartBarDisiplin"><canvas id="dashsiaba_dashChartBarDisiplin"></canvas></div>
+                    <div class="mt-2 text-center small text-muted font-italic">*Rekap Terlambat & Pulang Awal</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-maroon"><i class="fas fa-chart-bar mr-1"></i> Tren Cuti</h3>
+                </div>
+                <div class="card-body">
+                    <div style="height: 330px;" id="dashsiaba_dashWrapChartTrendCuti">
+                        <div class="h-100 d-flex align-items-center justify-content-center text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-primary"><i class="fas fa-chart-bar mr-1"></i> Tren Perjalanan Dinas</h3>
+                </div>
+                <div class="card-body">
+                    <div style="height: 330px;" id="dashsiaba_dashWrapChartTrendDinas">
+                        <div class="h-100 d-flex align-items-center justify-content-center text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-warning"><i class="fas fa-chart-bar mr-1"></i> Tren Lupa Presensi</h3>
+                </div>
+                <div class="card-body">
+                    <div style="height: 330px;" id="dashsiaba_dashWrapChartTrendLupa">
+                        <div class="h-100 d-flex align-items-center justify-content-center text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-sultan mb-3 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h3 class="card-title font-weight-bold text-danger"><i class="fas fa-chart-bar mr-1"></i> Tren Salah Presensi</h3>
+                </div>
+                <div class="card-body">
+                    <div style="height: 330px;" id="dashsiaba_dashWrapChartTrendSalah">
+                        <div class="h-100 d-flex align-items-center justify-content-center text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+    .f-20 { font-size: 1.25rem; }
+    .table-head-fixed th { position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+</style>
+
+<script>
+// ==========================================
+// 1. GLOBAL VARIABLES & ISOLATION (BAB I)
+// ==========================================
+var DASHSIABA_GLOBAL_STATS = {
+    cuti:  { proses: 0, revisi: 0, setuju: 0, tolak: 0 },
+    dinas: { proses: 0, revisi: 0, setuju: 0, tolak: 0 },
+    lupa:  { proses: 0, revisi: 0, setuju: 0, tolak: 0 },
+    salah: { proses: 0, revisi: 0, setuju: 0, tolak: 0 }
+};
+var DASHSIABA_PIE_CHART_INSTANCE = null;
+
+// VAKSIN BAB X: Race Condition Handler
+var dashsiaba_pendingRequests = 0; 
+
+// ==========================================
+// 2. INITIALIZATION
+// ==========================================
+$(document).ready(function() {
+    
+    // VAKSIN EVENT SPA (Anti Memory Leak)
+    $(document).off('change', '#dashsiaba_dashFilterTahun, #dashsiaba_dashFilterBulan').on('change', '#dashsiaba_dashFilterTahun, #dashsiaba_dashFilterBulan', dashsiaba_loadDataBelumLengkap);
+    $(document).off('click', '#dashsiaba_btnRefreshBelumLengkap').on('click', '#dashsiaba_btnRefreshBelumLengkap', dashsiaba_loadDataBelumLengkap);
+    $(document).off('click', '.dashsiaba-link-detail').on('click', '.dashsiaba-link-detail', function(e) {
+        e.preventDefault();
+        var target = $(this).data('target');
+        if (typeof loadContent === 'function') { loadContent(target); }
+    });
+
+    if (typeof Chart === 'undefined') {
+        $.getScript("https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js").done(function() {
+            dashsiaba_startDashboardEngine();
+        });
+    } else {
+        dashsiaba_startDashboardEngine();
+    }
+});
+
+function dashsiaba_startDashboardEngine() {
+    dashsiaba_initFiltersBelumLengkap(); 
+    dashsiaba_loadDashboardData();
+}
+
+// ==========================================
+// 3. CORE ENGINE (RACE CONDITION PROTECTED)
+// ==========================================
+function dashsiaba_loadDashboardData() {
+    if (dashsiaba_pendingRequests > 0) return; // Block jika masih loading
+    
+    dashsiaba_pendingRequests = 5; // 4 Metric + 1 Trend
+
+    DASHSIABA_GLOBAL_STATS = {
+        cuti:  { proses: 0, revisi: 0, setuju: 0, tolak: 0 },
+        dinas: { proses: 0, revisi: 0, setuju: 0, tolak: 0 },
+        lupa:  { proses: 0, revisi: 0, setuju: 0, tolak: 0 },
+        salah: { proses: 0, revisi: 0, setuju: 0, tolak: 0 }
+    };
+    
+    if (DASHSIABA_PIE_CHART_INSTANCE) {
+        DASHSIABA_PIE_CHART_INSTANCE.destroy();
+    }
+    
+    dashsiaba_showLoadingState(); 
+    
+    dashsiaba_fetchMetric('cuti', 'dashsiaba_dashTotalCuti', 'dashsiaba_dashBulanCuti', 'fa-calendar-alt', 'dashsiaba_dashChartTrendCuti');
+    dashsiaba_fetchMetric('dinas', 'dashsiaba_dashTotalDinas', 'dashsiaba_dashBulanDinas', 'fa-car', 'dashsiaba_dashChartTrendDinas');
+    dashsiaba_fetchMetric('lupa', 'dashsiaba_dashTotalLupa', 'dashsiaba_dashBulanLupa', 'fa-question-circle', 'dashsiaba_dashChartTrendLupa');
+    dashsiaba_fetchMetric('salah', 'dashsiaba_dashTotalSalah', 'dashsiaba_dashBulanSalah', 'fa-times-circle', 'dashsiaba_dashChartTrendSalah');
+    
+    dashsiaba_loadChartTrend();
+    dashsiaba_initPieChart();
+}
+
+function dashsiaba_finishRequest() {
+    dashsiaba_pendingRequests--;
+    if (dashsiaba_pendingRequests <= 0) {
+        dashsiaba_updatePieChart(); // Render pie chart SETELAH semua 4 metrik selesai
+    }
+}
+
+function dashsiaba_showLoadingState() {
+    $('#dashsiaba_dashTotalCuti, #dashsiaba_dashTotalDinas, #dashsiaba_dashTotalLupa, #dashsiaba_dashTotalSalah').html('<i class="fas fa-spinner fa-spin f-20"></i>');
+    $('#dashsiaba_dashBulanCuti, #dashsiaba_dashBulanDinas, #dashsiaba_dashBulanLupa, #dashsiaba_dashBulanSalah').text('-');
+
+    $('#dashsiaba_dashRincian-cuti').html('<i class="fas fa-circle-notch fa-spin"></i> Memuat Cuti...').addClass('text-center text-muted mb-2 pb-2 border-bottom');
+    $('#dashsiaba_dashRincian-dinas').html('<i class="fas fa-circle-notch fa-spin"></i> Memuat Perjalanan Dinas...').addClass('text-center text-muted mb-2 pb-2 border-bottom');
+    $('#dashsiaba_dashRincian-lupa').html('<i class="fas fa-circle-notch fa-spin"></i> Memuat Lupa Presensi...').addClass('text-center text-muted mb-2 pb-2 border-bottom');
+    $('#dashsiaba_dashRincian-salah').html('<i class="fas fa-circle-notch fa-spin"></i> Memuat Salah Presensi...').addClass('text-center text-muted mb-2 pb-2 border-bottom');
+
+    $('#dashsiaba_dashWrapChartTrendCuti, #dashsiaba_dashWrapChartTrendDinas, #dashsiaba_dashWrapChartTrendLupa, #dashsiaba_dashWrapChartTrendSalah').html('<div class="h-100 d-flex align-items-center justify-content-center text-muted"><i class="fas fa-spinner fa-spin fa-2x"></i></div>');
+}
+
+// ==========================================
+// 4. METRIC & TREND FETCHING
+// ==========================================
+function dashsiaba_fetchMetric(type, idTotal, idBulan, icon, idChart) {
+    google.script.run
+        .withSuccessHandler(function(json) {
+            var data = JSON.parse(json);
+            
+            $('#' + idTotal).text(data.total).hide().fadeIn();
+            $('#' + idBulan).text(data.bulanIni);
+
+            var html = dashsiaba_createSlimVisualRow(dashsiaba_capitalize(type), icon, data, type);
+            $('#dashsiaba_dashRincian-' + type).html(html).removeClass('text-center text-muted');
+
+            dashsiaba_renderSpecificChart(idChart, data.trend);
+
+            DASHSIABA_GLOBAL_STATS[type] = {
+                proses: data.proses || 0,
+                revisi: data.revisi || 0,
+                setuju: data.setuju || 0,
+                tolak:  data.tolak  || 0
+            };
+            
+            dashsiaba_finishRequest();
+        })
+        .withFailureHandler(function(e) {
+            $('#' + idTotal).html('<small class="text-danger">Err</small>');
+            $('#dashsiaba_dashRincian-' + type).html('<div class="text-danger text-center"><i class="fas fa-exclamation-triangle"></i> Gagal memuat data</div>');
+            dashsiaba_finishRequest();
+        })
+        .getSiabaMetric(type);
+}
+
+function dashsiaba_loadChartTrend() {
+    google.script.run.withSuccessHandler(function(json) {
+        var data = JSON.parse(json);
+        dashsiaba_renderBarChart(data);
+        dashsiaba_finishRequest();
+    }).withFailureHandler(function(){
+        dashsiaba_finishRequest();
+    }).getSiabaChartTrend();
+}
+
+// ==========================================
+// 5. PRESENSI BELUM LENGKAP (TABEL READ-ONLY)
+// ==========================================
+function dashsiaba_initFiltersBelumLengkap() {
+    var now = new Date();
+    var curYear = now.getFullYear();
+    var curMonth = now.getMonth(); 
+    
+    var defMonthIdx = curMonth - 1; 
+    var defYear = curYear;
+    if(defMonthIdx < 0) { 
+        defMonthIdx = 11;
+        defYear = curYear - 1;
+    }
+
+    var $th = $('#dashsiaba_dashFilterTahun').empty();
+    for(var i=0; i<3; i++) {
+        var y = curYear - i;
+        $th.append(`<option value="${y}">${y}</option>`);
+    }
+    $th.val(defYear);
+
+    var months = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+    var $bl = $('#dashsiaba_dashFilterBulan').empty();
+    months.forEach((m) => {
+        $bl.append(`<option value="${m}">${m}</option>`);
+    });
+    $bl.val(months[defMonthIdx]);
+
+    dashsiaba_loadDataBelumLengkap();
+}
+
+function dashsiaba_loadDataBelumLengkap() {
+    var th = $('#dashsiaba_dashFilterTahun').val();
+    var bl = $('#dashsiaba_dashFilterBulan').val();
+    var tbody = $('#dashsiaba_dashBodyBelumLengkap');
+    
+    $('#dashsiaba_btnRefreshBelumLengkap').prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-1"></i> Memuat...');
+    tbody.html('<tr><td colspan="2" class="text-center text-muted py-5"><i class="fas fa-spinner fa-spin mr-2"></i>Mengambil Data...</td></tr>');
+
+    google.script.run
+        .withSuccessHandler(function(res) {
+            $('#dashsiaba_btnRefreshBelumLengkap').prop('disabled', false).html('<i class="fas fa-sync-alt mr-1"></i> Refresh Data');
+            var data = JSON.parse(res);
+            
+            if (data.error) {
+                tbody.html(`<tr><td colspan="2" class="text-center text-danger small">${dashsiaba_escapeHtml(data.error)}</td></tr>`);
+                return;
+            }
+
+            if (!data.rows || data.rows.length === 0) {
+                tbody.html('<tr><td colspan="2" class="text-center text-success py-5 font-weight-bold"><i class="fas fa-check-circle fa-2x mb-2 d-block"></i>Semua Presensi Lengkap!</td></tr>');
+                return;
+            }
+
+            var unitCounts = {};
+            data.rows.forEach(function(row) {
+                var unit = row[row.length - 1]; 
+                if(unit) { unitCounts[unit] = (unitCounts[unit] || 0) + 1; }
+            });
+
+            var sortedUnits = Object.keys(unitCounts).map(function(key) {
+                return { unit: key, count: unitCounts[key] };
+            }).sort(function(a, b) { return b.count - a.count; }); 
+
+            var html = "";
+            sortedUnits.forEach(function(item) {
+                html += `<tr class="border-bottom">
+                            <td class="text-dark align-middle text-wrap px-3" style="font-size: 13px;">${dashsiaba_escapeHtml(item.unit)}</td>
+                            <td class="text-center align-middle px-2"><span class="badge badge-danger badge-pill px-2 py-1">${item.count}</span></td>
+                         </tr>`;
+            });
+            
+            if(html === "") {
+                 tbody.html('<tr><td colspan="2" class="text-center text-muted py-5">Data Kosong</td></tr>');
+            } else {
+                 tbody.html(html);
+            }
+        })
+        .withFailureHandler(function(e) {
+            $('#dashsiaba_btnRefreshBelumLengkap').prop('disabled', false).html('<i class="fas fa-sync-alt mr-1"></i> Refresh Data');
+            tbody.html(`<tr><td colspan="2" class="text-center text-danger small">Gagal: ${dashsiaba_escapeHtml(e.message)}</td></tr>`);
+        })
+        .getSiabaTidakData(th, bl, "SEMUA");
+}
+
+
+// ==========================================
+// 6. VISUAL RENDERING (CHART & WIDGET)
+// ==========================================
+
+function dashsiaba_initPieChart() {
+    var ctxElement = document.getElementById('dashsiaba_dashChartGabungan');
+    if (!ctxElement) return;
+    var ctx = ctxElement.getContext('2d');
+
+    if (DASHSIABA_PIE_CHART_INSTANCE) {
+        DASHSIABA_PIE_CHART_INSTANCE.destroy();
+    }
+
+    if (typeof Chart !== 'undefined') {
+        DASHSIABA_PIE_CHART_INSTANCE = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Diproses', 'Revisi', 'Disetujui', 'Ditolak'],
+                datasets: [{
+                    data: [0.1, 0, 0, 0], // VAKSIN BAB X: Empty state dummy
+                    backgroundColor: ['#e9ecef', '#17a2b8', '#28a745', '#dc3545'],
+                    borderWidth: 2, borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                maintainAspectRatio: false, responsive: true, cutout: '70%', 
+                plugins: { 
+                    legend: { position: 'right', labels: { boxWidth: 10, font: {size:10} } },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+    }
+}
+
+function dashsiaba_updatePieChart() {
+    if(!DASHSIABA_PIE_CHART_INSTANCE) return;
+    
+    var tProses = 0, tRevisi = 0, tSetuju = 0, tTolak = 0;
+    
+    ['cuti', 'dinas', 'lupa', 'salah'].forEach(function(k) {
+        tProses += DASHSIABA_GLOBAL_STATS[k].proses;
+        tRevisi += DASHSIABA_GLOBAL_STATS[k].revisi;
+        tSetuju += DASHSIABA_GLOBAL_STATS[k].setuju;
+        tTolak  += DASHSIABA_GLOBAL_STATS[k].tolak;
+    });
+
+    var totalAll = tProses + tRevisi + tSetuju + tTolak;
+    var finalData = totalAll === 0 ? [0.1, 0, 0, 0] : [tProses, tRevisi, tSetuju, tTolak];
+    var finalColors = totalAll === 0 ? ['#e9ecef', '#17a2b8', '#28a745', '#dc3545'] : ['#ffc107', '#17a2b8', '#28a745', '#dc3545'];
+
+    DASHSIABA_PIE_CHART_INSTANCE.data.datasets[0].data = finalData;
+    DASHSIABA_PIE_CHART_INSTANCE.data.datasets[0].backgroundColor = finalColors;
+    DASHSIABA_PIE_CHART_INSTANCE.options.plugins.tooltip.enabled = (totalAll > 0);
+    DASHSIABA_PIE_CHART_INSTANCE.update();
+    
+    dashsiaba_renderProgressBar(tProses, tRevisi, tSetuju, tTolak);
+}
+
+function dashsiaba_renderBarChart(data) {
+    $('#dashsiaba_dashWrapChartBarDisiplin').empty().html('<canvas id="dashsiaba_dashChartBarDisiplin"></canvas>');
+    var ctxElement = document.getElementById('dashsiaba_dashChartBarDisiplin');
+    if (!ctxElement) return;
+
+    var ctx = ctxElement.getContext('2d');
+    if (typeof Chart !== 'undefined') {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels, 
+                datasets: [
+                    { label: 'Terlambat', backgroundColor: '#dc3545', data: data.terlambat },
+                    { label: 'Pulang Awal', backgroundColor: '#6f42c1', data: data.pulangAwal }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false, responsive: true,
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { borderDash: [2, 2] } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true } } }
+            }
+        });
+    }
+}
+
+function dashsiaba_renderSpecificChart(canvasId, dataset) {
+    // VAKSIN DOUBLE PREFIX: Hapus penambahan 'dashsiaba_' karena argumen canvasId sudah membawanya
+    var wrapId = canvasId.replace('dashChartTrend', 'dashWrapChartTrend');
+    
+    $('#' + wrapId).empty().html('<canvas id="' + canvasId + '"></canvas>');
+    var ctxElement = document.getElementById(canvasId);
+    if (!ctxElement) return;
+
+    var ctx = ctxElement.getContext('2d');
+    
+    if (typeof Chart !== 'undefined') {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"],
+                datasets: [
+                    { label: 'Diproses', backgroundColor: '#ffc107', data: dataset.proses },
+                    { label: 'Revisi', backgroundColor: '#17a2b8', data: dataset.revisi },
+                    { label: 'Disetujui', backgroundColor: '#28a745', data: dataset.setuju },
+                    { label: 'Ditolak', backgroundColor: '#dc3545', data: dataset.tolak }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false, responsive: true,
+                plugins: { 
+                    legend: { position: 'top', labels: { boxWidth: 8, font: {size: 9}, usePointStyle: true } },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    x: { stacked: false, grid: { display: false }, ticks: { font: {size: 9} } },
+                    y: { stacked: false, beginAtZero: true, ticks: { font: {size: 9} } }
+                }
+            }
+        });
+    }
+}
+
+// ==========================================
+// 7. HELPER UTILITIES
+// ==========================================
+function dashsiaba_escapeHtml(text) { 
+    if(!text) return ""; 
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+}
+
+function dashsiaba_renderProgressBar(p, r, ok, no) {
+    var total = p + r + ok + no;
+    function calc(val) { return total > 0 ? Math.round((val / total) * 100) + '%' : '0%'; }
+    var html = `
+        ${dashsiaba_progressItem('Diproses', p, calc(p), 'warning')}
+        ${dashsiaba_progressItem('Revisi', r, calc(r), 'info')}
+        ${dashsiaba_progressItem('Disetujui', ok, calc(ok), 'success')}
+        ${dashsiaba_progressItem('Ditolak', no, calc(no), 'danger')}
+    `;
+    $('#dashsiaba_dashProgressContainer').html(html);
+}
+
+function dashsiaba_progressItem(lbl, val, pct, color) {
+    return `
+    <div class="d-flex justify-content-between mb-1 small">
+        <span class="text-${color} font-weight-bold">${lbl}</span><span>${val}</span>
+    </div>
+    <div class="progress progress-xs mb-2"><div class="progress-bar bg-${color}" style="width: ${pct}"></div></div>`;
+}
+
+function dashsiaba_createSlimVisualRow(label, icon, data, type) {
+    var displayLabel = label;
+    if(label === 'Cuti') displayLabel = 'Pengajuan Cuti';
+    if(label === 'Dinas') displayLabel = 'Perjalanan Dinas';
+    if(label === 'Lupa') displayLabel = 'Lupa Presensi';
+    if(label === 'Salah') displayLabel = 'Salah Presensi';
+
+    var borderClass = (type === 'salah') ? '' : 'border-bottom mb-2 pb-2';
+
+    return `
+    <div class="animated fadeIn ${borderClass}">
+        <div class="d-flex align-items-center mb-1">
+            <i class="fas ${icon} text-secondary mr-2" style="font-size: 0.9rem;"></i>
+            <span class="font-weight-bold text-dark" style="font-size: 0.9rem;">${displayLabel}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+            ${dashsiaba_renderMiniBox(data.proses, 'Diproses', 'warning', '#fff8e1', '#ffe0b2')}
+            ${dashsiaba_renderMiniBox(data.revisi, 'Revisi', 'info', '#e3f2fd', '#bbdefb')}
+            ${dashsiaba_renderMiniBox(data.setuju, 'Disetujui', 'success', '#e8f5e9', '#c8e6c9')}
+            ${dashsiaba_renderMiniBox(data.tolak, 'Ditolak', 'danger', '#ffebee', '#ffcdd2')}
+        </div>
+    </div>`;
+}
+
+function dashsiaba_renderMiniBox(val, label, color, bg, border) {
+    return `<div class="flex-fill mr-1 rounded text-center position-relative" style="background-color: ${bg}; border: 1px solid ${border}; padding: 2px;">
+                <span class="font-weight-bold text-${color}" style="font-size: 1rem;">${val}</span>
+                <span class="text-muted d-block" style="font-size: 8px; margin-top: -3px; text-transform:uppercase">${label}</span>
+            </div>`;
+}
+
+function dashsiaba_capitalize(s) { return s && s[0].toUpperCase() + s.slice(1); }
+</script>
